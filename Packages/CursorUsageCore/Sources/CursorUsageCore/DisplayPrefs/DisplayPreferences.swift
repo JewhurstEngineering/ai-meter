@@ -5,6 +5,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var launchAtLogin: Bool
     public var showInMenuBar: Bool
     public var menuBarFormat: MenuBarFormat
+    public var menuBarLabelStyle: MenuBarLabelStyle
     /// Menu bar red-dot threshold.
     public var warningThresholdPercent: Double
     public var notificationsEnabled: Bool
@@ -17,6 +18,13 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public enum MenuBarFormat: String, Codable, Sendable, CaseIterable {
         case compact
         case detailed
+    }
+
+    public enum MenuBarLabelStyle: String, Codable, Sendable, CaseIterable {
+        /// SF Symbols + short values (e.g. ✨ 2% · 􀫥 88%).
+        case icons
+        /// Readable words (e.g. Cursor 2% · Other 88%).
+        case shortWords
     }
 
     public struct SurfaceToggles: Codable, Sendable, Equatable {
@@ -72,13 +80,14 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         }
     }
 
-    public static let presetNotificationThresholds: [Double] = [50, 75, 85, 95, 100]
+    public static let presetNotificationThresholds: [Double] = [50, 75, 80, 85, 90, 95, 100]
 
     public static let `default` = DisplayPreferences(
         refreshIntervalMinutes: 5,
         launchAtLogin: false,
         showInMenuBar: true,
         menuBarFormat: .detailed,
+        menuBarLabelStyle: .icons,
         warningThresholdPercent: 95,
         notificationsEnabled: false,
         notificationThresholds: [85, 95],
@@ -91,6 +100,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         launchAtLogin: Bool,
         showInMenuBar: Bool,
         menuBarFormat: MenuBarFormat,
+        menuBarLabelStyle: MenuBarLabelStyle = .icons,
         warningThresholdPercent: Double,
         notificationsEnabled: Bool = false,
         notificationThresholds: [Double] = [85, 95],
@@ -101,6 +111,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.launchAtLogin = launchAtLogin
         self.showInMenuBar = showInMenuBar
         self.menuBarFormat = menuBarFormat
+        self.menuBarLabelStyle = menuBarLabelStyle
         self.warningThresholdPercent = warningThresholdPercent
         self.notificationsEnabled = notificationsEnabled
         self.notificationThresholds = Self.normalizeThresholds(notificationThresholds)
@@ -114,6 +125,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         launchAtLogin = try c.decodeIfPresent(Bool.self, forKey: .launchAtLogin) ?? false
         showInMenuBar = try c.decodeIfPresent(Bool.self, forKey: .showInMenuBar) ?? true
         menuBarFormat = try c.decodeIfPresent(MenuBarFormat.self, forKey: .menuBarFormat) ?? .detailed
+        menuBarLabelStyle = try c.decodeIfPresent(MenuBarLabelStyle.self, forKey: .menuBarLabelStyle) ?? .icons
         warningThresholdPercent = try c.decodeIfPresent(Double.self, forKey: .warningThresholdPercent) ?? 95
         notificationsEnabled = try c.decodeIfPresent(Bool.self, forKey: .notificationsEnabled) ?? false
         notificationThresholds = Self.normalizeThresholds(

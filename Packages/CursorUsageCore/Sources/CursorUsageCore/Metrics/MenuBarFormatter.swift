@@ -1,8 +1,28 @@
 import Foundation
 
+public struct MenuBarSegment: Sendable, Equatable {
+    public var systemImage: String?
+    public var text: String
+
+    public init(systemImage: String? = nil, text: String) {
+        self.systemImage = systemImage
+        self.text = text
+    }
+}
+
 public struct MenuBarPresentation: Sendable, Equatable {
-    public var title: String
+    public var segments: [MenuBarSegment]
     public var showWarningDot: Bool
+
+    public var accessibilityTitle: String {
+        let body = segments.map(\.text).joined(separator: " · ")
+        return body.isEmpty ? "Cursor Usage" : body
+    }
+
+    public init(segments: [MenuBarSegment], showWarningDot: Bool) {
+        self.segments = segments
+        self.showWarningDot = showWarningDot
+    }
 }
 
 public enum MenuBarFormatter {
@@ -12,64 +32,109 @@ public enum MenuBarFormatter {
         authenticated: Bool
     ) -> MenuBarPresentation {
         guard authenticated else {
-            return .init(title: "Cursor · Sign in", showWarningDot: false)
+            return .init(segments: [.init(systemImage: "person.crop.circle.badge.questionmark", text: "Sign in")], showWarningDot: false)
         }
         guard let snapshot else {
-            return .init(title: "Cursor · …", showWarningDot: false)
+            return .init(segments: [.init(text: "…")], showWarningDot: false)
         }
 
         let toggles = preferences.menuBar
-        var parts: [String] = []
+        let style = preferences.menuBarLabelStyle
+        var segments: [MenuBarSegment] = []
 
         switch preferences.menuBarFormat {
         case .compact:
             if toggles.otherModelsPercent, let p = snapshot.otherModelsPercentUsed {
-                parts.append(String(format: "%.0f%%", p))
+                segments.append(segment(style: style, kind: .otherModels, text: pct(p)))
             } else if toggles.cursorModelsPercent, let p = snapshot.cursorModelsPercentUsed {
-                parts.append(String(format: "%.0f%%", p))
+                segments.append(segment(style: style, kind: .cursorModels, text: pct(p)))
             } else if toggles.totalPercent, let p = snapshot.totalPercentUsed {
-                parts.append(String(format: "%.0f%%", p))
+                segments.append(segment(style: style, kind: .total, text: pct(p)))
             } else if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
-                parts.append("\(usd(used))/\(usd(limit))")
+                segments.append(segment(style: style, kind: .spend, text: "\(usd(used))/\(usd(limit))"))
             }
         case .detailed:
             if toggles.cursorModelsPercent, let p = snapshot.cursorModelsPercentUsed {
-                parts.append(String(format: "CM %.0f%%", p))
+                segments.append(segment(style: style, kind: .cursorModels, text: labeled(style, kind: .cursorModels, value: pct(p))))
             }
             if toggles.otherModelsPercent, let p = snapshot.otherModelsPercentUsed {
-                parts.append(String(format: "OM %.0f%%", p))
+                segments.append(segment(style: style, kind: .otherModels, text: labeled(style, kind: .otherModels, value: pct(p))))
             }
             if toggles.totalPercent, let p = snapshot.totalPercentUsed {
-                parts.append(String(format: "Tot %.0f%%", p))
+                segments.append(segment(style: style, kind: .total, text: labeled(style, kind: .total, value: pct(p))))
             }
             if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
                 var spend = "\(usd(used))/\(usd(limit))"
                 if toggles.bonus, let bonus = snapshot.bonusCents, bonus > 0 {
                     spend += " +\(usd(bonus))"
                 }
-                parts.append(spend)
+                segments.append(segment(style: style, kind: .spend, text: spend))
             } else if toggles.bonus, let bonus = snapshot.bonusCents, bonus > 0 {
-                parts.append("+\(usd(bonus))")
+                segments.append(segment(style: style, kind: .bonus, text: "+\(usd(bonus))"))
             }
             if toggles.onDemand {
+                let value: String
                 if snapshot.onDemandEnabled {
                     if let used = snapshot.onDemandUsedCents {
-                        parts.append("OD \(usd(used))")
+                        value = usd(used)
                     } else {
-                        parts.append("OD on")
+                        value = "on"
                     }
                 } else {
-                    parts.append("OD off")
+                    value = "off"
                 }
+                segments.append(segment(style: style, kind: .onDemand, text: labeled(style, kind: .onDemand, value: value)))
             }
             if toggles.daysRemaining, let days = snapshot.daysRemainingInCycle {
-                parts.append("\(days)d")
+                segments.append(segment(style: style, kind: .days, text: "\(days)d"))
             }
         }
 
-        let title = parts.isEmpty ? "Cursor \(snapshot.planDisplayName)" : parts.joined(separator: " · ")
+        if segments.isEmpty {
+            segments = [.init(text: snapshot.planDisplayName)]
+        }
+
         let warning = snapshot.highestWatchedPercent >= preferences.warningThresholdPercent
-        return .init(title: title, showWarningDot: warning)
+        return .init(segments: segments, showWarningDot: warning)
+    }
+
+    private enum Kind {
+        case cursorModels, otherModels, total, spend, bonus, onDemand, days
+    }
+
+    private static func pct(_ value: Double) -> String {
+        String(format: "%.0f%%", value)
+    }
+
+    private static func labeled(_ style: DisplayPreferences.MenuBarLabelStyle, kind: Kind, value: String) -> String {
+        switch style {
+        case .icons:
+            // Icon carries meaning; keep text short.
+            return value
+        case .shortWords:
+            switch kind {
+            case .cursorModels: return "Cursor \(value)"
+            case .otherModels: return "Other \(value)"
+            case .total: return "Total \(value)"
+            case .onDemand: return "On-demand \(value)"
+            case .spend, .bonus, .days: return value
+            }
+        }
+    }
+
+    private static func segment(style: DisplayPreferences.MenuBarLabelStyle, kind: Kind, text: String) -> MenuBarSegment {
+        let icon: String?
+        switch (style, kind) {
+        case (.icons, .cursorModels): icon = "sparkles"
+        case (.icons, .otherModels): icon = "cpu"
+        case (.icons, .total): icon = "chart.pie"
+        case (.icons, .spend): icon = "dollarsign.circle"
+        case (.icons, .bonus): icon = "gift"
+        case (.icons, .onDemand): icon = "creditcard"
+        case (.icons, .days): icon = "calendar"
+        case (.shortWords, _): icon = nil
+        }
+        return .init(systemImage: icon, text: text)
     }
 
     public static func usd(_ cents: Int) -> String {

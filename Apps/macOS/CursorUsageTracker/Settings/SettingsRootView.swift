@@ -8,6 +8,8 @@ struct SettingsRootView: View {
         TabView {
             GeneralSettingsView()
                 .tabItem { Label("General", systemImage: "gearshape") }
+            LayoutSettingsView()
+                .tabItem { Label("Layout", systemImage: "rectangle.split.2x1") }
             AuthenticationSettingsView()
                 .tabItem { Label("Authentication", systemImage: "lock") }
             IncludedUsageSettingsView()
@@ -19,5 +21,8 @@ struct SettingsRootView: View {
         }
         .padding()
         .environmentObject(store)
+        .onAppear {
+            AppActivation.focusSettingsWindows()
+        }
     }
 }

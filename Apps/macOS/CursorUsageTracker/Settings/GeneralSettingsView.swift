@@ -34,52 +34,10 @@ struct GeneralSettingsView: View {
                     }
                 }
 
-                HStack(alignment: .top, spacing: 16) {
-                    SettingsPanel(
-                        title: "Menu bar",
-                        systemImage: "menubar.rectangle",
-                        subtitle: "Compact glance strip in the system menu bar."
-                    ) {
-                        Toggle("Show title text in menu bar", isOn: showMenuBarBinding)
-                        Picker("Density", selection: formatBinding) {
-                            Text("Compact").tag(DisplayPreferences.MenuBarFormat.compact)
-                            Text("Detailed").tag(DisplayPreferences.MenuBarFormat.detailed)
-                        }
-                        .pickerStyle(.segmented)
-
-                        Divider().padding(.vertical, 4)
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: menuToggle(\.cursorModelsPercent))
-                            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: menuToggle(\.otherModelsPercent))
-                            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: menuToggle(\.totalPercent))
-                            MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: menuToggle(\.planSpend))
-                            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: menuToggle(\.bonus))
-                            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: menuToggle(\.onDemand))
-                            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: menuToggle(\.daysRemaining))
-                        }
-                    }
-
-                    SettingsPanel(
-                        title: "Popover",
-                        systemImage: "rectangle.portrait.on.rectangle.portrait",
-                        subtitle: "What appears when you click the menu bar item."
-                    ) {
-                        Text("Detail panel")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: popoverToggle(\.cursorModelsPercent))
-                            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: popoverToggle(\.otherModelsPercent))
-                            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: popoverToggle(\.totalPercent))
-                            MetricToggleRow(title: "Plan spend", systemImage: "dollarsign.circle", isOn: popoverToggle(\.planSpend))
-                            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: popoverToggle(\.bonus))
-                            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: popoverToggle(\.onDemand))
-                            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: popoverToggle(\.daysRemaining))
-                        }
-                    }
-                }
+                Text("Menu bar and popover layout live under the Layout tab.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
             }
             .padding(16)
         }
@@ -88,7 +46,9 @@ struct GeneralSettingsView: View {
 
     private var warningAndNotifications: some View {
         let threshold = store.preferences.warningThresholdPercent
-        let warnColor = UsageAppearance.poolColor(percent: threshold)
+        // Complementary cool surface; keep the slider itself warning-red.
+        let surface = Color(red: 0.93, green: 0.96, blue: 0.98)
+        let border = Color(red: 0.55, green: 0.68, blue: 0.78)
 
         return VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 8) {
@@ -101,28 +61,25 @@ struct GeneralSettingsView: View {
                     Spacer()
                     Text("\(Int(threshold))%")
                         .font(.subheadline.monospacedDigit().weight(.bold))
-                        .foregroundStyle(warnColor)
+                        .foregroundStyle(.red)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
-                        .background(Capsule().fill(warnColor.opacity(0.15)))
+                        .background(Capsule().fill(Color.red.opacity(0.12)))
                 }
 
                 Slider(value: thresholdBinding, in: 50...100, step: 1)
-                    .tint(warnColor)
+                    .tint(.red)
 
                 Text("Shows a red dot on the menu bar icon when Cursor Models, Other Models, or Total included hits this level.")
                     .font(.caption)
-                    .foregroundStyle(.primary.opacity(0.7))
+                    .foregroundStyle(.primary.opacity(0.75))
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(warnColor.opacity(0.10))
-            )
+            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(surface))
             .overlay(
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(warnColor.opacity(0.35), lineWidth: 1)
+                    .strokeBorder(border.opacity(0.55), lineWidth: 1)
             )
 
             VStack(alignment: .leading, spacing: 8) {
@@ -133,14 +90,15 @@ struct GeneralSettingsView: View {
 
                 Text("Get a macOS banner when usage crosses a selected threshold (once per threshold each billing cycle).")
                     .font(.caption)
-                    .foregroundStyle(.primary.opacity(0.7))
+                    .foregroundStyle(.primary.opacity(0.75))
                     .fixedSize(horizontal: false, vertical: true)
 
                 if store.preferences.notificationsEnabled {
                     Text("Notify at")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
-                    HStack(spacing: 8) {
+                    // Wrap chips so 7 options don't overflow.
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 52), spacing: 8)], alignment: .leading, spacing: 8) {
                         ForEach(DisplayPreferences.presetNotificationThresholds, id: \.self) { value in
                             let selected = store.preferences.notificationThresholds.contains(value)
                             Button {
@@ -150,7 +108,7 @@ struct GeneralSettingsView: View {
                             } label: {
                                 Text("\(Int(value))%")
                                     .font(.caption.weight(.semibold))
-                                    .padding(.horizontal, 10)
+                                    .frame(maxWidth: .infinity)
                                     .padding(.vertical, 6)
                                     .background(
                                         Capsule()
@@ -235,50 +193,6 @@ struct GeneralSettingsView: View {
                             : "Notifications are blocked — enable them for Cursor Usage Tracker in System Settings → Notifications."
                     }
                 }
-            }
-        )
-    }
-
-    private var showMenuBarBinding: Binding<Bool> {
-        Binding(
-            get: { store.preferences.showInMenuBar },
-            set: { value in
-                var prefs = store.preferences
-                prefs.showInMenuBar = value
-                store.applyPreferences(prefs)
-            }
-        )
-    }
-
-    private var formatBinding: Binding<DisplayPreferences.MenuBarFormat> {
-        Binding(
-            get: { store.preferences.menuBarFormat },
-            set: { value in
-                var prefs = store.preferences
-                prefs.menuBarFormat = value
-                store.applyPreferences(prefs)
-            }
-        )
-    }
-
-    private func menuToggle(_ keyPath: WritableKeyPath<DisplayPreferences.SurfaceToggles, Bool>) -> Binding<Bool> {
-        Binding(
-            get: { store.preferences.menuBar[keyPath: keyPath] },
-            set: { value in
-                var prefs = store.preferences
-                prefs.menuBar[keyPath: keyPath] = value
-                store.applyPreferences(prefs)
-            }
-        )
-    }
-
-    private func popoverToggle(_ keyPath: WritableKeyPath<DisplayPreferences.SurfaceToggles, Bool>) -> Binding<Bool> {
-        Binding(
-            get: { store.preferences.popover[keyPath: keyPath] },
-            set: { value in
-                var prefs = store.preferences
-                prefs.popover[keyPath: keyPath] = value
-                store.applyPreferences(prefs)
             }
         )
     }

@@ -46,8 +46,8 @@ final class UsageSnapshotMapperTests: XCTestCase {
         prefs.warningThresholdPercent = 95
 
         let presentation = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
-        XCTAssertTrue(presentation.title.contains("CM 4%"))
-        XCTAssertTrue(presentation.title.contains("OM 61%"))
+        XCTAssertTrue(presentation.accessibilityTitle.contains("4%") || presentation.segments.contains(where: { $0.text.contains("4%") }))
+        XCTAssertTrue(presentation.segments.contains(where: { $0.text.contains("61%") }))
         XCTAssertFalse(presentation.showWarningDot)
 
         prefs.warningThresholdPercent = 50

@@ -6,10 +6,21 @@ struct MenuBarLabelView: View {
 
     var body: some View {
         let presentation = store.menuBarPresentation
-        HStack(spacing: 4) {
+        HStack(spacing: 5) {
             Image(systemName: "circle.hexagongrid.fill")
             if store.preferences.showInMenuBar {
-                Text(presentation.title)
+                ForEach(Array(presentation.segments.enumerated()), id: \.offset) { index, segment in
+                    if index > 0 {
+                        Text("·")
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack(spacing: 2) {
+                        if let icon = segment.systemImage {
+                            Image(systemName: icon)
+                        }
+                        Text(segment.text)
+                    }
+                }
             }
             if presentation.showWarningDot {
                 Circle()
@@ -17,6 +28,7 @@ struct MenuBarLabelView: View {
                     .frame(width: 6, height: 6)
             }
         }
+        .accessibilityLabel(presentation.accessibilityTitle)
         .task {
             await store.bootstrap()
         }

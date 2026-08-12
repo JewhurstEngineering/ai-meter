@@ -18,7 +18,10 @@ struct CursorUsageTrackerApp: App {
         Settings {
             SettingsRootView()
                 .environmentObject(store)
-                .frame(minWidth: 720, idealWidth: 760, minHeight: 520, idealHeight: 560)
+                .frame(minWidth: 760, idealWidth: 820, minHeight: 560, idealHeight: 600)
+                .onAppear {
+                    AppActivation.focusSettingsWindows()
+                }
         }
     }
 }
