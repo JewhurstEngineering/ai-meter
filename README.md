@@ -29,3 +29,8 @@ open CursorUsageTracker.xcodeproj
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Version
+
+Current: **0.1.3**
+

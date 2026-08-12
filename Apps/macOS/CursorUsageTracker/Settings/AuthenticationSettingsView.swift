@@ -45,12 +45,14 @@ struct AuthenticationSettingsView: View {
                         authButton("Sign in with Cursor", systemImage: "globe") {
                             showLogin = true
                         }
-                        authButton("Connect from local Cursor", systemImage: "laptopcomputer") {
+                        authButton("Connect from Cursor IDE", systemImage: "laptopcomputer") {
                             Task {
                                 await store.tryAutoConnect()
                                 if store.isAuthenticated {
                                     await store.refresh()
-                                    statusMessage = "Connected from local Cursor session."
+                                    let email = store.accountEmail ?? "account"
+                                    let source = store.lastLocalConnectSource ?? "local Cursor"
+                                    statusMessage = "Connected \(email) via \(source)."
                                 } else {
                                     statusMessage = store.lastError ?? "No local Cursor session found."
                                 }
@@ -66,6 +68,11 @@ struct AuthenticationSettingsView: View {
                         }
                         .disabled(!store.isAuthenticated)
                     }
+
+                    Text("Uses the account signed into the Cursor app (state.vscdb). Cursor Agent’s keychain can be a different login — we no longer prefer that first.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 SettingsPanel(
@@ -99,6 +106,17 @@ struct AuthenticationSettingsView: View {
                     subtitle: "Foundation only for now."
                 ) {
                     Text(TeamAdminAPIConnectorStub.statusMessage)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                SettingsPanel(
+                    title: "Multiple accounts",
+                    systemImage: "person.2",
+                    subtitle: "Not simultaneous yet."
+                ) {
+                    Text("Right now this app holds one personal session at a time. To use another Cursor account, Sign Out (or Re-authenticate) and sign into the other account. Multi-account side-by-side is planned next.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

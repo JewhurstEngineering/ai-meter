@@ -92,11 +92,20 @@ struct MetricToggleRow: View {
     @Binding var isOn: Bool
 
     var body: some View {
-        Toggle(isOn: $isOn) {
+        HStack(spacing: 10) {
             Label(title, systemImage: systemImage)
                 .labelStyle(.titleAndIcon)
+                .font(.subheadline)
+            Spacer(minLength: 8)
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
         }
-        .toggleStyle(.switch)
-        .controlSize(.small)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
+        .accessibilityValue(isOn ? "On" : "Off")
+        .accessibilityAddTraits(.isButton)
     }
 }

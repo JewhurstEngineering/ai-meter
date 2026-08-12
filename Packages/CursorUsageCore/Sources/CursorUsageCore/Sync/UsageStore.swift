@@ -8,6 +8,8 @@ public final class UsageStore: ObservableObject {
     @Published public private(set) var isRefreshing: Bool = false
     @Published public private(set) var lastError: String?
     @Published public private(set) var accountEmail: String?
+    /// Human-readable source of the last successful local connect (IDE vs Agent).
+    @Published public private(set) var lastLocalConnectSource: String?
     @Published public var preferences: DisplayPreferences {
         didSet { DisplayPreferenceStore.save(preferences) }
     }
@@ -41,18 +43,20 @@ public final class UsageStore: ObservableObject {
 
     public func tryAutoConnect() async {
         #if os(macOS)
-        if let token = CursorLocalAuthReader.readCursorAgentKeychainToken()
-            ?? CursorLocalAuthReader.readAccessToken()
-        {
-            do {
-                let me = try await client.validate(sessionToken: token)
-                try keychain.save(token: token, account: SessionAccount.defaultAccount)
-                isAuthenticated = true
-                accountEmail = me.email
-                lastError = nil
-            } catch {
-                lastError = "Auto-connect failed. Sign in manually."
-            }
+        // Prefer Cursor IDE state.vscdb over Agent keychain — they can be different accounts.
+        guard let credential = CursorLocalAuthReader.preferredCredential() else {
+            lastError = "No local Cursor session found."
+            return
+        }
+        do {
+            let me = try await client.validate(sessionToken: credential.token)
+            try keychain.save(token: credential.token, account: SessionAccount.defaultAccount)
+            isAuthenticated = true
+            accountEmail = me.email ?? credential.cachedEmail
+            lastError = nil
+            lastLocalConnectSource = credential.source.rawValue
+        } catch {
+            lastError = "Auto-connect via \(credential.source.rawValue) failed. Sign in manually."
         }
         #endif
     }
@@ -72,6 +76,7 @@ public final class UsageStore: ObservableObject {
         isAuthenticated = false
         snapshot = nil
         accountEmail = nil
+        lastLocalConnectSource = nil
         refreshTask?.cancel()
         refreshTask = nil
     }
@@ -89,6 +94,7 @@ public final class UsageStore: ObservableObject {
             lastError = nil
             let widget = WidgetSnapshot(from: snap, warningThreshold: preferences.warningThresholdPercent)
             try? WidgetSnapshotStore.write(widget)
+            await UsageNotificationService.evaluate(snapshot: snap, preferences: preferences)
         } catch PersonalAPIError.unauthorized {
             lastError = "Session expired. Re-authenticate."
             isAuthenticated = false

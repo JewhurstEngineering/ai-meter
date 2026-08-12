@@ -29,44 +29,44 @@ struct IncludedUsageSettingsView: View {
 
     private func subscriptionHero(_ snapshot: UsageSnapshot) -> some View {
         SettingsPanel(title: "Subscription", systemImage: "crown", subtitle: nil) {
-            HStack(alignment: .top, spacing: 16) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(snapshot.planDisplayName)
-                        .font(.largeTitle.weight(.bold))
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .foregroundStyle(.green)
-                        Text(snapshot.subscriptionStatus ?? "active")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            HStack(alignment: .center, spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Text(snapshot.planDisplayName)
+                            .font(.title2.weight(.bold))
+                        if let status = snapshot.subscriptionStatus {
+                            Text(status)
+                                .font(.caption.weight(.semibold))
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 2)
+                                .background(Capsule().fill(Color.green.opacity(0.15)))
+                                .foregroundStyle(.green)
+                        }
                     }
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 4) {
-                    if let used = snapshot.planUsedCents {
-                        Text(MenuBarFormatter.usd(used))
-                            .font(.title2.monospacedDigit().weight(.semibold))
-                        Text("period total")
+                    if let start = snapshot.billingCycleStart, let end = snapshot.billingCycleEnd {
+                        Text("\(start.formatted(date: .abbreviated, time: .omitted)) → \(end.formatted(date: .abbreviated, time: .omitted))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
-                    if let days = snapshot.daysRemainingInCycle {
-                        Label("\(days) days left", systemImage: "calendar")
-                            .font(.caption.weight(.medium))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Capsule().fill(UsageAppearance.accentTotal.opacity(0.15)))
-                            .foregroundStyle(UsageAppearance.accentTotal)
+                }
+                Spacer(minLength: 8)
+                if let used = snapshot.planUsedCents {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(MenuBarFormatter.usd(used))
+                            .font(.title3.monospacedDigit().weight(.semibold))
+                        Text("period total")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
-            }
-            if let start = snapshot.billingCycleStart, let end = snapshot.billingCycleEnd {
-                Label(
-                    "\(start.formatted(date: .abbreviated, time: .shortened)) → \(end.formatted(date: .abbreviated, time: .shortened))",
-                    systemImage: "arrow.left.arrow.right"
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                if let days = snapshot.daysRemainingInCycle {
+                    Text("\(days)d left")
+                        .font(.caption.weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Capsule().fill(UsageAppearance.accentTotal.opacity(0.15)))
+                        .foregroundStyle(UsageAppearance.accentTotal)
+                }
             }
         }
     }
@@ -231,7 +231,7 @@ struct AboutSettingsView: View {
     var body: some View {
         ScrollView {
             SettingsPanel(title: "Cursor Usage Tracker", systemImage: "info.circle.fill", subtitle: nil) {
-                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0")
+                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.3")
                 Text("Personal open-source menu bar meter for Cursor Pro, Pro+, and Ultra. Unofficial session APIs may change; re-auth when needed.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
