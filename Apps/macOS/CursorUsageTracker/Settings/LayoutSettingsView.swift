@@ -7,71 +7,87 @@ struct LayoutSettingsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                SettingsPanel(
-                    title: "Live preview",
-                    systemImage: "eye",
-                    subtitle: "Updates as you change the options below."
-                ) {
-                    MenuBarPreviewStrip(presentation: store.menuBarPresentation, showText: store.preferences.showInMenuBar)
-                    PopoverPreviewCard(snapshot: store.snapshot, preferences: store.preferences)
-                }
-
-                HStack(alignment: .top, spacing: 16) {
+                // | Menu bar metrics | Shared options | Popover metrics |
+                HStack(alignment: .top, spacing: 12) {
                     SettingsPanel(
                         title: "Menu bar",
                         systemImage: "menubar.rectangle",
-                        subtitle: "Compact glance strip in the system menu bar."
+                        subtitle: "Metrics in the system menu bar."
+                    ) {
+                        metricToggles(menuToggle)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .top)
+
+                    SettingsPanel(
+                        title: "Display",
+                        systemImage: "slider.horizontal.3",
+                        subtitle: "Shared menu bar presentation."
                     ) {
                         Toggle("Show title text in menu bar", isOn: showMenuBarBinding)
 
-                        Picker("Density", selection: formatBinding) {
-                            Text("Compact").tag(DisplayPreferences.MenuBarFormat.compact)
-                            Text("Detailed").tag(DisplayPreferences.MenuBarFormat.detailed)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Density")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Picker("Density", selection: formatBinding) {
+                                Text("Compact").tag(DisplayPreferences.MenuBarFormat.compact)
+                                Text("Detailed").tag(DisplayPreferences.MenuBarFormat.detailed)
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
                         }
-                        .pickerStyle(.segmented)
 
-                        Picker("Labels", selection: labelStyleBinding) {
-                            Text("Icons").tag(DisplayPreferences.MenuBarLabelStyle.icons)
-                            Text("Short words").tag(DisplayPreferences.MenuBarLabelStyle.shortWords)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Labels")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Picker("Labels", selection: labelStyleBinding) {
+                                Text("Icons").tag(DisplayPreferences.MenuBarLabelStyle.icons)
+                                Text("Words").tag(DisplayPreferences.MenuBarLabelStyle.shortWords)
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
                         }
-                        .pickerStyle(.segmented)
 
                         Text(labelStyleHelp)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Divider().padding(.vertical, 4)
-
-                        VStack(alignment: .leading, spacing: 10) {
-                            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: menuToggle(\.cursorModelsPercent))
-                            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: menuToggle(\.otherModelsPercent))
-                            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: menuToggle(\.totalPercent))
-                            MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: menuToggle(\.planSpend))
-                            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: menuToggle(\.bonus))
-                            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: menuToggle(\.onDemand))
-                            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: menuToggle(\.daysRemaining))
-                        }
+                        Text("Detailed shows every enabled metric. The live menu bar uses a native status item so macOS is less likely to clip it with “…” (very crowded menu bars can still compress items).")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .frame(maxWidth: .infinity, alignment: .top)
 
                     SettingsPanel(
                         title: "Popover",
                         systemImage: "rectangle.portrait.on.rectangle.portrait",
-                        subtitle: "What appears when you click the menu bar item."
+                        subtitle: "Metrics in the click panel."
                     ) {
-                        Text("Detail panel metrics")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                        metricToggles(popoverToggle)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .top)
+                }
 
-                        VStack(alignment: .leading, spacing: 10) {
-                            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: popoverToggle(\.cursorModelsPercent))
-                            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: popoverToggle(\.otherModelsPercent))
-                            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: popoverToggle(\.totalPercent))
-                            MetricToggleRow(title: "Plan spend", systemImage: "dollarsign.circle", isOn: popoverToggle(\.planSpend))
-                            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: popoverToggle(\.bonus))
-                            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: popoverToggle(\.onDemand))
-                            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: popoverToggle(\.daysRemaining))
-                        }
+                SettingsPanel(
+                    title: "Live examples",
+                    systemImage: "eye",
+                    subtitle: "Interactive — toggles above update these previews immediately."
+                ) {
+                    HStack(alignment: .top, spacing: 14) {
+                        MenuBarPreviewStrip(
+                            presentation: store.menuBarPresentation,
+                            showText: store.preferences.showInMenuBar
+                        )
+                        .frame(maxWidth: .infinity, alignment: .top)
+
+                        PopoverPreviewCard(
+                            snapshot: store.snapshot,
+                            preferences: store.preferences
+                        )
+                        .frame(maxWidth: .infinity, alignment: .top)
                     }
                 }
             }
@@ -80,12 +96,27 @@ struct LayoutSettingsView: View {
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
+    @ViewBuilder
+    private func metricToggles(
+        _ binding: (WritableKeyPath<DisplayPreferences.SurfaceToggles, Bool>) -> Binding<Bool>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: binding(\.cursorModelsPercent))
+            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: binding(\.otherModelsPercent))
+            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: binding(\.totalPercent))
+            MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: binding(\.planSpend))
+            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
+            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
+            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: binding(\.daysRemaining))
+        }
+    }
+
     private var labelStyleHelp: String {
         switch store.preferences.menuBarLabelStyle {
         case .icons:
-            return "Icons mode: sparkles = Cursor Models, cpu = Other Models, credit card = On-demand — no CM/OM/OD text."
+            return "Icons: sparkles / cpu / credit card stand in for each metric."
         case .shortWords:
-            return "Short words mode: “Cursor 12% · Other 88% · On-demand off” — readable, a bit longer."
+            return "Words: “Cursor 12% · Other 88% · On-demand off”."
         }
     }
 
@@ -145,7 +176,7 @@ struct LayoutSettingsView: View {
     }
 }
 
-// MARK: - Previews
+// MARK: - Previews (live)
 
 private struct MenuBarPreviewStrip: View {
     let presentation: MenuBarPresentation
@@ -153,10 +184,10 @@ private struct MenuBarPreviewStrip: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Menu bar")
+            Text("Menu bar example")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-            HStack(spacing: 6) {
+            HStack(spacing: 5) {
                 Image(systemName: "circle.hexagongrid.fill")
                     .foregroundStyle(.white.opacity(0.95))
                 if showText {
@@ -172,6 +203,9 @@ private struct MenuBarPreviewStrip: View {
                         }
                         .foregroundStyle(.white)
                     }
+                } else {
+                    Text("(icon only)")
+                        .foregroundStyle(.white.opacity(0.7))
                 }
                 if presentation.showWarningDot {
                     Circle().fill(.red).frame(width: 6, height: 6)
@@ -181,7 +215,7 @@ private struct MenuBarPreviewStrip: View {
             .font(.caption.weight(.medium))
             .padding(.horizontal, 10)
             .padding(.vertical, 8)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(
@@ -204,8 +238,9 @@ private struct PopoverPreviewCard: View {
     let preferences: DisplayPreferences
 
     var body: some View {
+        let t = preferences.popover
         VStack(alignment: .leading, spacing: 6) {
-            Text("Popover")
+            Text("Popover example")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
 
@@ -219,17 +254,26 @@ private struct PopoverPreviewCard: View {
                         .foregroundStyle(.secondary)
                 }
 
-                if preferences.popover.cursorModelsPercent {
+                if t.cursorModelsPercent {
                     previewPool(title: "Cursor Models", icon: "sparkles", percent: snapshot?.cursorModelsPercentUsed ?? 2)
                 }
-                if preferences.popover.otherModelsPercent {
+                if t.otherModelsPercent {
                     previewPool(title: "Other Models", icon: "cpu", percent: snapshot?.otherModelsPercentUsed ?? 88)
                 }
-                if preferences.popover.totalPercent {
+                if t.totalPercent {
                     previewPool(title: "Total included", icon: "chart.pie", percent: snapshot?.totalPercentUsed ?? 12)
                 }
 
-                if preferences.popover.onDemand {
+                if t.planSpend, let used = snapshot?.planUsedCents, let limit = snapshot?.planLimitCents {
+                    Label("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit)) base", systemImage: "dollarsign.circle")
+                        .font(.caption2)
+                }
+                if t.bonus, let bonus = snapshot?.bonusCents, bonus > 0 {
+                    Label("+\(MenuBarFormatter.usd(bonus)) bonus", systemImage: "gift")
+                        .font(.caption2)
+                        .foregroundStyle(UsageAppearance.accentSpend)
+                }
+                if t.onDemand {
                     HStack {
                         Label("On-demand", systemImage: "creditcard")
                         Spacer()
@@ -239,8 +283,22 @@ private struct PopoverPreviewCard: View {
                     }
                     .font(.caption)
                 }
+                if t.daysRemaining, let days = snapshot?.daysRemainingInCycle {
+                    Label("\(days)d left", systemImage: "calendar")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent
+                    && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining
+                {
+                    Text("Enable a Popover metric above to preview it.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .fill(Color(nsColor: .controlBackgroundColor))

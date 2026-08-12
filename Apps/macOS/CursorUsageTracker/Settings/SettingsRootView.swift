@@ -22,7 +22,7 @@ struct SettingsRootView: View {
         .padding()
         .environmentObject(store)
         .onAppear {
-            AppActivation.focusSettingsWindows()
+            AppActivation.scheduleSettingsFocus()
         }
     }
 }

@@ -1,26 +1,40 @@
+import AppKit
 import SwiftUI
 import CursorUsageCore
 
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    let store = UsageStore()
+    private let statusItem = StatusItemController()
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.accessory)
+        statusItem.start(store: store)
+    }
+
+    nonisolated func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            Task { @MainActor in
+                AppActivation.openSettingsViaLinkFallback()
+            }
+        }
+        return true
+    }
+}
+
 @main
 struct CursorUsageTrackerApp: App {
-    @StateObject private var store = UsageStore()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            MenuBarPopoverView()
-                .environmentObject(store)
-        } label: {
-            MenuBarLabelView()
-                .environmentObject(store)
-        }
-        .menuBarExtraStyle(.window)
-
+        // Menu bar UI is hosted by StatusItemController (AppKit) so the label
+        // is not clipped the way SwiftUI MenuBarExtra truncates with "…".
         Settings {
             SettingsRootView()
-                .environmentObject(store)
-                .frame(minWidth: 760, idealWidth: 820, minHeight: 560, idealHeight: 600)
+                .environmentObject(appDelegate.store)
+                .frame(minWidth: 900, idealWidth: 960, minHeight: 560, idealHeight: 620)
                 .onAppear {
-                    AppActivation.focusSettingsWindows()
+                    AppActivation.scheduleSettingsFocus()
                 }
         }
     }

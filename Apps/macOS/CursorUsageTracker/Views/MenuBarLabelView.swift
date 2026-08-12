@@ -6,15 +6,16 @@ struct MenuBarLabelView: View {
 
     var body: some View {
         let presentation = store.menuBarPresentation
-        HStack(spacing: 5) {
+        // MenuBarExtra clips multi-item HStacks unless the label requests its intrinsic width.
+        HStack(spacing: 3) {
             Image(systemName: "circle.hexagongrid.fill")
             if store.preferences.showInMenuBar {
                 ForEach(Array(presentation.segments.enumerated()), id: \.offset) { index, segment in
                     if index > 0 {
                         Text("·")
-                            .foregroundStyle(.secondary)
+                            .opacity(0.7)
                     }
-                    HStack(spacing: 2) {
+                    HStack(spacing: 1) {
                         if let icon = segment.systemImage {
                             Image(systemName: icon)
                         }
@@ -28,6 +29,8 @@ struct MenuBarLabelView: View {
                     .frame(width: 6, height: 6)
             }
         }
+        .fixedSize()
+        .help(presentation.accessibilityTitle)
         .accessibilityLabel(presentation.accessibilityTitle)
         .task {
             await store.bootstrap()

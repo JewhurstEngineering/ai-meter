@@ -82,9 +82,7 @@ struct MenuBarPopoverView: View {
             Text("Open Settings → Authentication to connect with Cursor, local session, or a pasted token.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Button {
-                AppActivation.openSettingsAndFocus()
-            } label: {
+            SettingsOpenLink {
                 Label("Open Settings", systemImage: "gearshape")
             }
             .buttonStyle(.borderedProminent)
@@ -195,9 +193,7 @@ struct MenuBarPopoverView: View {
 
     private var footer: some View {
         HStack {
-            Button {
-                AppActivation.openSettingsAndFocus()
-            } label: {
+            SettingsOpenLink {
                 Label("Settings", systemImage: "gearshape")
             }
             .keyboardShortcut(",", modifiers: .command)
