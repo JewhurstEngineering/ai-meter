@@ -3,11 +3,10 @@ import Foundation
 import UserNotifications
 #endif
 
-/// Fires local notifications when watched usage crosses configured thresholds,
+/// Fires local notifications when watched channels hit their menu-bar warning levels,
 /// or when a live session becomes unauthorized.
-/// Dedupes per billing-cycle + threshold so the same alert does not spam.
 public enum UsageNotificationService {
-    private static let firedKeyPrefix = "usageAlert.fired."
+    private static let firedKeyPrefix = "usageAlert.channel."
     private static let sessionExpiredFiredKey = "usageAlert.sessionExpired.fired"
 
     public static func requestAuthorizationIfNeeded() async -> Bool {
@@ -31,7 +30,6 @@ public enum UsageNotificationService {
         #endif
     }
 
-    /// Clears the session-expired dedupe flag after a successful re-auth.
     public static func clearSessionExpiredDedupe(defaults: UserDefaults = .standard) {
         defaults.removeObject(forKey: sessionExpiredFiredKey)
     }
@@ -43,31 +41,60 @@ public enum UsageNotificationService {
         defaults: UserDefaults = .standard
     ) async {
         guard preferences.notificationsEnabled else { return }
-        guard !preferences.notificationThresholds.isEmpty else { return }
 
         let authorized = await requestAuthorizationIfNeeded()
         guard authorized else { return }
 
-        let highest = snapshot.highestWatchedPercent
         let cycleKey = cycleIdentity(for: snapshot)
-        let poolLabel = leadingPoolLabel(for: snapshot)
+        let channels = preferences.notificationChannels
+        let warnings = preferences.menuBarWarnings
+        let contentOptions = preferences.notificationContent
 
-        for threshold in preferences.notificationThresholds where highest >= threshold {
-            let key = "\(firedKeyPrefix)\(cycleKey).\(Int(threshold))"
+        let watches: [(UsageSnapshot.WarningChannel, Bool, String)] = [
+            (.cursorModels, channels.cursorModels, "Cursor Models"),
+            (.otherModels, channels.otherModels, "Other Models"),
+            (.onDemandAndLimits, channels.onDemandAndLimits, "On-demand & limits"),
+            (.totalIncluded, channels.totalIncluded, "Total included"),
+        ]
+
+        for (channel, enabled, label) in watches {
+            guard enabled else { continue }
+            guard let status = snapshot.warningChannelStatus(channel, warnings: warnings), status.triggered else {
+                continue
+            }
+            let key = "\(firedKeyPrefix)\(cycleKey).\(channel.rawValue)"
             if defaults.bool(forKey: key) { continue }
-            await postUsageNotification(
-                threshold: threshold,
-                current: highest,
-                poolLabel: poolLabel,
+            await postChannelNotification(
+                channelLabel: label,
+                detail: status.detail,
+                thresholdDescription: thresholdDescription(for: channel, warnings: warnings, snapshot: snapshot),
                 snapshot: snapshot,
-                contentOptions: preferences.notificationContent
+                contentOptions: contentOptions
             )
             defaults.set(true, forKey: key)
         }
     }
 
-    /// Called when a refresh fails with unauthorized while a session was in use.
-    /// Does not fire for intentional sign-out. Dedupes until re-auth succeeds.
+    private static func thresholdDescription(
+        for channel: UsageSnapshot.WarningChannel,
+        warnings: DisplayPreferences.MenuBarWarningThresholds,
+        snapshot: UsageSnapshot
+    ) -> String {
+        switch channel {
+        case .cursorModels:
+            return "\(Int(warnings.cursorModelsPercent))%"
+        case .otherModels:
+            return "\(Int(warnings.otherModelsPercent))%"
+        case .totalIncluded:
+            return "\(Int(warnings.totalIncludedPercent))%"
+        case .onDemandAndLimits:
+            if snapshot.isOnDemandUnlimited {
+                return MenuBarFormatter.usd(warnings.onDemandUnlimitedAlertCents)
+            }
+            return "\(Int(warnings.onDemandAndLimitsPercent))%"
+        }
+    }
+
     @MainActor
     public static func notifySessionExpiredIfNeeded(
         preferences: DisplayPreferences,
@@ -108,38 +135,26 @@ public enum UsageNotificationService {
         return "unknown-cycle"
     }
 
-    private static func leadingPoolLabel(for snapshot: UsageSnapshot) -> String {
-        let candidates: [(String, Double?)] = [
-            ("Other Models", snapshot.otherModelsPercentUsed),
-            ("Cursor Models", snapshot.cursorModelsPercentUsed),
-            ("Total included", snapshot.totalPercentUsed),
-        ]
-        return candidates
-            .compactMap { name, value in value.map { (name, $0) } }
-            .max(by: { $0.1 < $1.1 })?
-            .0 ?? "usage"
-    }
-
     #if canImport(UserNotifications)
-    private static func postUsageNotification(
-        threshold: Double,
-        current: Double,
-        poolLabel: String,
+    private static func postChannelNotification(
+        channelLabel: String,
+        detail: String,
+        thresholdDescription: String,
         snapshot: UsageSnapshot,
         contentOptions: DisplayPreferences.NotificationContent
     ) async {
         let content = UNMutableNotificationContent()
         if contentOptions.includePlanName {
-            content.title = "Cursor \(snapshot.planDisplayName) · \(Int(threshold))% threshold"
+            content.title = "Cursor \(snapshot.planDisplayName) · \(channelLabel)"
         } else {
-            content.title = "Cursor usage · \(Int(threshold))% threshold"
+            content.title = "Cursor usage · \(channelLabel)"
         }
 
         var parts: [String] = []
         if contentOptions.includePoolPercent {
-            parts.append("\(poolLabel) at \(Int(current.rounded()))%")
+            parts.append("\(channelLabel) at \(detail) (alert \(thresholdDescription))")
         } else {
-            parts.append("\(poolLabel) crossed \(Int(threshold))%")
+            parts.append("\(channelLabel) crossed \(thresholdDescription)")
         }
         if contentOptions.includeSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
             parts.append("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit)) included")
@@ -151,7 +166,7 @@ public enum UsageNotificationService {
         content.sound = contentOptions.playSound ? .default : nil
 
         let request = UNNotificationRequest(
-            identifier: "cursor-usage-\(Int(threshold))-\(UUID().uuidString)",
+            identifier: "cursor-usage-\(channelLabel)-\(UUID().uuidString)",
             content: content,
             trigger: nil
         )

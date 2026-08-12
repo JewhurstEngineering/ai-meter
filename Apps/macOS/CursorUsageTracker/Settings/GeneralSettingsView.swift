@@ -8,6 +8,10 @@ struct GeneralSettingsView: View {
 
     private let intervals = [1, 2, 5, 15, 30]
 
+    private var onDemandUnlimited: Bool {
+        store.snapshot?.isOnDemandUnlimited == true
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
@@ -37,79 +41,95 @@ struct GeneralSettingsView: View {
                 SettingsPanel(
                     title: "Menu bar warning",
                     systemImage: "menubar.rectangle",
-                    subtitle: "Independent red-dot thresholds per channel.",
+                    subtitle: "Red dot when any channel hits its level.",
                     compact: true
                 ) {
-                    VStack(spacing: 8) {
-                        warningRow(
-                            "Cursor Models",
+                    HStack(alignment: .top, spacing: 8) {
+                        warningCard(
+                            title: "Cursor Models",
                             systemImage: "sparkles",
                             tint: UsageAppearance.accentCursorModels,
-                            value: warningBinding(\.cursorModelsPercent)
+                            percent: warningBinding(\.cursorModelsPercent)
                         )
-                        Divider().opacity(0.5)
-                        warningRow(
-                            "Other Models",
+                        warningCard(
+                            title: "Other Models",
                             systemImage: "cpu",
                             tint: UsageAppearance.accentOtherModels,
-                            value: warningBinding(\.otherModelsPercent)
+                            percent: warningBinding(\.otherModelsPercent)
                         )
-                        Divider().opacity(0.5)
-                        warningRow(
-                            "On-demand & limits",
-                            systemImage: "creditcard",
-                            tint: UsageAppearance.accentSpend,
-                            value: warningBinding(\.onDemandAndLimitsPercent)
-                        )
+                        if onDemandUnlimited {
+                            unlimitedSpendCard
+                        } else {
+                            warningCard(
+                                title: "On-demand & limits",
+                                systemImage: "creditcard",
+                                tint: UsageAppearance.accentSpend,
+                                percent: warningBinding(\.onDemandAndLimitsPercent)
+                            )
+                        }
                     }
 
-                    Text("Limits watch plan spend vs included and on-demand vs its cap.")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    Text(
+                        onDemandUnlimited
+                            ? "On-demand is unlimited — menu bar warns at the spend amount you set."
+                            : "Limits = plan spend vs included + on-demand vs its cap."
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 }
 
                 SettingsPanel(
                     title: "System notifications",
                     systemImage: "bell.badge.fill",
-                    subtitle: "Banner once per threshold each billing cycle.",
+                    subtitle: "Uses each menu-bar warning level above — once per channel per billing cycle.",
                     compact: true
                 ) {
                     HStack {
                         Text(store.preferences.notificationsEnabled ? "Enabled" : "Off")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(store.preferences.notificationsEnabled ? .primary : .secondary)
                         Spacer()
                         Toggle("", isOn: notificationsBinding)
                             .labelsHidden()
-                            .toggleStyle(ReliableSwitchToggleStyle())
+                            .toggleStyle(ReliableSwitchToggleStyle(onColor: UsageAppearance.accentOtherModels))
                     }
 
                     if store.preferences.notificationsEnabled {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("Notify at")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(.secondary)
-                            HStack(spacing: 5) {
-                                ForEach(DisplayPreferences.presetNotificationThresholds, id: \.self) { value in
-                                    let selected = store.preferences.notificationThresholds.contains(value)
-                                    Button {
-                                        var prefs = store.preferences
-                                        prefs.toggleNotificationThreshold(value)
-                                        store.applyPreferences(prefs)
-                                    } label: {
-                                        Text("\(Int(value))%")
-                                            .font(.caption2.weight(.semibold))
-                                            .monospacedDigit()
-                                            .padding(.horizontal, 7)
-                                            .padding(.vertical, 4)
-                                            .background(
-                                                Capsule()
-                                                    .fill(selected ? Color.accentColor : Color.primary.opacity(0.06))
-                                            )
-                                            .foregroundStyle(selected ? Color.white : Color.primary)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
+                        Text("Notify for")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        LazyVGrid(
+                            columns: [GridItem(.flexible()), GridItem(.flexible())],
+                            alignment: .leading,
+                            spacing: 8
+                        ) {
+                            channelToggle(
+                                "Cursor Models",
+                                detail: "\(Int(store.preferences.menuBarWarnings.cursorModelsPercent))%",
+                                tint: UsageAppearance.accentCursorModels,
+                                isOn: channelBinding(\.cursorModels)
+                            )
+                            channelToggle(
+                                "Other Models",
+                                detail: "\(Int(store.preferences.menuBarWarnings.otherModelsPercent))%",
+                                tint: UsageAppearance.accentOtherModels,
+                                isOn: channelBinding(\.otherModels)
+                            )
+                            channelToggle(
+                                "On-demand & limits",
+                                detail: onDemandUnlimited
+                                    ? MenuBarFormatter.usd(store.preferences.menuBarWarnings.onDemandUnlimitedAlertCents)
+                                    : "\(Int(store.preferences.menuBarWarnings.onDemandAndLimitsPercent))%",
+                                tint: UsageAppearance.accentSpend,
+                                isOn: channelBinding(\.onDemandAndLimits)
+                            )
+                            channelToggle(
+                                "Total included",
+                                detail: "\(Int(store.preferences.menuBarWarnings.totalIncludedPercent))%",
+                                tint: UsageAppearance.accentTotal,
+                                isOn: channelBinding(\.totalIncluded)
+                            ) {
+                                totalThresholdStepper
                             }
                         }
 
@@ -117,17 +137,20 @@ struct GeneralSettingsView: View {
                             Text("Include in alert")
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.secondary)
-
                             LazyVGrid(
-                                columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+                                columns: [
+                                    GridItem(.flexible()),
+                                    GridItem(.flexible()),
+                                    GridItem(.flexible()),
+                                ],
                                 alignment: .leading,
                                 spacing: 6
                             ) {
-                                Toggle("Pool %", isOn: contentBinding(\.includePoolPercent))
+                                Toggle("Pool / amount", isOn: contentBinding(\.includePoolPercent))
                                 Toggle("Plan name", isOn: contentBinding(\.includePlanName))
                                 Toggle("Spend ($)", isOn: contentBinding(\.includeSpend))
                                 Toggle("Days left", isOn: contentBinding(\.includeDaysRemaining))
-                                Toggle("Play sound", isOn: contentBinding(\.playSound))
+                                Toggle("Sound", isOn: contentBinding(\.playSound))
                                 Toggle("Session expired", isOn: sessionExpiredNotifyBinding)
                             }
                             .toggleStyle(.checkbox)
@@ -137,16 +160,14 @@ struct GeneralSettingsView: View {
                         Text("Session expired fires once until you sign in again (not on manual Sign out).")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
 
                         if let notificationPermissionHint {
                             Text(notificationPermissionHint)
                                 .font(.caption2)
                                 .foregroundStyle(.orange)
-                                .fixedSize(horizontal: false, vertical: true)
                         }
                     } else {
-                        Text("Turn on to pick thresholds and alert contents.")
+                        Text("Turn on, then pick which channels notify at their warning levels.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -157,28 +178,138 @@ struct GeneralSettingsView: View {
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
-    private func warningRow(
-        _ title: String,
+    private var unlimitedSpendCard: some View {
+        let cents = store.preferences.menuBarWarnings.onDemandUnlimitedAlertCents
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 4) {
+                Image(systemName: "creditcard")
+                    .font(.caption)
+                Text("On-demand spend")
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                Text(MenuBarFormatter.usd(cents))
+                    .font(.subheadline.monospacedDigit().weight(.bold))
+                    .foregroundStyle(UsageAppearance.accentSpend)
+            }
+            Text("Unlimited — alert at amount")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Picker("Alert at", selection: unlimitedSpendBinding) {
+                ForEach(DisplayPreferences.MenuBarWarningThresholds.unlimitedSpendPresetsCents, id: \.self) { value in
+                    Text(MenuBarFormatter.usd(value)).tag(value)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(UsageAppearance.accentSpend.opacity(0.14))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(UsageAppearance.accentSpend.opacity(0.35), lineWidth: 1)
+        )
+    }
+
+    private var totalThresholdStepper: some View {
+        HStack(spacing: 4) {
+            Text("at")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text("\(Int(store.preferences.menuBarWarnings.totalIncludedPercent))%")
+                .font(.caption2.monospacedDigit().weight(.bold))
+            Stepper(
+                "",
+                value: warningBinding(\.totalIncludedPercent),
+                in: 50...100,
+                step: 5
+            )
+            .labelsHidden()
+            .controlSize(.mini)
+        }
+    }
+
+    private func warningCard(
+        title: String,
         systemImage: String,
         tint: Color,
-        value: Binding<Double>
+        percent: Binding<Double>
     ) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.caption)
-                .foregroundStyle(tint)
-                .frame(width: 14)
-            Text(title)
-                .font(.caption.weight(.medium))
-                .frame(width: 118, alignment: .leading)
-            Slider(value: value, in: 50...100, step: 1)
-                .controlSize(.mini)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .font(.caption)
+                    .foregroundStyle(tint)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+                Text("\(Int(percent.wrappedValue))%")
+                    .font(.subheadline.monospacedDigit().weight(.bold))
+                    .foregroundStyle(tint)
+            }
+            Slider(value: percent, in: 50...100, step: 1)
+                .controlSize(.small)
                 .tint(tint)
-            Text("\(Int(value.wrappedValue))%")
-                .font(.caption.monospacedDigit().weight(.bold))
+            Text("50% – 100%")
+                .font(.caption2)
                 .foregroundStyle(.secondary)
-                .frame(width: 36, alignment: .trailing)
         }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(tint.opacity(0.14))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(tint.opacity(0.35), lineWidth: 1)
+        )
+    }
+
+    private func channelToggle(
+        _ title: String,
+        detail: String,
+        tint: Color,
+        isOn: Binding<Bool>
+    ) -> some View {
+        channelToggle(title, detail: detail, tint: tint, isOn: isOn) { EmptyView() }
+    }
+
+    private func channelToggle<Trailing: View>(
+        _ title: String,
+        detail: String,
+        tint: Color,
+        isOn: Binding<Bool>,
+        @ViewBuilder trailing: () -> Trailing
+    ) -> some View {
+        HStack(spacing: 8) {
+            Toggle(isOn: isOn) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                        .font(.caption.weight(.semibold))
+                    Text(detail)
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(tint)
+                }
+            }
+            .toggleStyle(.checkbox)
+            Spacer(minLength: 0)
+            trailing()
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
     }
 
     private var launchAtLoginBinding: Binding<Bool> {
@@ -210,6 +341,18 @@ struct GeneralSettingsView: View {
         )
     }
 
+    private var unlimitedSpendBinding: Binding<Int> {
+        Binding(
+            get: { store.preferences.menuBarWarnings.onDemandUnlimitedAlertCents },
+            set: { value in
+                var prefs = store.preferences
+                prefs.menuBarWarnings.onDemandUnlimitedAlertCents =
+                    DisplayPreferences.MenuBarWarningThresholds.clampCents(value)
+                store.applyPreferences(prefs)
+            }
+        )
+    }
+
     private func warningBinding(
         _ keyPath: WritableKeyPath<DisplayPreferences.MenuBarWarningThresholds, Double>
     ) -> Binding<Double> {
@@ -222,8 +365,22 @@ struct GeneralSettingsView: View {
                 prefs.warningThresholdPercent = min(
                     w.cursorModelsPercent,
                     w.otherModelsPercent,
-                    w.onDemandAndLimitsPercent
+                    w.onDemandAndLimitsPercent,
+                    w.totalIncludedPercent
                 )
+                store.applyPreferences(prefs)
+            }
+        )
+    }
+
+    private func channelBinding(
+        _ keyPath: WritableKeyPath<DisplayPreferences.NotificationChannels, Bool>
+    ) -> Binding<Bool> {
+        Binding(
+            get: { store.preferences.notificationChannels[keyPath: keyPath] },
+            set: { value in
+                var prefs = store.preferences
+                prefs.notificationChannels[keyPath: keyPath] = value
                 store.applyPreferences(prefs)
             }
         )

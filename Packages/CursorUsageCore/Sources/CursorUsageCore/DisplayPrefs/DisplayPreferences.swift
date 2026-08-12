@@ -11,8 +11,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     /// Per-channel menu bar warning thresholds (independent levels).
     public var menuBarWarnings: MenuBarWarningThresholds
     public var notificationsEnabled: Bool
-    /// Sorted unique percents that can trigger a system notification when crossed.
+    /// Sorted unique percents (legacy multi-threshold chips; still honored if non-empty alongside channels).
     public var notificationThresholds: [Double]
+    /// Per-channel notification enables — fire at each channel’s menu-bar warning level.
+    public var notificationChannels: NotificationChannels
     /// Banner when a refresh fails with unauthorized / session expired (not intentional sign-out).
     public var notifyOnSessionExpired: Bool
     public var notificationContent: NotificationContent
@@ -33,42 +35,112 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public struct MenuBarWarningThresholds: Codable, Sendable, Equatable {
         public var cursorModelsPercent: Double
         public var otherModelsPercent: Double
-        /// Plan spend / included limit and on-demand spend vs limit.
+        /// Plan spend / included limit and on-demand spend vs limit (when a cap exists).
         public var onDemandAndLimitsPercent: Double
+        /// Total included pool (menu bar + notifications).
+        public var totalIncludedPercent: Double
+        /// When on-demand is unlimited (no cap), warn at this spend amount (USD cents).
+        public var onDemandUnlimitedAlertCents: Int
 
         public static let `default` = MenuBarWarningThresholds(
             cursorModelsPercent: 95,
             otherModelsPercent: 95,
-            onDemandAndLimitsPercent: 95
+            onDemandAndLimitsPercent: 95,
+            totalIncludedPercent: 95,
+            onDemandUnlimitedAlertCents: 5_000
         )
+
+        public static let unlimitedSpendPresetsCents: [Int] = [
+            1_000, 2_500, 5_000, 10_000, 25_000, 50_000, 100_000,
+        ]
 
         public init(
             cursorModelsPercent: Double,
             otherModelsPercent: Double,
-            onDemandAndLimitsPercent: Double
+            onDemandAndLimitsPercent: Double,
+            totalIncludedPercent: Double = 95,
+            onDemandUnlimitedAlertCents: Int = 5_000
         ) {
-            self.cursorModelsPercent = Self.clamp(cursorModelsPercent)
-            self.otherModelsPercent = Self.clamp(otherModelsPercent)
-            self.onDemandAndLimitsPercent = Self.clamp(onDemandAndLimitsPercent)
+            self.cursorModelsPercent = Self.clampPercent(cursorModelsPercent)
+            self.otherModelsPercent = Self.clampPercent(otherModelsPercent)
+            self.onDemandAndLimitsPercent = Self.clampPercent(onDemandAndLimitsPercent)
+            self.totalIncludedPercent = Self.clampPercent(totalIncludedPercent)
+            self.onDemandUnlimitedAlertCents = Self.clampCents(onDemandUnlimitedAlertCents)
         }
 
         public init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
-            cursorModelsPercent = Self.clamp(try c.decodeIfPresent(Double.self, forKey: .cursorModelsPercent) ?? 95)
-            otherModelsPercent = Self.clamp(try c.decodeIfPresent(Double.self, forKey: .otherModelsPercent) ?? 95)
-            onDemandAndLimitsPercent = Self.clamp(
+            cursorModelsPercent = Self.clampPercent(
+                try c.decodeIfPresent(Double.self, forKey: .cursorModelsPercent) ?? 95
+            )
+            otherModelsPercent = Self.clampPercent(
+                try c.decodeIfPresent(Double.self, forKey: .otherModelsPercent) ?? 95
+            )
+            onDemandAndLimitsPercent = Self.clampPercent(
                 try c.decodeIfPresent(Double.self, forKey: .onDemandAndLimitsPercent) ?? 95
+            )
+            totalIncludedPercent = Self.clampPercent(
+                try c.decodeIfPresent(Double.self, forKey: .totalIncludedPercent) ?? 95
+            )
+            onDemandUnlimitedAlertCents = Self.clampCents(
+                try c.decodeIfPresent(Int.self, forKey: .onDemandUnlimitedAlertCents) ?? 5_000
             )
         }
 
-        public static func clamp(_ value: Double) -> Double {
+        public static func clampPercent(_ value: Double) -> Double {
             min(100, max(50, value.rounded()))
         }
 
-        /// Seeds all channels from a legacy single threshold.
+        /// Alias used by settings bindings.
+        public static func clamp(_ value: Double) -> Double { clampPercent(value) }
+
+        public static func clampCents(_ value: Int) -> Int {
+            min(1_000_000, max(100, value))
+        }
+
         public static func migrated(fromLegacy threshold: Double) -> MenuBarWarningThresholds {
-            let v = clamp(threshold)
-            return .init(cursorModelsPercent: v, otherModelsPercent: v, onDemandAndLimitsPercent: v)
+            let v = clampPercent(threshold)
+            return .init(
+                cursorModelsPercent: v,
+                otherModelsPercent: v,
+                onDemandAndLimitsPercent: v,
+                totalIncludedPercent: v
+            )
+        }
+    }
+
+    /// Which channels can fire a system notification when they hit their menu-bar warning level.
+    public struct NotificationChannels: Codable, Sendable, Equatable {
+        public var cursorModels: Bool
+        public var otherModels: Bool
+        public var onDemandAndLimits: Bool
+        public var totalIncluded: Bool
+
+        public static let `default` = NotificationChannels(
+            cursorModels: true,
+            otherModels: true,
+            onDemandAndLimits: true,
+            totalIncluded: false
+        )
+
+        public init(
+            cursorModels: Bool,
+            otherModels: Bool,
+            onDemandAndLimits: Bool,
+            totalIncluded: Bool
+        ) {
+            self.cursorModels = cursorModels
+            self.otherModels = otherModels
+            self.onDemandAndLimits = onDemandAndLimits
+            self.totalIncluded = totalIncluded
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            cursorModels = try c.decodeIfPresent(Bool.self, forKey: .cursorModels) ?? true
+            otherModels = try c.decodeIfPresent(Bool.self, forKey: .otherModels) ?? true
+            onDemandAndLimits = try c.decodeIfPresent(Bool.self, forKey: .onDemandAndLimits) ?? true
+            totalIncluded = try c.decodeIfPresent(Bool.self, forKey: .totalIncluded) ?? false
         }
     }
 
@@ -196,6 +268,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         menuBarWarnings: .default,
         notificationsEnabled: false,
         notificationThresholds: [85, 95],
+        notificationChannels: .default,
         notifyOnSessionExpired: true,
         notificationContent: .default,
         menuBar: .menuBarDefault,
@@ -212,6 +285,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         menuBarWarnings: MenuBarWarningThresholds = .default,
         notificationsEnabled: Bool = false,
         notificationThresholds: [Double] = [85, 95],
+        notificationChannels: NotificationChannels = .default,
         notifyOnSessionExpired: Bool = true,
         notificationContent: NotificationContent = .default,
         menuBar: SurfaceToggles,
@@ -226,6 +300,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.menuBarWarnings = menuBarWarnings
         self.notificationsEnabled = notificationsEnabled
         self.notificationThresholds = Self.normalizeThresholds(notificationThresholds)
+        self.notificationChannels = notificationChannels
         self.notifyOnSessionExpired = notifyOnSessionExpired
         self.notificationContent = notificationContent
         self.menuBar = menuBar
@@ -250,6 +325,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationThresholds = Self.normalizeThresholds(
             try c.decodeIfPresent([Double].self, forKey: .notificationThresholds) ?? [85, 95]
         )
+        notificationChannels = try c.decodeIfPresent(NotificationChannels.self, forKey: .notificationChannels) ?? .default
         notifyOnSessionExpired = try c.decodeIfPresent(Bool.self, forKey: .notifyOnSessionExpired) ?? true
         notificationContent = try c.decodeIfPresent(NotificationContent.self, forKey: .notificationContent) ?? .default
         menuBar = try c.decodeIfPresent(SurfaceToggles.self, forKey: .menuBar) ?? .menuBarDefault

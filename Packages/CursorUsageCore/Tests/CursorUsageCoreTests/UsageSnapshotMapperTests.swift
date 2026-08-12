@@ -43,7 +43,12 @@ final class UsageSnapshotMapperTests: XCTestCase {
         prefs.menuBar.otherModelsPercent = true
         prefs.menuBar.planSpend = true
         prefs.menuBar.bonus = true
-        prefs.menuBarWarnings = .init(cursorModelsPercent: 95, otherModelsPercent: 95, onDemandAndLimitsPercent: 95)
+        prefs.menuBarWarnings = .init(
+            cursorModelsPercent: 95,
+            otherModelsPercent: 95,
+            onDemandAndLimitsPercent: 95,
+            totalIncludedPercent: 95
+        )
 
         let presentation = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
         XCTAssertTrue(presentation.accessibilityTitle.contains("4%") || presentation.segments.contains(where: { $0.text.contains("4%") }))

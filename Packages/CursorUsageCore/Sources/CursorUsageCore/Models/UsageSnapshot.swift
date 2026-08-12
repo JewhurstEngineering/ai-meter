@@ -124,10 +124,60 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         return values.max()
     }
 
+    /// On-demand enabled with no positive spend cap (Cursor “unlimited”).
+    public var isOnDemandUnlimited: Bool {
+        onDemandEnabled && (onDemandLimitCents == nil || (onDemandLimitCents ?? 0) <= 0)
+    }
+
     public func exceedsMenuBarWarnings(_ warnings: DisplayPreferences.MenuBarWarningThresholds) -> Bool {
         if let p = cursorModelsPercentUsed, p >= warnings.cursorModelsPercent { return true }
         if let p = otherModelsPercentUsed, p >= warnings.otherModelsPercent { return true }
-        if let p = onDemandAndLimitsPercentUsed, p >= warnings.onDemandAndLimitsPercent { return true }
+        if let p = totalPercentUsed, p >= warnings.totalIncludedPercent { return true }
+        if let status = warningChannelStatus(.onDemandAndLimits, warnings: warnings), status.triggered {
+            return true
+        }
         return false
+    }
+
+    public enum WarningChannel: String, Sendable {
+        case cursorModels
+        case otherModels
+        case onDemandAndLimits
+        case totalIncluded
+    }
+
+    public func warningChannelStatus(
+        _ channel: WarningChannel,
+        warnings: DisplayPreferences.MenuBarWarningThresholds
+    ) -> (triggered: Bool, detail: String)? {
+        switch channel {
+        case .cursorModels:
+            guard let p = cursorModelsPercentUsed else { return nil }
+            return (p >= warnings.cursorModelsPercent, "\(Int(p.rounded()))%")
+        case .otherModels:
+            guard let p = otherModelsPercentUsed else { return nil }
+            return (p >= warnings.otherModelsPercent, "\(Int(p.rounded()))%")
+        case .totalIncluded:
+            guard let p = totalPercentUsed else { return nil }
+            return (p >= warnings.totalIncludedPercent, "\(Int(p.rounded()))%")
+        case .onDemandAndLimits:
+            if isOnDemandUnlimited {
+                if let used = onDemandUsedCents, used >= warnings.onDemandUnlimitedAlertCents {
+                    return (true, "\(MenuBarFormatter.usd(used)) on-demand")
+                }
+                if let used = planUsedCents, let limit = planLimitCents, limit > 0 {
+                    let p = min(100, Double(used) / Double(limit) * 100)
+                    if p >= warnings.onDemandAndLimitsPercent {
+                        return (true, "\(Int(p.rounded()))% plan")
+                    }
+                }
+                if let used = onDemandUsedCents {
+                    return (false, "\(MenuBarFormatter.usd(used)) on-demand")
+                }
+                return nil
+            }
+            guard let p = onDemandAndLimitsPercentUsed else { return nil }
+            return (p >= warnings.onDemandAndLimitsPercent, "\(Int(p.rounded()))%")
+        }
     }
 }

@@ -37,7 +37,7 @@ struct UsageProgressBar: View {
             let color = tint ?? UsageAppearance.poolColor(percent: percent)
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(Color.primary.opacity(0.08))
+                    .fill(Color.primary.opacity(0.14))
                 Capsule()
                     .fill(color.gradient)
                     .frame(width: max(6, geo.size.width * clamped))
