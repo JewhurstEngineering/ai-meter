@@ -1,0 +1,9 @@
+{
+  "email": "user@example.com",
+  "email_verified": true,
+  "name": "Example User",
+  "sub": "user_01EXAMPLE",
+  "id": 12345678,
+  "created_at": "2024-01-01T00:00:00.000Z",
+  "updated_at": "2026-08-12T00:00:00.000Z"
+}

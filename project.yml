@@ -1,0 +1,61 @@
+name: CursorUsageTracker
+options:
+  bundleIdPrefix: com.cursorusagetracker
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+packages:
+  CursorUsageCore:
+    path: Packages/CursorUsageCore
+targets:
+  CursorUsageTracker:
+    type: application
+    platform: macOS
+    sources:
+      - path: Apps/macOS/CursorUsageTracker
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app
+        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage Tracker
+        INFOPLIST_KEY_LSUIElement: YES
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_ENTITLEMENTS: Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        COMBINE_HIDPI_IMAGES: YES
+    dependencies:
+      - package: CursorUsageCore
+      - target: CursorUsageWidgets
+        embed: true
+  CursorUsageWidgets:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Widgets/CursorUsageWidgets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app.widgets
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage Widgets
+        INFOPLIST_FILE: Widgets/CursorUsageWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Widgets/CursorUsageWidgets/CursorUsageWidgets.entitlements
+        SKIP_INSTALL: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+          - "@executable_path/../../../../Frameworks"
+    dependencies:
+      - package: CursorUsageCore
+schemes:
+  CursorUsageTracker:
+    build:
+      targets:
+        CursorUsageTracker: all
+        CursorUsageWidgets: all
+    run:
+      config: Debug

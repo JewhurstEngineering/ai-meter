@@ -1,0 +1,20 @@
+{
+  "membershipType": "ultra",
+  "paymentId": "cus_REDACTED",
+  "subscriptionStatus": "active",
+  "verifiedStudent": false,
+  "studentDiscountApplied": false,
+  "trialEligible": false,
+  "trialLengthDays": 7,
+  "isOnStudentPlan": false,
+  "isOnBillableAuto": true,
+  "customerBalance": 0,
+  "trialWasCancelled": false,
+  "isTeamMember": false,
+  "teamMembershipType": null,
+  "individualMembershipType": "ultra",
+  "lastPaymentFailed": false,
+  "pendingCancellationDate": null,
+  "paymentRecoveryAction": null,
+  "isYearlyPlan": false
+}
