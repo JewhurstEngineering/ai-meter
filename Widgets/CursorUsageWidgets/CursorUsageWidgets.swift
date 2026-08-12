@@ -24,12 +24,27 @@ struct Entry: TimelineEntry {
 }
 
 struct CursorUsageWidgetEntryView: View {
+    @Environment(\.widgetFamily) private var family
     var entry: Entry
 
     var body: some View {
+        if family == .systemMedium {
+            mediumBody
+        } else {
+            smallBody
+        }
+    }
+
+    private var smallBody: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(entry.snapshot?.planDisplayName ?? "Cursor")
-                .font(.caption.weight(.semibold))
+            HStack {
+                Text(entry.snapshot?.planDisplayName ?? "Cursor")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                if entry.snapshot?.showWarning == true {
+                    Circle().fill(.red).frame(width: 7, height: 7)
+                }
+            }
             if let om = entry.snapshot?.otherModelsPercentUsed {
                 Text("\(Int(om.rounded()))%")
                     .font(.title.bold())
@@ -45,7 +60,7 @@ struct CursorUsageWidgetEntryView: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             } else {
-                Text("Open app to sync")
+                Text("Open the menu bar app to sync")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -56,8 +71,64 @@ struct CursorUsageWidgetEntryView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .padding()
         .containerBackground(.fill.tertiary, for: .widget)
+    }
+
+    private var mediumBody: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(entry.snapshot?.planDisplayName ?? "Cursor")
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                if let used = entry.snapshot?.planUsedCents, let limit = entry.snapshot?.planLimitCents {
+                    Text("\(usd(used)) / \(usd(limit))")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+                if entry.snapshot?.showWarning == true {
+                    Circle().fill(.red).frame(width: 7, height: 7)
+                }
+            }
+            if let snap = entry.snapshot {
+                poolRow("Cursor Models", percent: snap.cursorModelsPercentUsed, color: Color(red: 0.22, green: 0.48, blue: 0.86))
+                poolRow("Other Models", percent: snap.otherModelsPercentUsed, color: Color(red: 0.55, green: 0.35, blue: 0.82))
+                poolRow("Total", percent: snap.totalPercentUsed, color: Color(red: 0.20, green: 0.55, blue: 0.58))
+            } else {
+                Text("Open Cursor Usage Tracker to sync.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .containerBackground(.fill.tertiary, for: .widget)
+    }
+
+    private func poolRow(_ title: String, percent: Double?, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.caption2)
+                .frame(width: 92, alignment: .leading)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.primary.opacity(0.12))
+                    Capsule()
+                        .fill(color)
+                        .frame(width: geo.size.width * min(1, max(0, (percent ?? 0) / 100)))
+                }
+            }
+            .frame(height: 6)
+            Text(percent.map { "\(Int($0.rounded()))%" } ?? "—")
+                .font(.caption2.monospacedDigit().weight(.semibold))
+                .frame(width: 36, alignment: .trailing)
+        }
+    }
+
+    private func usd(_ cents: Int) -> String {
+        let dollars = Double(cents) / 100.0
+        if dollars == floor(dollars) {
+            return String(format: "$%.0f", dollars)
+        }
+        return String(format: "$%.2f", dollars)
     }
 }
 
@@ -76,7 +147,7 @@ struct CursorUsageWidget: Widget {
             CursorUsageWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Cursor Usage")
-        .description("Glance at Cursor Models / Other Models usage.")
+        .description("Cursor Models, Other Models, and included spend on your desktop.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

@@ -17,6 +17,8 @@ public final class UsageStore: ObservableObject {
     private let keychain = KeychainStore()
     private let client = PersonalUsageClient.shared
     private var refreshTask: Task<Void, Never>?
+    /// Host app sets this to reload WidgetKit after a snapshot write.
+    public var onWidgetSnapshotWritten: (() -> Void)?
 
     public init() {
         preferences = DisplayPreferenceStore.load()
@@ -97,6 +99,7 @@ public final class UsageStore: ObservableObject {
             lastError = nil
             let widget = WidgetSnapshot(from: snap, warnings: preferences.menuBarWarnings)
             try? WidgetSnapshotStore.write(widget)
+            onWidgetSnapshotWritten?()
             await UsageNotificationService.evaluate(snapshot: snap, preferences: preferences)
         } catch PersonalAPIError.unauthorized {
             let email = accountEmail
@@ -133,6 +136,7 @@ public final class UsageStore: ObservableObject {
         if let snapshot {
             let widget = WidgetSnapshot(from: snapshot, warnings: prefs.menuBarWarnings)
             try? WidgetSnapshotStore.write(widget)
+            onWidgetSnapshotWritten?()
         }
     }
 }

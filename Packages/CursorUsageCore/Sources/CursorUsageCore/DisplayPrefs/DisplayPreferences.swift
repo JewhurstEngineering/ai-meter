@@ -88,7 +88,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         }
 
         public static func clampPercent(_ value: Double) -> Double {
-            min(100, max(50, value.rounded()))
+            min(100, max(1, value.rounded()))
         }
 
         /// Alias used by settings bindings.

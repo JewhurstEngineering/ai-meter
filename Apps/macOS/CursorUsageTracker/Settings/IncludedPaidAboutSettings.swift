@@ -252,17 +252,176 @@ struct PaidUsageSettingsView: View {
 }
 
 struct AboutSettingsView: View {
+    private var version: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.18"
+    }
+
+    @State private var installMessage: String?
+
+    private var isRunningFromApplications: Bool {
+        Bundle.main.bundleURL.path.hasPrefix("/Applications/")
+    }
+
     var body: some View {
         ScrollView {
-            SettingsPanel(title: "Cursor Usage Tracker", systemImage: "info.circle.fill", subtitle: nil) {
-                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.16")
-                Text("Personal open-source menu bar meter for Cursor Pro, Pro+, and Ultra. Unofficial session APIs may change; re-auth when needed.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 12) {
+                hero
+
+                HStack(alignment: .top, spacing: 10) {
+                    SettingsPanel(
+                        title: "What it tracks",
+                        systemImage: "chart.bar.fill",
+                        subtitle: "Personal Pro / Pro+ / Ultra.",
+                        compact: true
+                    ) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            aboutBullet("sparkles", "Cursor Models included pool")
+                            aboutBullet("cpu", "Other Models included pool")
+                            aboutBullet("creditcard", "On-demand, limits, and spend")
+                            aboutBullet("bell.badge", "Menu bar warnings + notifications")
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .top)
+
+                    SettingsPanel(
+                        title: "Desktop widget",
+                        systemImage: "rectangle.on.rectangle",
+                        subtitle: "macOS only lists widgets from /Applications.",
+                        compact: true
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Xcode Run copies live in DerivedData, so Edit Widgets search stays empty until the app is installed.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+
+                            if isRunningFromApplications {
+                                Label("Installed in Applications — search “Cursor Usage”.", systemImage: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            } else {
+                                Button {
+                                    installMessage = installToApplications()
+                                } label: {
+                                    Label("Install to Applications", systemImage: "square.and.arrow.down")
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .controlSize(.small)
+                            }
+
+                            aboutBullet("1.circle", "Install (button above) or drag this .app into /Applications")
+                            aboutBullet("2.circle", "Open that copy once from Applications")
+                            aboutBullet("3.circle", "Right-click desktop → Edit Widgets → “Cursor Usage”")
+
+                            if let installMessage {
+                                Text(installMessage)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .top)
+                }
+
+                SettingsPanel(
+                    title: "Unofficial & local-first",
+                    systemImage: "lock.shield",
+                    subtitle: nil,
+                    compact: true
+                ) {
+                    Text("Session tokens stay in Keychain on this Mac. Widgets only see a sanitized usage snapshot — never credentials. Cursor’s personal APIs can change; re-auth from Authentication if usage stops updating.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    HStack(spacing: 8) {
+                        Link(destination: URL(string: "https://cursor.com/dashboard")!) {
+                            Label("Cursor dashboard", systemImage: "globe")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        Spacer()
+                        Text("MIT license · open source")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
-            .padding(16)
+            .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private func installToApplications() -> String {
+        let src = Bundle.main.bundleURL
+        let dest = URL(fileURLWithPath: "/Applications/Cursor Usage Tracker.app")
+        do {
+            if FileManager.default.fileExists(atPath: dest.path) {
+                try FileManager.default.removeItem(at: dest)
+            }
+            try FileManager.default.copyItem(at: src, to: dest)
+            NSWorkspace.shared.open(dest)
+            return "Copied to \(dest.path). Quit the Xcode copy, use the Applications one, then Edit Widgets."
+        } catch {
+            return "Couldn’t install: \(error.localizedDescription). Drag the app into /Applications yourself."
+        }
+    }
+
+    private var hero: some View {
+        HStack(alignment: .center, spacing: 14) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                UsageAppearance.accentCursorModels,
+                                UsageAppearance.accentOtherModels,
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 56, height: 56)
+                Image(systemName: "circle.hexagongrid.fill")
+                    .font(.title)
+                    .foregroundStyle(.white)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Cursor Usage Tracker")
+                    .font(.title2.weight(.bold))
+                Text("Menu bar meter for Cursor usage — unofficial, local-first.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    Text("v\(version)")
+                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(UsageAppearance.accentCursorModels.opacity(0.15)))
+                        .foregroundStyle(UsageAppearance.accentCursorModels)
+                    Text("macOS 14+")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(nsColor: .controlBackgroundColor))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+    }
+
+    private func aboutBullet(_ systemImage: String, _ text: String) -> some View {
+        Label(text, systemImage: systemImage)
+            .font(.caption)
+            .labelStyle(.titleAndIcon)
     }
 }

@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        store.onWidgetSnapshotWritten = { WidgetReload.afterWritingSnapshot() }
         statusItem.start(store: store)
     }
 

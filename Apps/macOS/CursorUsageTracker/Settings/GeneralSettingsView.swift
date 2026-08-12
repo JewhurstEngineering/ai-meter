@@ -225,8 +225,8 @@ struct GeneralSettingsView: View {
             Stepper(
                 "",
                 value: warningBinding(\.totalIncludedPercent),
-                in: 50...100,
-                step: 5
+                in: 1...100,
+                step: 1
             )
             .labelsHidden()
             .controlSize(.mini)
@@ -252,10 +252,10 @@ struct GeneralSettingsView: View {
                     .font(.subheadline.monospacedDigit().weight(.bold))
                     .foregroundStyle(tint)
             }
-            Slider(value: percent, in: 50...100, step: 1)
+            Slider(value: percent, in: 1...100, step: 1)
                 .controlSize(.small)
                 .tint(tint)
-            Text("50% – 100%")
+            Text("1% – 100%")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
