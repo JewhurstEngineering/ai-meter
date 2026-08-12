@@ -39,6 +39,10 @@ struct MenuBarPopoverView: View {
                 .padding(.vertical, 10)
         }
         .frame(width: 360)
+        // Flatten to an opaque bitmap so popover vibrancy cannot bleed editor content through.
+        .background(Color(nsColor: .windowBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .compositingGroup()
     }
 
     private var header: some View {

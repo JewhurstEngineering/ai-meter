@@ -36,23 +36,11 @@ struct GeneralSettingsView: View {
                     }
                 }
 
+                // Tallest card wins; both stretch so bottoms stay aligned.
                 HStack(alignment: .top, spacing: 14) {
                     menuBarWarningCard
-                        .frame(maxWidth: .infinity, alignment: .top)
                     systemNotificationsCard
-                        .frame(maxWidth: .infinity, alignment: .top)
                 }
-
-                HStack(spacing: 8) {
-                    Image(systemName: "rectangle.split.2x1")
-                        .foregroundStyle(.tint)
-                    Text("Menu bar and popover layout live under the ")
-                        + Text("Layout").fontWeight(.semibold)
-                        + Text(" tab.")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
             }
             .padding(16)
         }
@@ -70,7 +58,7 @@ struct GeneralSettingsView: View {
                     .foregroundStyle(.tint)
                 Text("Menu bar warning")
                     .font(.headline)
-                Spacer()
+                Spacer(minLength: 0)
                 Text("\(Int(threshold))%")
                     .font(.subheadline.monospacedDigit().weight(.bold))
                     .foregroundStyle(.red)
@@ -86,24 +74,22 @@ struct GeneralSettingsView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
-                    Text("50%")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    Text("50%").font(.caption2).foregroundStyle(.secondary)
                     Spacer()
-                    Text("100%")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    Text("100%").font(.caption2).foregroundStyle(.secondary)
                 }
                 Slider(value: thresholdBinding, in: 50...100, step: 1)
                     .tint(.red)
             }
+
+            Spacer(minLength: 0)
 
             Label("Watches Cursor Models, Other Models, and Total included", systemImage: "eye")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(surface))
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -112,33 +98,29 @@ struct GeneralSettingsView: View {
     }
 
     private var systemNotificationsCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: "bell.badge.fill")
                     .foregroundStyle(UsageAppearance.accentOtherModels)
                 Text("System notifications")
                     .font(.headline)
-                Spacer()
+                Spacer(minLength: 0)
                 Toggle("", isOn: notificationsBinding)
                     .labelsHidden()
                     .toggleStyle(.switch)
             }
 
-            Text("macOS banner when usage crosses a selected threshold (once per threshold each billing cycle).")
+            Text("Banner once per threshold each billing cycle.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
 
             if store.preferences.notificationsEnabled {
                 Text("Notify at")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
 
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 48), spacing: 8)],
-                    alignment: .leading,
-                    spacing: 8
-                ) {
+                // Single non-wrapping row — compact chips.
+                HStack(spacing: 4) {
                     ForEach(DisplayPreferences.presetNotificationThresholds, id: \.self) { value in
                         let selected = store.preferences.notificationThresholds.contains(value)
                         Button {
@@ -146,10 +128,12 @@ struct GeneralSettingsView: View {
                             prefs.toggleNotificationThreshold(value)
                             store.applyPreferences(prefs)
                         } label: {
-                            Text("\(Int(value))%")
-                                .font(.caption.weight(.semibold))
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 7)
+                            Text("\(Int(value))")
+                                .font(.caption2.weight(.bold))
+                                .monospacedDigit()
+                                .frame(minWidth: 28)
+                                .padding(.horizontal, 4)
+                                .padding(.vertical, 5)
                                 .background(
                                     Capsule()
                                         .fill(selected ? UsageAppearance.accentOtherModels : Color.primary.opacity(0.06))
@@ -157,8 +141,25 @@ struct GeneralSettingsView: View {
                                 .foregroundStyle(selected ? Color.white : Color.primary)
                         }
                         .buttonStyle(.plain)
+                        .help("\(Int(value))%")
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Text("Include in alert")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Pool percent used", isOn: contentBinding(\.includePoolPercent))
+                    Toggle("Plan name", isOn: contentBinding(\.includePlanName))
+                    Toggle("Included spend ($)", isOn: contentBinding(\.includeSpend))
+                    Toggle("Days remaining", isOn: contentBinding(\.includeDaysRemaining))
+                    Toggle("Play sound", isOn: contentBinding(\.playSound))
+                }
+                .toggleStyle(.checkbox)
+                .font(.caption)
 
                 if let notificationPermissionHint {
                     Text(notificationPermissionHint)
@@ -167,14 +168,14 @@ struct GeneralSettingsView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             } else {
-                Text("Turn on to choose thresholds.")
+                Text("Turn on to choose thresholds and alert contents.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                Spacer(minLength: 0)
             }
         }
         .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(UsageAppearance.accentOtherModels.opacity(0.08))
@@ -237,9 +238,22 @@ struct GeneralSettingsView: View {
                         let ok = await UsageNotificationService.requestAuthorizationIfNeeded()
                         notificationPermissionHint = ok
                             ? nil
-                            : "Notifications are blocked — enable them for Cursor Usage Tracker in System Settings → Notifications."
+                            : "Notifications are blocked — enable them in System Settings → Notifications."
                     }
                 }
+            }
+        )
+    }
+
+    private func contentBinding(
+        _ keyPath: WritableKeyPath<DisplayPreferences.NotificationContent, Bool>
+    ) -> Binding<Bool> {
+        Binding(
+            get: { store.preferences.notificationContent[keyPath: keyPath] },
+            set: { value in
+                var prefs = store.preferences
+                prefs.notificationContent[keyPath: keyPath] = value
+                store.applyPreferences(prefs)
             }
         )
     }

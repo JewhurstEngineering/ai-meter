@@ -29,6 +29,10 @@ final class StatusItemController: NSObject {
                 .environmentObject(store)
                 .frame(width: 360)
         )
+        // Opaque fill so vibrancy does not blend editor chrome into the UI.
+        hosting.view.wantsLayer = true
+        hosting.view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+
         let pop = NSPopover()
         pop.behavior = .transient
         pop.animates = true
@@ -82,7 +86,29 @@ final class StatusItemController: NSObject {
         } else {
             AppActivation.bringToFront()
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            Self.hardenPopoverBackground(popover)
             addEventMonitor()
+        }
+    }
+
+    /// NSPopover wraps content in a vibrant effect view; force an opaque material so dark apps don't show through.
+    private static func hardenPopoverBackground(_ popover: NSPopover) {
+        guard let root = popover.contentViewController?.view else { return }
+        root.wantsLayer = true
+        root.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+
+        func walk(_ view: NSView) {
+            if let effect = view as? NSVisualEffectView {
+                effect.material = .contentBackground
+                effect.blendingMode = .withinWindow
+                effect.state = .active
+                effect.isEmphasized = true
+            }
+            view.subviews.forEach(walk)
+        }
+        walk(root)
+        if let frame = root.superview {
+            walk(frame)
         }
     }
 

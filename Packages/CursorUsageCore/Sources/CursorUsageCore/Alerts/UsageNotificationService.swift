@@ -51,8 +51,9 @@ public enum UsageNotificationService {
             await postNotification(
                 threshold: threshold,
                 current: highest,
-                plan: snapshot.planDisplayName,
-                poolLabel: poolLabel
+                poolLabel: poolLabel,
+                snapshot: snapshot,
+                contentOptions: preferences.notificationContent
             )
             defaults.set(true, forKey: key)
         }
@@ -81,13 +82,31 @@ public enum UsageNotificationService {
     private static func postNotification(
         threshold: Double,
         current: Double,
-        plan: String,
-        poolLabel: String
+        poolLabel: String,
+        snapshot: UsageSnapshot,
+        contentOptions: DisplayPreferences.NotificationContent
     ) async {
         let content = UNMutableNotificationContent()
-        content.title = "Cursor \(plan) · \(Int(threshold))% threshold"
-        content.body = "\(poolLabel) is at \(Int(current.rounded()))% of included usage."
-        content.sound = .default
+        if contentOptions.includePlanName {
+            content.title = "Cursor \(snapshot.planDisplayName) · \(Int(threshold))% threshold"
+        } else {
+            content.title = "Cursor usage · \(Int(threshold))% threshold"
+        }
+
+        var parts: [String] = []
+        if contentOptions.includePoolPercent {
+            parts.append("\(poolLabel) at \(Int(current.rounded()))%")
+        } else {
+            parts.append("\(poolLabel) crossed \(Int(threshold))%")
+        }
+        if contentOptions.includeSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
+            parts.append("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit)) included")
+        }
+        if contentOptions.includeDaysRemaining, let days = snapshot.daysRemainingInCycle {
+            parts.append("\(days)d left in cycle")
+        }
+        content.body = parts.joined(separator: " · ")
+        content.sound = contentOptions.playSound ? .default : nil
 
         let request = UNNotificationRequest(
             identifier: "cursor-usage-\(Int(threshold))-\(UUID().uuidString)",

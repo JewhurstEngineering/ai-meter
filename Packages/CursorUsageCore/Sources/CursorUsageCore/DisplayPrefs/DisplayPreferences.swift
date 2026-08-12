@@ -11,6 +11,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var notificationsEnabled: Bool
     /// Sorted unique percents that can trigger a system notification when crossed.
     public var notificationThresholds: [Double]
+    public var notificationContent: NotificationContent
 
     public var menuBar: SurfaceToggles
     public var popover: SurfaceToggles
@@ -21,10 +22,47 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     }
 
     public enum MenuBarLabelStyle: String, Codable, Sendable, CaseIterable {
-        /// SF Symbols + short values (e.g. ✨ 2% · 􀫥 88%).
         case icons
-        /// Readable words (e.g. Cursor 2% · Other 88%).
         case shortWords
+    }
+
+    public struct NotificationContent: Codable, Sendable, Equatable {
+        public var includePoolPercent: Bool
+        public var includePlanName: Bool
+        public var includeSpend: Bool
+        public var includeDaysRemaining: Bool
+        public var playSound: Bool
+
+        public static let `default` = NotificationContent(
+            includePoolPercent: true,
+            includePlanName: true,
+            includeSpend: true,
+            includeDaysRemaining: false,
+            playSound: true
+        )
+
+        public init(
+            includePoolPercent: Bool,
+            includePlanName: Bool,
+            includeSpend: Bool,
+            includeDaysRemaining: Bool,
+            playSound: Bool
+        ) {
+            self.includePoolPercent = includePoolPercent
+            self.includePlanName = includePlanName
+            self.includeSpend = includeSpend
+            self.includeDaysRemaining = includeDaysRemaining
+            self.playSound = playSound
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            includePoolPercent = try c.decodeIfPresent(Bool.self, forKey: .includePoolPercent) ?? true
+            includePlanName = try c.decodeIfPresent(Bool.self, forKey: .includePlanName) ?? true
+            includeSpend = try c.decodeIfPresent(Bool.self, forKey: .includeSpend) ?? true
+            includeDaysRemaining = try c.decodeIfPresent(Bool.self, forKey: .includeDaysRemaining) ?? false
+            playSound = try c.decodeIfPresent(Bool.self, forKey: .playSound) ?? true
+        }
     }
 
     public struct SurfaceToggles: Codable, Sendable, Equatable {
@@ -91,6 +129,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         warningThresholdPercent: 95,
         notificationsEnabled: false,
         notificationThresholds: [85, 95],
+        notificationContent: .default,
         menuBar: .menuBarDefault,
         popover: .popoverDefault
     )
@@ -104,6 +143,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         warningThresholdPercent: Double,
         notificationsEnabled: Bool = false,
         notificationThresholds: [Double] = [85, 95],
+        notificationContent: NotificationContent = .default,
         menuBar: SurfaceToggles,
         popover: SurfaceToggles
     ) {
@@ -115,6 +155,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.warningThresholdPercent = warningThresholdPercent
         self.notificationsEnabled = notificationsEnabled
         self.notificationThresholds = Self.normalizeThresholds(notificationThresholds)
+        self.notificationContent = notificationContent
         self.menuBar = menuBar
         self.popover = popover
     }
@@ -131,6 +172,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationThresholds = Self.normalizeThresholds(
             try c.decodeIfPresent([Double].self, forKey: .notificationThresholds) ?? [85, 95]
         )
+        notificationContent = try c.decodeIfPresent(NotificationContent.self, forKey: .notificationContent) ?? .default
         menuBar = try c.decodeIfPresent(SurfaceToggles.self, forKey: .menuBar) ?? .menuBarDefault
         popover = try c.decodeIfPresent(SurfaceToggles.self, forKey: .popover) ?? .popoverDefault
     }
