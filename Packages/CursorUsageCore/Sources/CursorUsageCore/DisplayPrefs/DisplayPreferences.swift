@@ -11,6 +11,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var notificationsEnabled: Bool
     /// Sorted unique percents that can trigger a system notification when crossed.
     public var notificationThresholds: [Double]
+    /// Banner when a refresh fails with unauthorized / session expired (not intentional sign-out).
+    public var notifyOnSessionExpired: Bool
     public var notificationContent: NotificationContent
 
     public var menuBar: SurfaceToggles
@@ -129,6 +131,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         warningThresholdPercent: 95,
         notificationsEnabled: false,
         notificationThresholds: [85, 95],
+        notifyOnSessionExpired: true,
         notificationContent: .default,
         menuBar: .menuBarDefault,
         popover: .popoverDefault
@@ -143,6 +146,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         warningThresholdPercent: Double,
         notificationsEnabled: Bool = false,
         notificationThresholds: [Double] = [85, 95],
+        notifyOnSessionExpired: Bool = true,
         notificationContent: NotificationContent = .default,
         menuBar: SurfaceToggles,
         popover: SurfaceToggles
@@ -155,6 +159,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.warningThresholdPercent = warningThresholdPercent
         self.notificationsEnabled = notificationsEnabled
         self.notificationThresholds = Self.normalizeThresholds(notificationThresholds)
+        self.notifyOnSessionExpired = notifyOnSessionExpired
         self.notificationContent = notificationContent
         self.menuBar = menuBar
         self.popover = popover
@@ -172,6 +177,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationThresholds = Self.normalizeThresholds(
             try c.decodeIfPresent([Double].self, forKey: .notificationThresholds) ?? [85, 95]
         )
+        notifyOnSessionExpired = try c.decodeIfPresent(Bool.self, forKey: .notifyOnSessionExpired) ?? true
         notificationContent = try c.decodeIfPresent(NotificationContent.self, forKey: .notificationContent) ?? .default
         menuBar = try c.decodeIfPresent(SurfaceToggles.self, forKey: .menuBar) ?? .menuBarDefault
         popover = try c.decodeIfPresent(SurfaceToggles.self, forKey: .popover) ?? .popoverDefault

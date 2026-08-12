@@ -157,9 +157,15 @@ struct GeneralSettingsView: View {
                     Toggle("Included spend ($)", isOn: contentBinding(\.includeSpend))
                     Toggle("Days remaining", isOn: contentBinding(\.includeDaysRemaining))
                     Toggle("Play sound", isOn: contentBinding(\.playSound))
+                    Toggle("Session expired / signed out by Cursor", isOn: sessionExpiredNotifyBinding)
                 }
                 .toggleStyle(.checkbox)
                 .font(.caption)
+
+                Text("Session alerts fire once until you sign in again. Manual Sign out does not notify.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 if let notificationPermissionHint {
                     Text(notificationPermissionHint)
@@ -241,6 +247,17 @@ struct GeneralSettingsView: View {
                             : "Notifications are blocked — enable them in System Settings → Notifications."
                     }
                 }
+            }
+        )
+    }
+
+    private var sessionExpiredNotifyBinding: Binding<Bool> {
+        Binding(
+            get: { store.preferences.notifyOnSessionExpired },
+            set: { value in
+                var prefs = store.preferences
+                prefs.notifyOnSessionExpired = value
+                store.applyPreferences(prefs)
             }
         )
     }

@@ -55,6 +55,7 @@ public final class UsageStore: ObservableObject {
             accountEmail = me.email ?? credential.cachedEmail
             lastError = nil
             lastLocalConnectSource = credential.source.rawValue
+            UsageNotificationService.clearSessionExpiredDedupe()
         } catch {
             lastError = "Auto-connect via \(credential.source.rawValue) failed. Sign in manually."
         }
@@ -67,6 +68,7 @@ public final class UsageStore: ObservableObject {
         isAuthenticated = true
         accountEmail = me.email
         lastError = nil
+        UsageNotificationService.clearSessionExpiredDedupe()
         await refresh()
         startAutoRefresh()
     }
@@ -79,6 +81,7 @@ public final class UsageStore: ObservableObject {
         lastLocalConnectSource = nil
         refreshTask?.cancel()
         refreshTask = nil
+        // Intentional sign-out — no session-expired banner.
     }
 
     public func refresh() async {
@@ -96,8 +99,17 @@ public final class UsageStore: ObservableObject {
             try? WidgetSnapshotStore.write(widget)
             await UsageNotificationService.evaluate(snapshot: snap, preferences: preferences)
         } catch PersonalAPIError.unauthorized {
+            let email = accountEmail
             lastError = "Session expired. Re-authenticate."
             isAuthenticated = false
+            snapshot = nil
+            keychain.delete(account: SessionAccount.defaultAccount)
+            refreshTask?.cancel()
+            refreshTask = nil
+            await UsageNotificationService.notifySessionExpiredIfNeeded(
+                preferences: preferences,
+                accountEmail: email
+            )
         } catch {
             lastError = "Refresh failed: \(error.localizedDescription)"
         }
