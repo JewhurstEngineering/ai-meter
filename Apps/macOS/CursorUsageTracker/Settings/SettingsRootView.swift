@@ -10,6 +10,8 @@ struct SettingsRootView: View {
                 .tabItem { Label("General", systemImage: "gearshape") }
             LayoutSettingsView()
                 .tabItem { Label("Layout", systemImage: "rectangle.split.2x1") }
+            ThemeSettingsView()
+                .tabItem { Label("Theme", systemImage: "paintpalette") }
             AuthenticationSettingsView()
                 .tabItem { Label("Authentication", systemImage: "lock") }
             IncludedUsageSettingsView()
@@ -21,6 +23,7 @@ struct SettingsRootView: View {
         }
         .padding()
         .environmentObject(store)
+        .appThemed(store.preferences)
         .onAppear {
             AppActivation.scheduleSettingsFocus()
         }

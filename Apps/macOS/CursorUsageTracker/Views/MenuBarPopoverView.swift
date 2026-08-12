@@ -4,6 +4,7 @@ import CursorUsageCore
 
 struct MenuBarPopoverView: View {
     @EnvironmentObject private var store: UsageStore
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -43,17 +44,12 @@ struct MenuBarPopoverView: View {
         .background(Color(nsColor: .windowBackgroundColor))
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .compositingGroup()
+        .appThemed(store.preferences)
     }
 
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(UsageAppearance.accentCursorModels.opacity(0.15))
-                    .frame(width: 34, height: 34)
-                Image(systemName: "circle.hexagongrid.fill")
-                    .foregroundStyle(UsageAppearance.accentCursorModels)
-            }
+            AppLogo(size: 34)
             VStack(alignment: .leading, spacing: 2) {
                 Text(store.snapshot?.planDisplayName ?? "Cursor")
                     .font(.headline)
@@ -143,12 +139,12 @@ struct MenuBarPopoverView: View {
                             }
                         } icon: {
                             Image(systemName: "dollarsign.circle.fill")
-                                .foregroundStyle(UsageAppearance.accentSpend)
+                                .foregroundStyle(theme.spend)
                         }
                         if t.bonus, let bonus = snapshot.bonusCents, bonus > 0 {
                             Label("+\(MenuBarFormatter.usd(bonus)) bonus", systemImage: "gift.fill")
                                 .font(.caption)
-                                .foregroundStyle(UsageAppearance.accentSpend)
+                                .foregroundStyle(theme.spend)
                         }
                     }
 
@@ -162,10 +158,10 @@ struct MenuBarPopoverView: View {
                                 .padding(.vertical, 3)
                                 .background(
                                     Capsule().fill(
-                                        (snapshot.onDemandEnabled ? Color.green : Color.red).opacity(0.15)
+                                        (snapshot.onDemandEnabled ? theme.ok : theme.danger).opacity(0.18)
                                     )
                                 )
-                                .foregroundStyle(snapshot.onDemandEnabled ? Color.green : Color.red)
+                                .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
                         }
                         .font(.subheadline)
                     }
@@ -223,9 +219,10 @@ private struct PopoverPoolRow: View {
     let systemImage: String
     let percent: Double
     let caption: String?
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
-        let tint = UsageAppearance.color(forPool: title, percent: percent)
+        let tint = theme.color(forPool: title, percent: percent)
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
@@ -257,6 +254,7 @@ private struct PopoverPoolRow: View {
 private struct PopoverModelsThisPeriodCard: View {
     let snapshot: UsageSnapshot
     private let maxRows = 8
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         let rows = Array(snapshot.modelBreakdown.prefix(maxRows))
@@ -277,7 +275,7 @@ private struct PopoverModelsThisPeriodCard: View {
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.caption)
-                                .foregroundStyle(UsageAppearance.accentOtherModels.opacity(0.75))
+                                .foregroundStyle(theme.otherModels.opacity(0.75))
                             Text(row.model)
                                 .font(.caption)
                                 .lineLimit(1)

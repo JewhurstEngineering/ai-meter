@@ -19,6 +19,7 @@ final class StatusItemController: NSObject {
         statusItem = item
         if let button = item.button {
             button.imagePosition = .imageLeft
+            button.imageScaling = .scaleProportionallyDown
             button.target = self
             button.action = #selector(togglePopover(_:))
             button.sendAction(on: [.leftMouseUp])
@@ -52,7 +53,10 @@ final class StatusItemController: NSObject {
             .store(in: &cancellables)
         store.$preferences
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.refreshTitle() }
+            .sink { [weak self] prefs in
+                self?.refreshTitle()
+                self?.applyPopoverAppearance(prefs)
+            }
             .store(in: &cancellables)
         store.$isAuthenticated
             .receive(on: DispatchQueue.main)
@@ -60,13 +64,29 @@ final class StatusItemController: NSObject {
             .store(in: &cancellables)
 
         refreshTitle()
+        applyPopoverAppearance(store.preferences)
         Task { await store.bootstrap() }
+    }
+
+    private func applyPopoverAppearance(_ prefs: DisplayPreferences) {
+        let appearance = prefs.appearanceMode.nsAppearance
+        popover?.appearance = appearance
+        let paint: () -> Void = { [weak self] in
+            self?.popover?.contentViewController?.view.layer?.backgroundColor =
+                NSColor.windowBackgroundColor.cgColor
+        }
+        if let appearance {
+            appearance.performAsCurrentDrawingAppearance(paint)
+        } else {
+            paint()
+        }
     }
 
     func refreshTitle() {
         guard let store, let button = statusItem?.button else { return }
         let presentation = store.menuBarPresentation
-        button.image = nil
+        button.image = Self.menuBarLogo()
+        button.imagePosition = .imageLeft
         button.attributedTitle = Self.makeAttributedTitle(
             presentation: presentation,
             showText: store.preferences.showInMenuBar
@@ -143,8 +163,6 @@ final class StatusItemController: NSObject {
             .baselineOffset: -0.5,
         ]
 
-        appendSymbol(named: "circle.hexagongrid.fill", to: result, pointSize: 12)
-
         if showText {
             if !presentation.segments.isEmpty {
                 result.append(NSAttributedString(string: " ", attributes: textAttrs))
@@ -173,6 +191,18 @@ final class StatusItemController: NSObject {
         }
 
         return result
+    }
+
+    private static func menuBarLogo() -> NSImage? {
+        guard let base = NSImage(named: "AppLogoTemplate") else { return nil }
+        let point = NSSize(width: 18, height: 18)
+        let image = NSImage(size: point, flipped: false) { rect in
+            NSGraphicsContext.current?.imageInterpolation = .high
+            base.draw(in: rect)
+            return true
+        }
+        image.isTemplate = true
+        return image
     }
 
     private static func appendSymbol(named name: String, to result: NSMutableAttributedString, pointSize: CGFloat) {

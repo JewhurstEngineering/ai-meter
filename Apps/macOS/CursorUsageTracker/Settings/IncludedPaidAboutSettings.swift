@@ -3,6 +3,7 @@ import CursorUsageCore
 
 struct IncludedUsageSettingsView: View {
     @EnvironmentObject private var store: UsageStore
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         ScrollView {
@@ -39,8 +40,8 @@ struct IncludedUsageSettingsView: View {
                                 .font(.caption2.weight(.semibold))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 1)
-                                .background(Capsule().fill(Color.green.opacity(0.15)))
-                                .foregroundStyle(.green)
+                                .background(Capsule().fill(theme.ok.opacity(0.15)))
+                                .foregroundStyle(theme.ok)
                         }
                     }
                     if let start = snapshot.billingCycleStart, let end = snapshot.billingCycleEnd {
@@ -64,8 +65,8 @@ struct IncludedUsageSettingsView: View {
                         .font(.caption2.weight(.semibold))
                         .padding(.horizontal, 7)
                         .padding(.vertical, 3)
-                        .background(Capsule().fill(UsageAppearance.accentTotal.opacity(0.15)))
-                        .foregroundStyle(UsageAppearance.accentTotal)
+                        .background(Capsule().fill(theme.total.opacity(0.15)))
+                        .foregroundStyle(theme.total)
                 }
             }
         }
@@ -85,7 +86,7 @@ struct IncludedUsageSettingsView: View {
                         systemImage: "sparkles",
                         percent: p,
                         caption: "First-party",
-                        accent: UsageAppearance.accentCursorModels,
+                        accent: theme.cursorModels,
                         compact: true
                     )
                 }
@@ -95,7 +96,7 @@ struct IncludedUsageSettingsView: View {
                         systemImage: "cpu",
                         percent: p,
                         caption: "API / third-party",
-                        accent: UsageAppearance.accentOtherModels,
+                        accent: theme.otherModels,
                         compact: true
                     )
                 }
@@ -105,7 +106,7 @@ struct IncludedUsageSettingsView: View {
                         systemImage: "chart.pie.fill",
                         percent: p,
                         caption: "Overall pool",
-                        accent: UsageAppearance.accentTotal,
+                        accent: theme.total,
                         compact: true
                     )
                 }
@@ -118,11 +119,11 @@ struct IncludedUsageSettingsView: View {
                     Spacer()
                     Text(MenuBarFormatter.usd(bonus))
                         .font(.caption.monospacedDigit().weight(.semibold))
-                        .foregroundStyle(UsageAppearance.accentSpend)
+                        .foregroundStyle(theme.spend)
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 6)
-                .background(RoundedRectangle(cornerRadius: 8).fill(UsageAppearance.accentSpend.opacity(0.08)))
+                .background(RoundedRectangle(cornerRadius: 8).fill(theme.spend.opacity(0.08)))
             }
         }
     }
@@ -139,7 +140,7 @@ struct IncludedUsageSettingsView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.caption)
-                                .foregroundStyle(UsageAppearance.accentOtherModels.opacity(0.7))
+                                .foregroundStyle(theme.otherModels.opacity(0.7))
                             Text(row.model)
                                 .font(.caption)
                                 .lineLimit(1)
@@ -172,6 +173,7 @@ private struct IncludedPoolCard: View {
     let caption: String
     let accent: Color
     var compact: Bool = false
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 4 : 8) {
@@ -184,9 +186,9 @@ private struct IncludedPoolCard: View {
                 Spacer(minLength: 0)
                 Text("\(Int(percent.rounded()))%")
                     .font(compact ? .subheadline.monospacedDigit().weight(.bold) : .title3.monospacedDigit().weight(.bold))
-                    .foregroundStyle(UsageAppearance.color(forPool: title, percent: percent))
+                    .foregroundStyle(theme.color(forPool: title, percent: percent))
             }
-            UsageProgressBar(percent: percent, tint: UsageAppearance.color(forPool: title, percent: percent))
+            UsageProgressBar(percent: percent, tint: theme.color(forPool: title, percent: percent))
                 .frame(height: compact ? 6 : 8)
             Text(caption)
                 .font(.caption2)
@@ -208,6 +210,7 @@ private struct IncludedPoolCard: View {
 
 struct PaidUsageSettingsView: View {
     @EnvironmentObject private var store: UsageStore
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         ScrollView {
@@ -223,7 +226,7 @@ struct PaidUsageSettingsView: View {
                                 snapshot.onDemandEnabled ? "Enabled" : "Disabled",
                                 systemImage: snapshot.onDemandEnabled ? "checkmark.circle.fill" : "xmark.octagon.fill"
                             )
-                            .foregroundStyle(snapshot.onDemandEnabled ? Color.green : Color.red)
+                            .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
                             .font(.headline)
                             Spacer()
                         }
@@ -252,8 +255,9 @@ struct PaidUsageSettingsView: View {
 }
 
 struct AboutSettingsView: View {
+    @Environment(\.appTheme) private var theme
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.19"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.22"
     }
 
     @State private var installMessage: String?
@@ -370,23 +374,7 @@ struct AboutSettingsView: View {
 
     private var hero: some View {
         HStack(alignment: .center, spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                UsageAppearance.accentCursorModels,
-                                UsageAppearance.accentOtherModels,
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 56, height: 56)
-                Image(systemName: "circle.hexagongrid.fill")
-                    .font(.title)
-                    .foregroundStyle(.white)
-            }
+            AppLogo(size: 56)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Cursor Usage Tracker")
                     .font(.title2.weight(.bold))
@@ -398,8 +386,8 @@ struct AboutSettingsView: View {
                         .font(.caption.monospacedDigit().weight(.semibold))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
-                        .background(Capsule().fill(UsageAppearance.accentCursorModels.opacity(0.15)))
-                        .foregroundStyle(UsageAppearance.accentCursorModels)
+                        .background(Capsule().fill(theme.cursorModels.opacity(0.15)))
+                        .foregroundStyle(theme.cursorModels)
                     Text("macOS 14+")
                         .font(.caption)
                         .foregroundStyle(.secondary)

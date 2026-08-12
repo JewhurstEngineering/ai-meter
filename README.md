@@ -1,11 +1,16 @@
 # Cursor Usage Tracker
 
+<p align="center">
+  <img src="docs/images/cursor-usage-tracker-logo-dark.png" width="128" alt="Cursor Usage Tracker">
+</p>
+
 Local-first macOS menu bar meter for **Cursor Pro / Pro+ / Ultra** usage.
 
 - Cursor Models % vs Other Models % (and on-demand state)
 - Configurable auto-refresh
 - WebView login, local Cursor session auto-connect, or paste token
 - Desktop widget extension (reads cached snapshot)
+- Light / dark lock plus choosable color themes (Original, Cursor, editor palettes, custom)
 - Shared `CursorUsageCore` ready for iOS widgets + watchOS later
 
 ## Quick start
@@ -32,5 +37,5 @@ MIT — see [LICENSE](LICENSE).
 
 ## Version
 
-Current: **0.1.19**
+Current: **0.1.22**
 

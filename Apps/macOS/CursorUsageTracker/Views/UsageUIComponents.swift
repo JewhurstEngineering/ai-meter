@@ -1,45 +1,20 @@
 import SwiftUI
 import AppKit
 
-enum UsageAppearance {
-    static func poolColor(percent: Double) -> Color {
-        switch percent {
-        case ..<60: return Color(red: 0.18, green: 0.62, blue: 0.48) // teal-green
-        case ..<85: return Color(red: 0.90, green: 0.62, blue: 0.16) // amber
-        default: return Color(red: 0.86, green: 0.28, blue: 0.30) // coral red
-        }
-    }
-
-    static var accentCursorModels: Color { Color(red: 0.22, green: 0.48, blue: 0.86) }
-    static var accentOtherModels: Color { Color(red: 0.55, green: 0.35, blue: 0.82) }
-    static var accentTotal: Color { Color(red: 0.20, green: 0.55, blue: 0.58) }
-    static var accentSpend: Color { Color(red: 0.15, green: 0.45, blue: 0.40) }
-
-    static func color(forPool title: String, percent: Double) -> Color {
-        // Prefer semantic pool accent until high usage, then warn by threshold color.
-        if percent >= 85 { return poolColor(percent: percent) }
-        switch title {
-        case "Cursor Models": return accentCursorModels
-        case "Other Models": return accentOtherModels
-        case "Total included", "Total Included": return accentTotal
-        default: return poolColor(percent: percent)
-        }
-    }
-}
-
 struct UsageProgressBar: View {
     let percent: Double
     var tint: Color? = nil
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         GeometryReader { geo in
             let clamped = min(max(percent / 100.0, 0), 1)
-            let color = tint ?? UsageAppearance.poolColor(percent: percent)
+            let color = tint ?? theme.poolColor(percent: percent)
             ZStack(alignment: .leading) {
                 Capsule()
                     .fill(Color.primary.opacity(0.14))
                 Capsule()
-                    .fill(color.gradient)
+                    .fill(color)
                     .frame(width: max(6, geo.size.width * clamped))
             }
         }
@@ -53,13 +28,14 @@ struct SettingsPanel<Content: View>: View {
     var subtitle: String? = nil
     var compact: Bool = false
     @ViewBuilder var content: () -> Content
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 8 : 12) {
             HStack(spacing: compact ? 8 : 10) {
                 Image(systemName: systemImage)
                     .font(compact ? .body : .title3)
-                    .foregroundStyle(.tint)
+                    .foregroundStyle(theme.tint)
                     .frame(width: compact ? 22 : 28, height: compact ? 22 : 28)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
@@ -82,7 +58,7 @@ struct SettingsPanel<Content: View>: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: compact ? 12 : 14, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
         )
     }
 }
@@ -100,8 +76,6 @@ struct MetricToggleRow: View {
             Spacer(minLength: 8)
             Toggle("", isOn: $isOn)
                 .labelsHidden()
-                // Native `.switch` paints inactive-window grey on first open for
-                // LSUIElement apps; custom style always reflects `isOn`.
                 .toggleStyle(ReliableSwitchToggleStyle())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -114,19 +88,30 @@ struct MetricToggleRow: View {
 
 /// Compact switch that does not rely on AppKit’s inactive-window switch chrome.
 struct ReliableSwitchToggleStyle: ToggleStyle {
-    var onColor: Color = Color.accentColor
+    var onColor: Color? = nil
 
     func makeBody(configuration: Configuration) -> some View {
+        ThemedSwitch(configuration: configuration, onColor: onColor)
+    }
+}
+
+private struct ThemedSwitch: View {
+    let configuration: ToggleStyleConfiguration
+    var onColor: Color?
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
         let isOn = configuration.isOn
-        return HStack(spacing: 0) {
+        let fill = onColor ?? theme.tint
+        HStack(spacing: 0) {
             configuration.label
             Capsule()
-                .fill(isOn ? onColor : Color.primary.opacity(0.18))
+                .fill(isOn ? fill : Color.primary.opacity(0.18))
                 .frame(width: 34, height: 20)
                 .overlay(alignment: isOn ? .trailing : .leading) {
                     Circle()
-                        .fill(Color.white)
-                        .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
+                        .fill(Color(nsColor: .windowBackgroundColor))
+                        .shadow(color: .black.opacity(0.22), radius: 1, y: 0.5)
                         .frame(width: 16, height: 16)
                         .padding(2)
                 }

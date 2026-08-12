@@ -4,6 +4,7 @@ import ServiceManagement
 
 struct GeneralSettingsView: View {
     @EnvironmentObject private var store: UsageStore
+    @Environment(\.appTheme) private var theme
     @State private var notificationPermissionHint: String?
 
     private let intervals = [1, 2, 5, 15, 30]
@@ -48,13 +49,13 @@ struct GeneralSettingsView: View {
                         warningCard(
                             title: "Cursor Models",
                             systemImage: "sparkles",
-                            tint: UsageAppearance.accentCursorModels,
+                            tint: theme.cursorModels,
                             percent: warningBinding(\.cursorModelsPercent)
                         )
                         warningCard(
                             title: "Other Models",
                             systemImage: "cpu",
-                            tint: UsageAppearance.accentOtherModels,
+                            tint: theme.otherModels,
                             percent: warningBinding(\.otherModelsPercent)
                         )
                         if onDemandUnlimited {
@@ -63,7 +64,7 @@ struct GeneralSettingsView: View {
                             warningCard(
                                 title: "On-demand & limits",
                                 systemImage: "creditcard",
-                                tint: UsageAppearance.accentSpend,
+                                tint: theme.spend,
                                 percent: warningBinding(\.onDemandAndLimitsPercent)
                             )
                         }
@@ -90,7 +91,7 @@ struct GeneralSettingsView: View {
                         Spacer()
                         Toggle("", isOn: notificationsBinding)
                             .labelsHidden()
-                            .toggleStyle(ReliableSwitchToggleStyle(onColor: UsageAppearance.accentOtherModels))
+                            .toggleStyle(ReliableSwitchToggleStyle(onColor: theme.otherModels))
                     }
 
                     if store.preferences.notificationsEnabled {
@@ -106,13 +107,13 @@ struct GeneralSettingsView: View {
                             channelToggle(
                                 "Cursor Models",
                                 detail: "\(Int(store.preferences.menuBarWarnings.cursorModelsPercent))%",
-                                tint: UsageAppearance.accentCursorModels,
+                                tint: theme.cursorModels,
                                 isOn: channelBinding(\.cursorModels)
                             )
                             channelToggle(
                                 "Other Models",
                                 detail: "\(Int(store.preferences.menuBarWarnings.otherModelsPercent))%",
-                                tint: UsageAppearance.accentOtherModels,
+                                tint: theme.otherModels,
                                 isOn: channelBinding(\.otherModels)
                             )
                             channelToggle(
@@ -120,13 +121,13 @@ struct GeneralSettingsView: View {
                                 detail: onDemandUnlimited
                                     ? MenuBarFormatter.usd(store.preferences.menuBarWarnings.onDemandUnlimitedAlertCents)
                                     : "\(Int(store.preferences.menuBarWarnings.onDemandAndLimitsPercent))%",
-                                tint: UsageAppearance.accentSpend,
+                                tint: theme.spend,
                                 isOn: channelBinding(\.onDemandAndLimits)
                             )
                             channelToggle(
                                 "Total included",
                                 detail: "\(Int(store.preferences.menuBarWarnings.totalIncludedPercent))%",
-                                tint: UsageAppearance.accentTotal,
+                                tint: theme.total,
                                 isOn: channelBinding(\.totalIncluded)
                             ) {
                                 totalThresholdStepper
@@ -190,7 +191,7 @@ struct GeneralSettingsView: View {
                 Spacer(minLength: 0)
                 Text(MenuBarFormatter.usd(cents))
                     .font(.subheadline.monospacedDigit().weight(.bold))
-                    .foregroundStyle(UsageAppearance.accentSpend)
+                    .foregroundStyle(theme.spend)
             }
             Text("Unlimited — alert at amount")
                 .font(.caption2)
@@ -207,11 +208,11 @@ struct GeneralSettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(UsageAppearance.accentSpend.opacity(0.14))
+                .fill(theme.spend.opacity(0.14))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(UsageAppearance.accentSpend.opacity(0.35), lineWidth: 1)
+                .strokeBorder(theme.spend.opacity(0.35), lineWidth: 1)
         )
     }
 

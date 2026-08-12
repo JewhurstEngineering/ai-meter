@@ -8,7 +8,7 @@ struct MenuBarLabelView: View {
         let presentation = store.menuBarPresentation
         // MenuBarExtra clips multi-item HStacks unless the label requests its intrinsic width.
         HStack(spacing: 3) {
-            Image(systemName: "circle.hexagongrid.fill")
+            AppLogo(size: 13, template: true)
             if store.preferences.showInMenuBar {
                 ForEach(Array(presentation.segments.enumerated()), id: \.offset) { index, segment in
                     if index > 0 {

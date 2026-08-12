@@ -7,8 +7,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    MARKETING_VERSION: "0.1.19"
-    CURRENT_PROJECT_VERSION: "13"
+    MARKETING_VERSION: "0.1.22"
+    CURRENT_PROJECT_VERSION: "16"
     DEVELOPMENT_TEAM: "6998422DKP"
     CODE_SIGN_STYLE: Automatic
 packages:
@@ -20,11 +20,14 @@ targets:
     platform: macOS
     sources:
       - path: Apps/macOS/CursorUsageTracker
+      - path: Apps/Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app
         INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage Tracker
         INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_CFBundleIconName: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: YES
         CODE_SIGN_ENTITLEMENTS: Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements
         ENABLE_HARDENED_RUNTIME: YES
@@ -41,6 +44,7 @@ targets:
     platform: macOS
     sources:
       - path: Widgets/CursorUsageWidgets
+      - path: Apps/Shared
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app.widgets

@@ -200,19 +200,26 @@ struct LayoutSettingsView: View {
 private struct MenuBarPreviewStrip: View {
     let presentation: MenuBarPresentation
     let showText: Bool
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
+        let dark = colorScheme == .dark
+        let barFill = dark
+            ? Color(red: 0.14, green: 0.14, blue: 0.14)
+            : Color(red: 0.91, green: 0.90, blue: 0.87)
+        let fg = dark ? Color.white.opacity(0.92) : Color.black.opacity(0.82)
         VStack(alignment: .leading, spacing: 6) {
             Text("Menu bar example")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
             HStack(spacing: 5) {
-                Image(systemName: "circle.hexagongrid.fill")
-                    .foregroundStyle(.white.opacity(0.95))
+                AppLogo(size: 14, template: true)
+                    .foregroundStyle(fg)
                 if showText {
                     ForEach(Array(presentation.segments.enumerated()), id: \.offset) { index, segment in
                         if index > 0 {
-                            Text("·").foregroundStyle(.white.opacity(0.55))
+                            Text("·").foregroundStyle(fg.opacity(0.55))
                         }
                         HStack(spacing: 2) {
                             if let icon = segment.systemImage {
@@ -220,14 +227,14 @@ private struct MenuBarPreviewStrip: View {
                             }
                             Text(segment.text)
                         }
-                        .foregroundStyle(.white)
+                        .foregroundStyle(fg)
                     }
                 } else {
                     Text("(icon only)")
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(fg.opacity(0.7))
                 }
                 if presentation.showWarningDot {
-                    Circle().fill(.red).frame(width: 6, height: 6)
+                    Circle().fill(theme.danger).frame(width: 6, height: 6)
                 }
                 Spacer(minLength: 0)
             }
@@ -237,16 +244,11 @@ private struct MenuBarPreviewStrip: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.18, green: 0.32, blue: 0.55),
-                                Color(red: 0.12, green: 0.22, blue: 0.40),
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+                    .fill(barFill)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
             )
         }
     }
@@ -255,6 +257,7 @@ private struct MenuBarPreviewStrip: View {
 private struct PopoverPreviewCard: View {
     let snapshot: UsageSnapshot?
     let preferences: DisplayPreferences
+    @Environment(\.appTheme) private var theme
 
     var body: some View {
         let t = preferences.popover
@@ -290,7 +293,7 @@ private struct PopoverPreviewCard: View {
                 if t.bonus, let bonus = snapshot?.bonusCents, bonus > 0 {
                     Label("+\(MenuBarFormatter.usd(bonus)) bonus", systemImage: "gift")
                         .font(.caption2)
-                        .foregroundStyle(UsageAppearance.accentSpend)
+                        .foregroundStyle(theme.spend)
                 }
                 if t.onDemand {
                     HStack {
@@ -298,7 +301,7 @@ private struct PopoverPreviewCard: View {
                         Spacer()
                         Text(snapshot?.onDemandEnabled == true ? "Enabled" : "Disabled")
                             .font(.caption2.weight(.bold))
-                            .foregroundStyle(snapshot?.onDemandEnabled == true ? .green : .red)
+                            .foregroundStyle(snapshot?.onDemandEnabled == true ? theme.ok : theme.danger)
                     }
                     .font(.caption)
                 }
@@ -321,7 +324,7 @@ private struct PopoverPreviewCard: View {
                         HStack(spacing: 6) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.caption2)
-                                .foregroundStyle(UsageAppearance.accentOtherModels.opacity(0.7))
+                                .foregroundStyle(theme.otherModels.opacity(0.7))
                             Text(row.model)
                                 .lineLimit(1)
                                 .truncationMode(.middle)
@@ -362,7 +365,7 @@ private struct PopoverPreviewCard: View {
     }
 
     private func previewPool(title: String, icon: String, percent: Double) -> some View {
-        let tint = UsageAppearance.color(forPool: title, percent: percent)
+        let tint = theme.color(forPool: title, percent: percent)
         return VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Label(title, systemImage: icon)

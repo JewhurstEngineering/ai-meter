@@ -37,7 +37,8 @@ struct CursorUsageWidgetEntryView: View {
 
     private var smallBody: some View {
         VStack(alignment: .leading, spacing: 6) {
-            HStack {
+            HStack(spacing: 6) {
+                AppLogo(size: 16)
                 Text(entry.snapshot?.planDisplayName ?? "Cursor")
                     .font(.caption.weight(.semibold))
                 Spacer()
@@ -76,7 +77,8 @@ struct CursorUsageWidgetEntryView: View {
 
     private var mediumBody: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            HStack(spacing: 6) {
+                AppLogo(size: 18)
                 Text(entry.snapshot?.planDisplayName ?? "Cursor")
                     .font(.subheadline.weight(.semibold))
                 Spacer()

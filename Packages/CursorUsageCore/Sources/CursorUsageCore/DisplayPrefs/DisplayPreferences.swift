@@ -21,6 +21,154 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
 
     public var menuBar: SurfaceToggles
     public var popover: SurfaceToggles
+    /// Settings + popover chrome: follow macOS, or lock light/dark.
+    public var appearanceMode: AppearanceMode
+    /// Color language for pools, tints, and warnings.
+    public var colorTheme: ColorTheme
+    /// Four metric colors used when `colorTheme == .custom`.
+    public var customThemeColors: CustomThemeColors
+
+    public enum AppearanceMode: String, Codable, Sendable, CaseIterable {
+        case system
+        case light
+        case dark
+
+        public var title: String {
+            switch self {
+            case .system: return "System"
+            case .light: return "Light"
+            case .dark: return "Dark"
+            }
+        }
+    }
+
+    public struct ThemeSwatch: Codable, Sendable, Equatable {
+        public var red: Double
+        public var green: Double
+        public var blue: Double
+
+        public init(red: Double, green: Double, blue: Double) {
+            self.red = Self.clamp(red)
+            self.green = Self.clamp(green)
+            self.blue = Self.clamp(blue)
+        }
+
+        /// `#RRGGBB` or `RRGGBB`.
+        public init(hex: String) {
+            var s = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+            if s.hasPrefix("#") { s.removeFirst() }
+            guard s.count == 6, let v = UInt32(s, radix: 16) else {
+                self.init(red: 0.5, green: 0.5, blue: 0.5)
+                return
+            }
+            self.init(
+                red: Double((v >> 16) & 0xFF) / 255,
+                green: Double((v >> 8) & 0xFF) / 255,
+                blue: Double(v & 0xFF) / 255
+            )
+        }
+
+        private static func clamp(_ v: Double) -> Double { min(1, max(0, v)) }
+    }
+
+    public struct CustomThemeColors: Codable, Sendable, Equatable {
+        public var cursorModels: ThemeSwatch
+        public var otherModels: ThemeSwatch
+        public var total: ThemeSwatch
+        public var spend: ThemeSwatch
+
+        /// Original app accents (blue / purple / teal / pine).
+        public static let `default` = CustomThemeColors(
+            cursorModels: ThemeSwatch(red: 0.22, green: 0.48, blue: 0.86),
+            otherModels: ThemeSwatch(red: 0.55, green: 0.35, blue: 0.82),
+            total: ThemeSwatch(red: 0.20, green: 0.55, blue: 0.58),
+            spend: ThemeSwatch(red: 0.15, green: 0.45, blue: 0.40)
+        )
+
+        public init(
+            cursorModels: ThemeSwatch,
+            otherModels: ThemeSwatch,
+            total: ThemeSwatch,
+            spend: ThemeSwatch
+        ) {
+            self.cursorModels = cursorModels
+            self.otherModels = otherModels
+            self.total = total
+            self.spend = spend
+        }
+    }
+
+    public enum ColorTheme: String, Codable, Sendable, CaseIterable, Identifiable {
+        case original
+        case cursor
+        case system
+        case ink
+        case harbor
+        case forest
+        case tokyoNight
+        case catppuccin
+        case dracula
+        case nord
+        case solarized
+        case oneDark
+        case gruvbox
+        case monokai
+        case nightOwl
+        case synthwave
+        case ayu
+        case github
+        case custom
+
+        public var id: String { rawValue }
+
+        public var title: String {
+            switch self {
+            case .original: return "Original"
+            case .cursor: return "Cursor"
+            case .system: return "macOS"
+            case .ink: return "Ink"
+            case .harbor: return "Harbor"
+            case .forest: return "Forest"
+            case .tokyoNight: return "Tokyo Night"
+            case .catppuccin: return "Catppuccin"
+            case .dracula: return "Dracula"
+            case .nord: return "Nord"
+            case .solarized: return "Solarized"
+            case .oneDark: return "One Dark"
+            case .gruvbox: return "Gruvbox"
+            case .monokai: return "Monokai"
+            case .nightOwl: return "Night Owl"
+            case .synthwave: return "SynthWave ’84"
+            case .ayu: return "Ayu"
+            case .github: return "GitHub"
+            case .custom: return "Custom"
+            }
+        }
+
+        public var subtitle: String {
+            switch self {
+            case .original: return "The blue / purple / teal we shipped with"
+            case .cursor: return "Zinc and warm paper, like the IDE"
+            case .system: return "Your accent color and system greens"
+            case .ink: return "High-contrast print, almost no hue"
+            case .harbor: return "Slate and copper"
+            case .forest: return "Moss, bark, cream"
+            case .tokyoNight: return "Midnight neon — cyan, pink, gold"
+            case .catppuccin: return "Soothing pastels, mocha / latte"
+            case .dracula: return "Purple canvas, neon accents"
+            case .nord: return "Arctic frost and aurora"
+            case .solarized: return "Precision teal-gray contrast"
+            case .oneDark: return "Atom’s chalky dark slate"
+            case .gruvbox: return "Warm sand, rust, and olive"
+            case .monokai: return "Classic pink, cyan, and lime"
+            case .nightOwl: return "Navy night, readable lavenders"
+            case .synthwave: return "Retrowave pinks and laser green"
+            case .ayu: return "Warm gold on near-black iron"
+            case .github: return "github.com dark / light"
+            case .custom: return "Pick the four metric colors"
+            }
+        }
+    }
 
     public enum MenuBarFormat: String, Codable, Sendable, CaseIterable {
         case compact
@@ -272,7 +420,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notifyOnSessionExpired: true,
         notificationContent: .default,
         menuBar: .menuBarDefault,
-        popover: .popoverDefault
+        popover: .popoverDefault,
+        appearanceMode: .system,
+        colorTheme: .cursor,
+        customThemeColors: .default
     )
 
     public init(
@@ -289,7 +440,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notifyOnSessionExpired: Bool = true,
         notificationContent: NotificationContent = .default,
         menuBar: SurfaceToggles,
-        popover: SurfaceToggles
+        popover: SurfaceToggles,
+        appearanceMode: AppearanceMode = .system,
+        colorTheme: ColorTheme = .cursor,
+        customThemeColors: CustomThemeColors = .default
     ) {
         self.refreshIntervalMinutes = refreshIntervalMinutes
         self.launchAtLogin = launchAtLogin
@@ -305,6 +459,9 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.notificationContent = notificationContent
         self.menuBar = menuBar
         self.popover = popover
+        self.appearanceMode = appearanceMode
+        self.colorTheme = colorTheme
+        self.customThemeColors = customThemeColors
     }
 
     public init(from decoder: Decoder) throws {
@@ -330,6 +487,9 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationContent = try c.decodeIfPresent(NotificationContent.self, forKey: .notificationContent) ?? .default
         menuBar = try c.decodeIfPresent(SurfaceToggles.self, forKey: .menuBar) ?? .menuBarDefault
         popover = try c.decodeIfPresent(SurfaceToggles.self, forKey: .popover) ?? .popoverDefault
+        appearanceMode = try c.decodeIfPresent(AppearanceMode.self, forKey: .appearanceMode) ?? .system
+        colorTheme = try c.decodeIfPresent(ColorTheme.self, forKey: .colorTheme) ?? .cursor
+        customThemeColors = try c.decodeIfPresent(CustomThemeColors.self, forKey: .customThemeColors) ?? .default
     }
 
     public static func normalizeThresholds(_ values: [Double]) -> [Double] {
