@@ -107,7 +107,7 @@ struct GeneralSettingsView: View {
                 Spacer(minLength: 0)
                 Toggle("", isOn: notificationsBinding)
                     .labelsHidden()
-                    .toggleStyle(.switch)
+                    .toggleStyle(ReliableSwitchToggleStyle())
             }
 
             Text("Banner once per threshold each billing cycle.")

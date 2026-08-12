@@ -3,6 +3,8 @@ import CursorUsageCore
 
 struct LayoutSettingsView: View {
     @EnvironmentObject private var store: UsageStore
+    /// Bumps after Settings becomes key so any leftover native controls redraw.
+    @State private var appearanceEpoch = 0
 
     var body: some View {
         ScrollView {
@@ -24,6 +26,7 @@ struct LayoutSettingsView: View {
                         subtitle: "Shared menu bar presentation."
                     ) {
                         Toggle("Show title text in menu bar", isOn: showMenuBarBinding)
+                            .toggleStyle(.checkbox)
 
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Density")
@@ -70,6 +73,7 @@ struct LayoutSettingsView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .top)
                 }
+                .id(appearanceEpoch)
 
                 SettingsPanel(
                     title: "Live examples",
@@ -94,6 +98,13 @@ struct LayoutSettingsView: View {
             .padding(16)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+        .onAppear {
+            // Settings often paints before the window is key (accessory app).
+            // Rebuild once after focus settles so tinted controls match state.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) {
+                appearanceEpoch += 1
+            }
+        }
     }
 
     @ViewBuilder

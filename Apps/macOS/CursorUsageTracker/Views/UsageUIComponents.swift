@@ -99,13 +99,41 @@ struct MetricToggleRow: View {
             Spacer(minLength: 8)
             Toggle("", isOn: $isOn)
                 .labelsHidden()
-                .toggleStyle(.switch)
-                .controlSize(.small)
+                // Native `.switch` paints inactive-window grey on first open for
+                // LSUIElement apps; custom style always reflects `isOn`.
+                .toggleStyle(ReliableSwitchToggleStyle())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(title)
         .accessibilityValue(isOn ? "On" : "Off")
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// Compact switch that does not rely on AppKit’s inactive-window switch chrome.
+struct ReliableSwitchToggleStyle: ToggleStyle {
+    var onColor: Color = Color.accentColor
+
+    func makeBody(configuration: Configuration) -> some View {
+        let isOn = configuration.isOn
+        return HStack(spacing: 0) {
+            configuration.label
+            Capsule()
+                .fill(isOn ? onColor : Color.primary.opacity(0.18))
+                .frame(width: 34, height: 20)
+                .overlay(alignment: isOn ? .trailing : .leading) {
+                    Circle()
+                        .fill(Color.white)
+                        .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
+                        .frame(width: 16, height: 16)
+                        .padding(2)
+                }
+                .animation(.easeInOut(duration: 0.12), value: isOn)
+                .onTapGesture {
+                    configuration.isOn.toggle()
+                }
+                .accessibilityAddTraits(.isButton)
+        }
     }
 }
