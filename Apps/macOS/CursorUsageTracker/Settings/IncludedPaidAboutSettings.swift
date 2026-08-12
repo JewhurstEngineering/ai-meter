@@ -253,7 +253,7 @@ struct PaidUsageSettingsView: View {
 
 struct AboutSettingsView: View {
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.18"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.19"
     }
 
     @State private var installMessage: String?
