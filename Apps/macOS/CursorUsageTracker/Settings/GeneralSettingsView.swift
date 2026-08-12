@@ -48,45 +48,49 @@ struct GeneralSettingsView: View {
     }
 
     private var menuBarWarningCard: some View {
-        let threshold = store.preferences.warningThresholdPercent
         let surface = Color(red: 0.93, green: 0.96, blue: 0.98)
         let border = Color(red: 0.55, green: 0.68, blue: 0.78)
 
-        return VStack(alignment: .leading, spacing: 12) {
+        return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: "menubar.rectangle")
                     .foregroundStyle(.tint)
                 Text("Menu bar warning")
                     .font(.headline)
                 Spacer(minLength: 0)
-                Text("\(Int(threshold))%")
-                    .font(.subheadline.monospacedDigit().weight(.bold))
-                    .foregroundStyle(.red)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Capsule().fill(Color.red.opacity(0.12)))
             }
 
-            Text("Red dot on the menu bar icon when a watched pool hits this level.")
+            Text("Red dot when any enabled channel hits its own level.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            VStack(alignment: .leading, spacing: 6) {
-                HStack {
-                    Text("50%").font(.caption2).foregroundStyle(.secondary)
-                    Spacer()
-                    Text("100%").font(.caption2).foregroundStyle(.secondary)
-                }
-                Slider(value: thresholdBinding, in: 50...100, step: 1)
-                    .tint(.red)
-            }
+            warningChannelRow(
+                title: "Cursor Models",
+                systemImage: "sparkles",
+                tint: UsageAppearance.accentCursorModels,
+                value: warningBinding(\.cursorModelsPercent)
+            )
+            warningChannelRow(
+                title: "Other Models",
+                systemImage: "cpu",
+                tint: UsageAppearance.accentOtherModels,
+                value: warningBinding(\.otherModelsPercent)
+            )
+            warningChannelRow(
+                title: "On-demand & limits",
+                systemImage: "creditcard",
+                tint: UsageAppearance.accentSpend,
+                value: warningBinding(\.onDemandAndLimitsPercent)
+            )
 
-            Spacer(minLength: 0)
-
-            Label("Watches Cursor Models, Other Models, and Total included", systemImage: "eye")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Label(
+                "Limits = plan spend vs included + on-demand vs its cap.",
+                systemImage: "eye"
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -95,6 +99,33 @@ struct GeneralSettingsView: View {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .strokeBorder(border.opacity(0.55), lineWidth: 1)
         )
+    }
+
+    private func warningChannelRow(
+        title: String,
+        systemImage: String,
+        tint: Color,
+        value: Binding<Double>
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.caption)
+                    .foregroundStyle(tint)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                Spacer(minLength: 0)
+                Text("\(Int(value.wrappedValue))%")
+                    .font(.caption.monospacedDigit().weight(.bold))
+                    .foregroundStyle(.red)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.red.opacity(0.12)))
+            }
+            Slider(value: value, in: 50...100, step: 1)
+                .controlSize(.mini)
+                .tint(.red)
+        }
     }
 
     private var systemNotificationsCard: some View {
@@ -227,6 +258,27 @@ struct GeneralSettingsView: View {
             set: { value in
                 var prefs = store.preferences
                 prefs.warningThresholdPercent = value
+                prefs.menuBarWarnings = .migrated(fromLegacy: value)
+                store.applyPreferences(prefs)
+            }
+        )
+    }
+
+    private func warningBinding(
+        _ keyPath: WritableKeyPath<DisplayPreferences.MenuBarWarningThresholds, Double>
+    ) -> Binding<Double> {
+        Binding(
+            get: { store.preferences.menuBarWarnings[keyPath: keyPath] },
+            set: { value in
+                var prefs = store.preferences
+                prefs.menuBarWarnings[keyPath: keyPath] = DisplayPreferences.MenuBarWarningThresholds.clamp(value)
+                // Keep legacy single field as the lowest channel for older readers.
+                let w = prefs.menuBarWarnings
+                prefs.warningThresholdPercent = min(
+                    w.cursorModelsPercent,
+                    w.otherModelsPercent,
+                    w.onDemandAndLimitsPercent
+                )
                 store.applyPreferences(prefs)
             }
         )

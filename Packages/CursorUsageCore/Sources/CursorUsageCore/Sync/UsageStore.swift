@@ -95,7 +95,7 @@ public final class UsageStore: ObservableObject {
             let snap = try await client.fetchSnapshot(sessionToken: token)
             snapshot = snap
             lastError = nil
-            let widget = WidgetSnapshot(from: snap, warningThreshold: preferences.warningThresholdPercent)
+            let widget = WidgetSnapshot(from: snap, warnings: preferences.menuBarWarnings)
             try? WidgetSnapshotStore.write(widget)
             await UsageNotificationService.evaluate(snapshot: snap, preferences: preferences)
         } catch PersonalAPIError.unauthorized {
@@ -131,7 +131,7 @@ public final class UsageStore: ObservableObject {
         preferences = prefs
         startAutoRefresh()
         if let snapshot {
-            let widget = WidgetSnapshot(from: snapshot, warningThreshold: prefs.warningThresholdPercent)
+            let widget = WidgetSnapshot(from: snapshot, warnings: prefs.menuBarWarnings)
             try? WidgetSnapshotStore.write(widget)
         }
     }

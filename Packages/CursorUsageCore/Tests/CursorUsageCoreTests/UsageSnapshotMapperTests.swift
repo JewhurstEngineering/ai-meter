@@ -32,7 +32,7 @@ final class UsageSnapshotMapperTests: XCTestCase {
             planDisplayName: "Ultra",
             cursorModelsPercentUsed: 4,
             otherModelsPercentUsed: 61,
-            planUsedCents: 40000,
+            planUsedCents: 20000,
             planLimitCents: 40000,
             bonusCents: 17712,
             onDemandEnabled: false
@@ -43,14 +43,19 @@ final class UsageSnapshotMapperTests: XCTestCase {
         prefs.menuBar.otherModelsPercent = true
         prefs.menuBar.planSpend = true
         prefs.menuBar.bonus = true
-        prefs.warningThresholdPercent = 95
+        prefs.menuBarWarnings = .init(cursorModelsPercent: 95, otherModelsPercent: 95, onDemandAndLimitsPercent: 95)
 
         let presentation = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
         XCTAssertTrue(presentation.accessibilityTitle.contains("4%") || presentation.segments.contains(where: { $0.text.contains("4%") }))
         XCTAssertTrue(presentation.segments.contains(where: { $0.text.contains("61%") }))
         XCTAssertFalse(presentation.showWarningDot)
 
-        prefs.warningThresholdPercent = 50
+        prefs.menuBarWarnings.otherModelsPercent = 50
+        XCTAssertTrue(MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true).showWarningDot)
+
+        prefs.menuBarWarnings.otherModelsPercent = 95
+        prefs.menuBarWarnings.onDemandAndLimitsPercent = 40
+        // plan used 50% of limit → warns on limits channel
         XCTAssertTrue(MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true).showWarningDot)
     }
 

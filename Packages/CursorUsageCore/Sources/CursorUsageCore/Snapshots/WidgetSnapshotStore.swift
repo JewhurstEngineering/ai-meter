@@ -13,7 +13,7 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var daysRemaining: Int?
     public var showWarning: Bool
 
-    public init(from snapshot: UsageSnapshot, warningThreshold: Double) {
+    public init(from snapshot: UsageSnapshot, warnings: DisplayPreferences.MenuBarWarningThresholds) {
         generatedAt = snapshot.fetchedAt
         planDisplayName = snapshot.planDisplayName
         cursorModelsPercentUsed = snapshot.cursorModelsPercentUsed
@@ -23,7 +23,12 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         planLimitCents = snapshot.planLimitCents
         onDemandEnabled = snapshot.onDemandEnabled
         daysRemaining = snapshot.daysRemainingInCycle
-        showWarning = snapshot.highestWatchedPercent >= warningThreshold
+        showWarning = snapshot.exceedsMenuBarWarnings(warnings)
+    }
+
+    @available(*, deprecated, message: "Use init(from:warnings:)")
+    public init(from snapshot: UsageSnapshot, warningThreshold: Double) {
+        self.init(from: snapshot, warnings: .migrated(fromLegacy: warningThreshold))
     }
 }
 

@@ -111,4 +111,23 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
             .compactMap { $0 }
             .max() ?? 0
     }
+
+    /// Max of plan-included spend % and on-demand spend % (when a limit exists).
+    public var onDemandAndLimitsPercentUsed: Double? {
+        var values: [Double] = []
+        if let used = planUsedCents, let limit = planLimitCents, limit > 0 {
+            values.append(min(100, Double(used) / Double(limit) * 100))
+        }
+        if let used = onDemandUsedCents, let limit = onDemandLimitCents, limit > 0 {
+            values.append(min(100, Double(used) / Double(limit) * 100))
+        }
+        return values.max()
+    }
+
+    public func exceedsMenuBarWarnings(_ warnings: DisplayPreferences.MenuBarWarningThresholds) -> Bool {
+        if let p = cursorModelsPercentUsed, p >= warnings.cursorModelsPercent { return true }
+        if let p = otherModelsPercentUsed, p >= warnings.otherModelsPercent { return true }
+        if let p = onDemandAndLimitsPercentUsed, p >= warnings.onDemandAndLimitsPercent { return true }
+        return false
+    }
 }

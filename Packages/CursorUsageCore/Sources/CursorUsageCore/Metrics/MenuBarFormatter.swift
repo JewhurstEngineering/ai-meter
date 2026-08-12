@@ -94,7 +94,7 @@ public enum MenuBarFormatter {
             segments = [.init(text: snapshot.planDisplayName)]
         }
 
-        let warning = snapshot.highestWatchedPercent >= preferences.warningThresholdPercent
+        let warning = snapshot.exceedsMenuBarWarnings(preferences.menuBarWarnings)
         return .init(segments: segments, showWarningDot: warning)
     }
 

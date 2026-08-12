@@ -51,21 +51,22 @@ struct SettingsPanel<Content: View>: View {
     let title: String
     var systemImage: String
     var subtitle: String? = nil
+    var compact: Bool = false
     @ViewBuilder var content: () -> Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: compact ? 8 : 12) {
+            HStack(spacing: compact ? 8 : 10) {
                 Image(systemName: systemImage)
-                    .font(.title3)
+                    .font(compact ? .body : .title3)
                     .foregroundStyle(.tint)
-                    .frame(width: 28, height: 28)
-                VStack(alignment: .leading, spacing: 2) {
+                    .frame(width: compact ? 22 : 28, height: compact ? 22 : 28)
+                VStack(alignment: .leading, spacing: 1) {
                     Text(title)
-                        .font(.headline)
+                        .font(compact ? .subheadline.weight(.semibold) : .headline)
                     if let subtitle {
                         Text(subtitle)
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -73,14 +74,14 @@ struct SettingsPanel<Content: View>: View {
             }
             content()
         }
-        .padding(14)
+        .padding(compact ? 10 : 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: compact ? 12 : 14, style: .continuous)
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: compact ? 12 : 14, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
         )
     }

@@ -8,6 +8,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var menuBarLabelStyle: MenuBarLabelStyle
     /// Menu bar red-dot threshold.
     public var warningThresholdPercent: Double
+    /// Per-channel menu bar warning thresholds (independent levels).
+    public var menuBarWarnings: MenuBarWarningThresholds
     public var notificationsEnabled: Bool
     /// Sorted unique percents that can trigger a system notification when crossed.
     public var notificationThresholds: [Double]
@@ -26,6 +28,48 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public enum MenuBarLabelStyle: String, Codable, Sendable, CaseIterable {
         case icons
         case shortWords
+    }
+
+    public struct MenuBarWarningThresholds: Codable, Sendable, Equatable {
+        public var cursorModelsPercent: Double
+        public var otherModelsPercent: Double
+        /// Plan spend / included limit and on-demand spend vs limit.
+        public var onDemandAndLimitsPercent: Double
+
+        public static let `default` = MenuBarWarningThresholds(
+            cursorModelsPercent: 95,
+            otherModelsPercent: 95,
+            onDemandAndLimitsPercent: 95
+        )
+
+        public init(
+            cursorModelsPercent: Double,
+            otherModelsPercent: Double,
+            onDemandAndLimitsPercent: Double
+        ) {
+            self.cursorModelsPercent = Self.clamp(cursorModelsPercent)
+            self.otherModelsPercent = Self.clamp(otherModelsPercent)
+            self.onDemandAndLimitsPercent = Self.clamp(onDemandAndLimitsPercent)
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            cursorModelsPercent = Self.clamp(try c.decodeIfPresent(Double.self, forKey: .cursorModelsPercent) ?? 95)
+            otherModelsPercent = Self.clamp(try c.decodeIfPresent(Double.self, forKey: .otherModelsPercent) ?? 95)
+            onDemandAndLimitsPercent = Self.clamp(
+                try c.decodeIfPresent(Double.self, forKey: .onDemandAndLimitsPercent) ?? 95
+            )
+        }
+
+        public static func clamp(_ value: Double) -> Double {
+            min(100, max(50, value.rounded()))
+        }
+
+        /// Seeds all channels from a legacy single threshold.
+        public static func migrated(fromLegacy threshold: Double) -> MenuBarWarningThresholds {
+            let v = clamp(threshold)
+            return .init(cursorModelsPercent: v, otherModelsPercent: v, onDemandAndLimitsPercent: v)
+        }
     }
 
     public struct NotificationContent: Codable, Sendable, Equatable {
@@ -149,6 +193,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         menuBarFormat: .detailed,
         menuBarLabelStyle: .icons,
         warningThresholdPercent: 95,
+        menuBarWarnings: .default,
         notificationsEnabled: false,
         notificationThresholds: [85, 95],
         notifyOnSessionExpired: true,
@@ -164,6 +209,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         menuBarFormat: MenuBarFormat,
         menuBarLabelStyle: MenuBarLabelStyle = .icons,
         warningThresholdPercent: Double,
+        menuBarWarnings: MenuBarWarningThresholds = .default,
         notificationsEnabled: Bool = false,
         notificationThresholds: [Double] = [85, 95],
         notifyOnSessionExpired: Bool = true,
@@ -177,6 +223,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.menuBarFormat = menuBarFormat
         self.menuBarLabelStyle = menuBarLabelStyle
         self.warningThresholdPercent = warningThresholdPercent
+        self.menuBarWarnings = menuBarWarnings
         self.notificationsEnabled = notificationsEnabled
         self.notificationThresholds = Self.normalizeThresholds(notificationThresholds)
         self.notifyOnSessionExpired = notifyOnSessionExpired
@@ -192,7 +239,13 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         showInMenuBar = try c.decodeIfPresent(Bool.self, forKey: .showInMenuBar) ?? true
         menuBarFormat = try c.decodeIfPresent(MenuBarFormat.self, forKey: .menuBarFormat) ?? .detailed
         menuBarLabelStyle = try c.decodeIfPresent(MenuBarLabelStyle.self, forKey: .menuBarLabelStyle) ?? .icons
-        warningThresholdPercent = try c.decodeIfPresent(Double.self, forKey: .warningThresholdPercent) ?? 95
+        let legacyWarning = try c.decodeIfPresent(Double.self, forKey: .warningThresholdPercent) ?? 95
+        warningThresholdPercent = legacyWarning
+        if let warnings = try c.decodeIfPresent(MenuBarWarningThresholds.self, forKey: .menuBarWarnings) {
+            menuBarWarnings = warnings
+        } else {
+            menuBarWarnings = .migrated(fromLegacy: legacyWarning)
+        }
         notificationsEnabled = try c.decodeIfPresent(Bool.self, forKey: .notificationsEnabled) ?? false
         notificationThresholds = Self.normalizeThresholds(
             try c.decodeIfPresent([Double].self, forKey: .notificationThresholds) ?? [85, 95]
