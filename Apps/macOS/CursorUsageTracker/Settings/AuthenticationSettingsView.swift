@@ -10,38 +10,44 @@ struct AuthenticationSettingsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 10) {
                 SettingsPanel(
                     title: "Session",
                     systemImage: "person.badge.shield.checkmark",
                     subtitle: store.isAuthenticated
-                        ? "Connected. Re-auth if usage stops updating."
-                        : "Sign in once — tokens stay in Keychain on this Mac."
+                        ? "Connected — re-auth if usage stops updating."
+                        : "Sign in once; tokens stay in Keychain on this Mac.",
+                    compact: true
                 ) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         Circle()
-                            .fill(store.isAuthenticated ? Color.green : Color.orange.opacity(0.8))
-                            .frame(width: 10, height: 10)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(store.isAuthenticated ? "Authenticated" : "Not authenticated")
-                                .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(store.isAuthenticated ? Color.green : Color.secondary)
-                            if let email = store.accountEmail {
-                                Text(email)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .textSelection(.enabled)
-                            }
-                            if let statusMessage {
-                                Text(statusMessage)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
+                            .fill(store.isAuthenticated ? Color.green : Color.orange.opacity(0.85))
+                            .frame(width: 8, height: 8)
+                        Text(store.isAuthenticated ? "Authenticated" : "Not authenticated")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(store.isAuthenticated ? Color.green : Color.secondary)
+                        if let email = store.accountEmail {
+                            Text("·")
+                                .foregroundStyle(.tertiary)
+                            Text(email)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .textSelection(.enabled)
+                                .lineLimit(1)
                         }
-                        Spacer()
+                        Spacer(minLength: 0)
+                        if let statusMessage {
+                            Text(statusMessage)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                        }
                     }
 
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
+                        spacing: 8
+                    ) {
                         authButton("Sign in with Cursor", systemImage: "globe") {
                             showLogin = true
                         }
@@ -69,60 +75,67 @@ struct AuthenticationSettingsView: View {
                         .disabled(!store.isAuthenticated)
                     }
 
-                    Text("Uses the account signed into the Cursor app (state.vscdb). Cursor Agent’s keychain can be a different login — we no longer prefer that first.")
+                    Text("Prefers Cursor IDE (state.vscdb). Agent keychain can be a different account.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 SettingsPanel(
                     title: "Paste token",
                     systemImage: "key",
-                    subtitle: "Escape hatch if WebView or local Cursor connect fails."
+                    subtitle: "Escape hatch if WebView or IDE connect fails.",
+                    compact: true
                 ) {
-                    SecureField("WorkosCursorSessionToken or JWT", text: $pasteToken)
-                        .textFieldStyle(.roundedBorder)
-                    Button {
-                        Task {
-                            do {
-                                try await store.saveSessionToken(pasteToken)
-                                pasteToken = ""
-                                statusMessage = "Token saved."
-                            } catch {
-                                statusMessage = "Token rejected: \(error.localizedDescription)"
+                    HStack(spacing: 8) {
+                        SecureField("WorkosCursorSessionToken or JWT", text: $pasteToken)
+                            .textFieldStyle(.roundedBorder)
+                        Button {
+                            Task {
+                                do {
+                                    try await store.saveSessionToken(pasteToken)
+                                    pasteToken = ""
+                                    statusMessage = "Token saved."
+                                } catch {
+                                    statusMessage = "Token rejected: \(error.localizedDescription)"
+                                }
                             }
+                        } label: {
+                            Label("Save", systemImage: "checkmark.circle")
                         }
-                    } label: {
-                        Label("Save token", systemImage: "checkmark.circle")
-                            .frame(maxWidth: .infinity)
+                        .buttonStyle(.borderedProminent)
+                        .disabled(pasteToken.isEmpty)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(pasteToken.isEmpty)
                 }
 
-                SettingsPanel(
-                    title: "Team / Enterprise",
-                    systemImage: "building.2",
-                    subtitle: "Foundation only for now."
-                ) {
-                    Text(TeamAdminAPIConnectorStub.statusMessage)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                HStack(alignment: .top, spacing: 10) {
+                    SettingsPanel(
+                        title: "Team / Enterprise",
+                        systemImage: "building.2",
+                        subtitle: "Not available yet.",
+                        compact: true
+                    ) {
+                        Text(TeamAdminAPIConnectorStub.statusMessage)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-                SettingsPanel(
-                    title: "Multiple accounts",
-                    systemImage: "person.2",
-                    subtitle: "Not simultaneous yet."
-                ) {
-                    Text("Right now this app holds one personal session at a time. To use another Cursor account, Sign Out (or Re-authenticate) and sign into the other account. Multi-account side-by-side is planned next.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    SettingsPanel(
+                        title: "Multiple accounts",
+                        systemImage: "person.2",
+                        subtitle: "One session at a time.",
+                        compact: true
+                    ) {
+                        Text("Sign out and re-auth to switch accounts. Side-by-side multi-account is planned.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 }
             }
-            .padding(16)
+            .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
         .sheet(isPresented: $showLogin) {
@@ -162,11 +175,12 @@ struct AuthenticationSettingsView: View {
     ) -> some View {
         Button(role: role, action: action) {
             Label(title, systemImage: systemImage)
+                .font(.caption.weight(.medium))
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 6)
+                .padding(.vertical, 2)
         }
         .buttonStyle(.bordered)
-        .controlSize(.large)
+        .controlSize(.regular)
     }
 }
 

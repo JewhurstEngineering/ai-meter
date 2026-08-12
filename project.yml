@@ -7,7 +7,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    MARKETING_VERSION: "0.1.14"
+    MARKETING_VERSION: "0.1.15"
     CURRENT_PROJECT_VERSION: "10"
 packages:
   CursorUsageCore:
