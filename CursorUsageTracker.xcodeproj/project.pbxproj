@@ -13,6 +13,7 @@
 		44D27C3EB943F82E0B4DC7AD /* IncludedPaidAboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */; };
 		4DBD41D473BA56E5DF08370B /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD38FF7739F2FCF0BBAAC89F /* MenuBarLabelView.swift */; };
 		5E1E126E24564CD7A93D864A /* CursorUsageWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0023361D50A46D8DFCBE0AA /* CursorUsageWidgets.swift */; };
+		8C409FE10EFE01E694FCCB41 /* UsageUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD98FB6EECD4B00188EC604 /* UsageUIComponents.swift */; };
 		AB1CD943F35327A3FB09F25C /* CursorUsageTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */; };
 		B8B07B749C82E504A37C9388 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10B4DC6481D9FBB53CB9194 /* MenuBarPopoverView.swift */; };
 		C31824068E33904B649A3594 /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1C35E5E6634A287A0971CC6F /* CursorUsageCore */; };
@@ -47,6 +48,7 @@
 /* Begin PBXFileReference section */
 		01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageTrackerApp.swift; sourceTree = "<group>"; };
 		15C1A86C67D4E7B40D40AE8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1BD98FB6EECD4B00188EC604 /* UsageUIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageUIComponents.swift; sourceTree = "<group>"; };
 		4238390F852D7D39A70FEF75 /* CursorUsageTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageTracker.entitlements; sourceTree = "<group>"; };
 		7E5AFE99C7EE27A406E96CE5 /* CursorUsageCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CursorUsageCore; path = Packages/CursorUsageCore; sourceTree = SOURCE_ROOT; };
 		8161504B9ED6174A8DF8349F /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 			children = (
 				CD38FF7739F2FCF0BBAAC89F /* MenuBarLabelView.swift */,
 				B10B4DC6481D9FBB53CB9194 /* MenuBarPopoverView.swift */,
+				1BD98FB6EECD4B00188EC604 /* UsageUIComponents.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -273,6 +276,7 @@
 				4DBD41D473BA56E5DF08370B /* MenuBarLabelView.swift in Sources */,
 				B8B07B749C82E504A37C9388 /* MenuBarPopoverView.swift in Sources */,
 				38BEB562C58CFAE068095C59 /* SettingsRootView.swift in Sources */,
+				8C409FE10EFE01E694FCCB41 /* UsageUIComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

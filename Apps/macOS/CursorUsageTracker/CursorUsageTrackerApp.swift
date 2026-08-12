@@ -9,7 +9,6 @@ struct CursorUsageTrackerApp: App {
         MenuBarExtra {
             MenuBarPopoverView()
                 .environmentObject(store)
-                .frame(width: 340)
         } label: {
             MenuBarLabelView()
                 .environmentObject(store)
@@ -19,7 +18,7 @@ struct CursorUsageTrackerApp: App {
         Settings {
             SettingsRootView()
                 .environmentObject(store)
-                .frame(width: 520, height: 440)
+                .frame(minWidth: 720, idealWidth: 760, minHeight: 520, idealHeight: 560)
         }
     }
 }

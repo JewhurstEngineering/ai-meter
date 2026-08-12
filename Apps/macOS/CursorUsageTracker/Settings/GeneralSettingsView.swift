@@ -8,51 +8,89 @@ struct GeneralSettingsView: View {
     private let intervals = [1, 2, 5, 15, 30]
 
     var body: some View {
-        Form {
-            Section("Startup") {
-                Toggle("Launch at login", isOn: launchAtLoginBinding)
-            }
-            Section("Refresh") {
-                Picker("Interval", selection: refreshBinding) {
-                    ForEach(intervals, id: \.self) { minutes in
-                        Text("\(minutes) minute(s)").tag(minutes)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                SettingsPanel(
+                    title: "App behavior",
+                    systemImage: "bolt.horizontal.circle",
+                    subtitle: "How often we sync and when the menu bar warns you."
+                ) {
+                    HStack(alignment: .top, spacing: 16) {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Toggle("Launch at login", isOn: launchAtLoginBinding)
+                            Picker("Refresh every", selection: refreshBinding) {
+                                ForEach(intervals, id: \.self) { minutes in
+                                    Text("\(minutes) min").tag(minutes)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(maxWidth: 180, alignment: .leading)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Warning at \(Int(store.preferences.warningThresholdPercent))%")
+                                .font(.subheadline.weight(.medium))
+                            Slider(value: thresholdBinding, in: 50...100, step: 1)
+                            Text("Red dot on the menu bar icon when any watched pool crosses this line.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+
+                HStack(alignment: .top, spacing: 16) {
+                    SettingsPanel(
+                        title: "Menu bar",
+                        systemImage: "menubar.rectangle",
+                        subtitle: "Compact glance strip in the system menu bar."
+                    ) {
+                        Toggle("Show title text in menu bar", isOn: showMenuBarBinding)
+                        Picker("Density", selection: formatBinding) {
+                            Text("Compact").tag(DisplayPreferences.MenuBarFormat.compact)
+                            Text("Detailed").tag(DisplayPreferences.MenuBarFormat.detailed)
+                        }
+                        .pickerStyle(.segmented)
+
+                        Divider().padding(.vertical, 4)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: menuToggle(\.cursorModelsPercent))
+                            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: menuToggle(\.otherModelsPercent))
+                            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: menuToggle(\.totalPercent))
+                            MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: menuToggle(\.planSpend))
+                            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: menuToggle(\.bonus))
+                            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: menuToggle(\.onDemand))
+                            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: menuToggle(\.daysRemaining))
+                        }
+                    }
+
+                    SettingsPanel(
+                        title: "Popover",
+                        systemImage: "rectangle.portrait.on.rectangle.portrait",
+                        subtitle: "What appears when you click the menu bar item."
+                    ) {
+                        Text("Detail panel")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: popoverToggle(\.cursorModelsPercent))
+                            MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: popoverToggle(\.otherModelsPercent))
+                            MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: popoverToggle(\.totalPercent))
+                            MetricToggleRow(title: "Plan spend", systemImage: "dollarsign.circle", isOn: popoverToggle(\.planSpend))
+                            MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: popoverToggle(\.bonus))
+                            MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: popoverToggle(\.onDemand))
+                            MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: popoverToggle(\.daysRemaining))
+                        }
                     }
                 }
             }
-            Section("Warnings") {
-                VStack(alignment: .leading) {
-                    Slider(value: thresholdBinding, in: 50...100, step: 1)
-                    Text("Show warning dot when usage exceeds \(Int(store.preferences.warningThresholdPercent))% of a watched pool.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Section("Menu Bar") {
-                Toggle("Show in Menu Bar", isOn: showMenuBarBinding)
-                Picker("Format", selection: formatBinding) {
-                    Text("Compact").tag(DisplayPreferences.MenuBarFormat.compact)
-                    Text("Detailed").tag(DisplayPreferences.MenuBarFormat.detailed)
-                }
-                .pickerStyle(.segmented)
-                Toggle("Cursor Models %", isOn: menuToggle(\.cursorModelsPercent))
-                Toggle("Other Models %", isOn: menuToggle(\.otherModelsPercent))
-                Toggle("Total included %", isOn: menuToggle(\.totalPercent))
-                Toggle("Subscription usage ($)", isOn: menuToggle(\.planSpend))
-                Toggle("Bonus usage details", isOn: menuToggle(\.bonus))
-                Toggle("On-demand / billable", isOn: menuToggle(\.onDemand))
-                Toggle("Days remaining", isOn: menuToggle(\.daysRemaining))
-            }
-            Section("Popover") {
-                Toggle("Cursor Models %", isOn: popoverToggle(\.cursorModelsPercent))
-                Toggle("Other Models %", isOn: popoverToggle(\.otherModelsPercent))
-                Toggle("Total included %", isOn: popoverToggle(\.totalPercent))
-                Toggle("Plan spend", isOn: popoverToggle(\.planSpend))
-                Toggle("Bonus", isOn: popoverToggle(\.bonus))
-                Toggle("On-demand", isOn: popoverToggle(\.onDemand))
-                Toggle("Days remaining", isOn: popoverToggle(\.daysRemaining))
-            }
+            .padding(16)
         }
-        .formStyle(.grouped)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     private var launchAtLoginBinding: Binding<Bool> {
@@ -68,9 +106,7 @@ struct GeneralSettingsView: View {
                     } else {
                         try SMAppService.mainApp.unregister()
                     }
-                } catch {
-                    // Best-effort; preference still saved.
-                }
+                } catch {}
             }
         )
     }
