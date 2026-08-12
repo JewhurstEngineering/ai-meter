@@ -231,7 +231,7 @@ struct AboutSettingsView: View {
     var body: some View {
         ScrollView {
             SettingsPanel(title: "Cursor Usage Tracker", systemImage: "info.circle.fill", subtitle: nil) {
-                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.12")
+                LabeledContent("Version", value: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.13")
                 Text("Personal open-source menu bar meter for Cursor Pro, Pro+, and Ultra. Unofficial session APIs may change; re-auth when needed.")
                     .font(.callout)
                     .foregroundStyle(.secondary)

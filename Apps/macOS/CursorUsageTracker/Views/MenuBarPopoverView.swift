@@ -187,6 +187,10 @@ struct MenuBarPopoverView: View {
                 )
             }
 
+            if t.modelsThisPeriod {
+                PopoverModelsThisPeriodCard(snapshot: snapshot)
+            }
+
             if let error = store.lastError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption)
@@ -246,6 +250,72 @@ private struct PopoverPoolRow: View {
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(tint.opacity(0.08))
+        )
+    }
+}
+
+private struct PopoverModelsThisPeriodCard: View {
+    let snapshot: UsageSnapshot
+    private let maxRows = 8
+
+    var body: some View {
+        let rows = Array(snapshot.modelBreakdown.prefix(maxRows))
+        let overflow = max(0, snapshot.modelBreakdown.count - rows.count)
+
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Models this period", systemImage: "list.bullet.rectangle")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            if rows.isEmpty {
+                Text("No model spend yet this period.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(spacing: 6) {
+                    ForEach(rows) { row in
+                        HStack(spacing: 8) {
+                            Image(systemName: "chevron.right.circle.fill")
+                                .font(.caption)
+                                .foregroundStyle(UsageAppearance.accentOtherModels.opacity(0.75))
+                            Text(row.model)
+                                .font(.caption)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer(minLength: 8)
+                            Text(MenuBarFormatter.usd(row.totalCents))
+                                .font(.caption.monospacedDigit().weight(.medium))
+                        }
+                    }
+
+                    if overflow > 0 {
+                        Text("+\(overflow) more in Settings → Included")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let total = snapshot.totalModelCostCents {
+                        Divider()
+                        HStack {
+                            Text("Total")
+                                .font(.caption.weight(.semibold))
+                            Spacer()
+                            Text(MenuBarFormatter.usd(total))
+                                .font(.caption.monospacedDigit().weight(.bold))
+                        }
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
         )
     }
 }

@@ -69,7 +69,7 @@ struct LayoutSettingsView: View {
                         systemImage: "rectangle.portrait.on.rectangle.portrait",
                         subtitle: "Metrics in the click panel."
                     ) {
-                        metricToggles(popoverToggle)
+                        metricToggles(popoverToggle, includeModelsThisPeriod: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .top)
                 }
@@ -109,7 +109,8 @@ struct LayoutSettingsView: View {
 
     @ViewBuilder
     private func metricToggles(
-        _ binding: (WritableKeyPath<DisplayPreferences.SurfaceToggles, Bool>) -> Binding<Bool>
+        _ binding: (WritableKeyPath<DisplayPreferences.SurfaceToggles, Bool>) -> Binding<Bool>,
+        includeModelsThisPeriod: Bool = false
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: binding(\.cursorModelsPercent))
@@ -119,6 +120,13 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
             MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: binding(\.daysRemaining))
+            if includeModelsThisPeriod {
+                MetricToggleRow(
+                    title: "Models this period",
+                    systemImage: "list.bullet.rectangle",
+                    isOn: binding(\.modelsThisPeriod)
+                )
+            }
         }
     }
 
@@ -300,8 +308,40 @@ private struct PopoverPreviewCard: View {
                         .foregroundStyle(.secondary)
                 }
 
+                if t.modelsThisPeriod {
+                    Divider()
+                    Label("Models this period", systemImage: "list.bullet.rectangle")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    let models = snapshot?.modelBreakdown ?? [
+                        .init(model: "claude-fable-5-thinking-high", totalCents: 465),
+                        .init(model: "cursor-grok-4.5-high", totalCents: 300),
+                    ]
+                    ForEach(Array(models.prefix(3))) { row in
+                        HStack(spacing: 6) {
+                            Image(systemName: "chevron.right.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(UsageAppearance.accentOtherModels.opacity(0.7))
+                            Text(row.model)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                            Spacer()
+                            Text(MenuBarFormatter.usd(row.totalCents))
+                                .monospacedDigit()
+                        }
+                        .font(.caption2)
+                    }
+                    let total = snapshot?.totalModelCostCents ?? models.reduce(0) { $0 + $1.totalCents }
+                    HStack {
+                        Text("Total").fontWeight(.semibold)
+                        Spacer()
+                        Text(MenuBarFormatter.usd(total)).fontWeight(.bold).monospacedDigit()
+                    }
+                    .font(.caption2)
+                }
+
                 if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent
-                    && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining
+                    && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining && !t.modelsThisPeriod
                 {
                     Text("Enable a Popover metric above to preview it.")
                         .font(.caption)

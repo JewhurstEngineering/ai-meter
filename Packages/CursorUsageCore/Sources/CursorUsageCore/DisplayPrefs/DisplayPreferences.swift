@@ -76,6 +76,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var onDemand: Bool
         public var daysRemaining: Bool
         public var burnRateEstimate: Bool
+        /// Popover-only: per-model spend for the billing period.
+        public var modelsThisPeriod: Bool
 
         public static let menuBarDefault = SurfaceToggles(
             cursorModelsPercent: true,
@@ -85,7 +87,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             bonus: false,
             onDemand: false,
             daysRemaining: false,
-            burnRateEstimate: false
+            burnRateEstimate: false,
+            modelsThisPeriod: false
         )
 
         public static let popoverDefault = SurfaceToggles(
@@ -96,7 +99,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             bonus: true,
             onDemand: true,
             daysRemaining: true,
-            burnRateEstimate: true
+            burnRateEstimate: true,
+            modelsThisPeriod: true
         )
 
         public init(
@@ -107,7 +111,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             bonus: Bool,
             onDemand: Bool,
             daysRemaining: Bool,
-            burnRateEstimate: Bool
+            burnRateEstimate: Bool,
+            modelsThisPeriod: Bool = false
         ) {
             self.cursorModelsPercent = cursorModelsPercent
             self.otherModelsPercent = otherModelsPercent
@@ -117,6 +122,21 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             self.onDemand = onDemand
             self.daysRemaining = daysRemaining
             self.burnRateEstimate = burnRateEstimate
+            self.modelsThisPeriod = modelsThisPeriod
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            cursorModelsPercent = try c.decodeIfPresent(Bool.self, forKey: .cursorModelsPercent) ?? true
+            otherModelsPercent = try c.decodeIfPresent(Bool.self, forKey: .otherModelsPercent) ?? true
+            totalPercent = try c.decodeIfPresent(Bool.self, forKey: .totalPercent) ?? false
+            planSpend = try c.decodeIfPresent(Bool.self, forKey: .planSpend) ?? false
+            bonus = try c.decodeIfPresent(Bool.self, forKey: .bonus) ?? false
+            onDemand = try c.decodeIfPresent(Bool.self, forKey: .onDemand) ?? false
+            daysRemaining = try c.decodeIfPresent(Bool.self, forKey: .daysRemaining) ?? false
+            burnRateEstimate = try c.decodeIfPresent(Bool.self, forKey: .burnRateEstimate) ?? false
+            // Default on so upgraded installs get the popover section without a reset.
+            modelsThisPeriod = try c.decodeIfPresent(Bool.self, forKey: .modelsThisPeriod) ?? true
         }
     }
 
