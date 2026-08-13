@@ -1,6 +1,10 @@
 import SwiftUI
-import AppKit
 import CursorUsageCore
+#if os(macOS)
+import AppKit
+#elseif os(iOS)
+import UIKit
+#endif
 
 struct ThemePalette: Equatable {
     var tint: Color
@@ -132,12 +136,12 @@ struct ThemePalette: Equatable {
     private static let systemAdaptive = ThemePalette(
         tint: Color.accentColor,
         cursorModels: Color.accentColor,
-        otherModels: Color(nsColor: .systemGray),
-        total: Color(nsColor: .systemTeal),
-        spend: Color(nsColor: .systemBrown),
-        ok: Color(nsColor: .systemGreen),
-        warn: Color(nsColor: .systemOrange),
-        danger: Color(nsColor: .systemRed)
+        otherModels: Color.gray,
+        total: Color.teal,
+        spend: Color.brown,
+        ok: Color.green,
+        warn: Color.orange,
+        danger: Color.red
     )
 
     private static let inkDark = pack(
@@ -351,11 +355,20 @@ extension DisplayPreferences.ThemeSwatch {
     var color: Color { Color(red: red, green: green, blue: blue) }
 
     init(_ color: Color) {
+        #if os(macOS)
         let ns = NSColor(color)
         let rgb = ns.usingColorSpace(.sRGB) ?? ns
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         rgb.getRed(&r, green: &g, blue: &b, alpha: &a)
         self.init(red: Double(r), green: Double(g), blue: Double(b))
+        #elseif os(iOS)
+        let ui = UIColor(color)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        ui.getRed(&r, green: &g, blue: &b, alpha: &a)
+        self.init(red: Double(r), green: Double(g), blue: Double(b))
+        #else
+        self.init(red: 0.5, green: 0.5, blue: 0.5)
+        #endif
     }
 }
 
@@ -400,30 +413,50 @@ private struct AppScaleKey: EnvironmentKey {
 struct AppThemed<Content: View>: View {
     let preferences: DisplayPreferences
     @ViewBuilder var content: () -> Content
+    @Environment(\.colorScheme) private var systemScheme
+    #if os(macOS)
     @ObservedObject private var system = SystemAppearanceMonitor.shared
+    #endif
 
     var body: some View {
-        let scheme = preferences.appearanceMode.colorScheme(systemIsDark: system.isDark)
+        #if os(macOS)
+        let systemIsDark = system.isDark
+        #else
+        let systemIsDark = systemScheme == .dark
+        #endif
+        let scheme = preferences.appearanceMode.colorScheme(systemIsDark: systemIsDark)
         let palette = ThemePalette.resolved(preferences, scheme: scheme)
             .adapted(
                 for: preferences.colorVision,
                 highContrast: preferences.highContrast,
                 scheme: scheme
             )
-        content()
+        let themed = content()
             .environment(\.appTheme, palette)
             .environment(\.colorScheme, scheme)
             .environment(\.appUsePatterns, preferences.distinguishWithoutColor || preferences.colorVision != .typical)
             .environment(\.appHighContrast, preferences.highContrast)
             .environment(\.appScale, preferences.interfaceSize.scale)
-            // Pin Dynamic Type so a larger size cannot stick (same class of bug as Dark).
-            .transformEnvironment(\.dynamicTypeSize) { $0 = .large }
             .preferredColorScheme(scheme)
             .tint(palette.tint)
+        #if os(macOS)
+        themed
+            .transformEnvironment(\.dynamicTypeSize) { $0 = .large }
             .background(WindowAppearanceBridge(appearance: preferences.appearanceMode.nsAppearance))
+        #else
+        themed
+            .transformEnvironment(\.dynamicTypeSize) { size in
+                switch preferences.interfaceSize {
+                case .defaultSize: size = .large
+                case .large: size = .xLarge
+                case .extraLarge: size = .xxLarge
+                }
+            }
+        #endif
     }
 }
 
+#if os(macOS)
 /// Follows macOS light/dark without setting `NSApp.appearance` (that would tint the menu bar).
 @MainActor
 final class SystemAppearanceMonitor: ObservableObject {
@@ -570,6 +603,7 @@ private final class AppearanceProbeView: NSView {
         WindowAppearanceApplier.unlockResize(window)
     }
 }
+#endif
 
 extension DisplayPreferences.AppearanceMode {
     func colorScheme(systemIsDark: Bool) -> ColorScheme {
@@ -580,6 +614,7 @@ extension DisplayPreferences.AppearanceMode {
         }
     }
 
+    #if os(macOS)
     var nsAppearance: NSAppearance? {
         switch self {
         case .system: return nil
@@ -587,6 +622,7 @@ extension DisplayPreferences.AppearanceMode {
         case .dark: return NSAppearance(named: .darkAqua)
         }
     }
+    #endif
 }
 
 extension DisplayPreferences.InterfaceSize {

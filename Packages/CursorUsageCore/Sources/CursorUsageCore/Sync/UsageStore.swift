@@ -254,6 +254,12 @@ public final class UsageStore: ObservableObject {
         writeWidgetSnapshot()
     }
 
+    public func updatePreferences(_ mutate: (inout DisplayPreferences) -> Void) {
+        var prefs = preferences
+        mutate(&prefs)
+        applyPreferences(prefs)
+    }
+
     public func snoozeMenuBarWarning(_ channel: UsageSnapshot.WarningChannel) {
         preferences.snoozeWarning(channel)
     }

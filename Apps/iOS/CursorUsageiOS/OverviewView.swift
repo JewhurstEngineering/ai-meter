@@ -3,8 +3,10 @@ import CursorUsageCore
 
 struct OverviewView: View {
     @EnvironmentObject private var store: UsageStore
+    @Environment(\.appTheme) private var theme
 
     private var account: AccountRuntime? { store.activeAccount }
+    private var layout: DisplayPreferences.SurfaceToggles { store.preferences.popover }
 
     var body: some View {
         NavigationStack {
@@ -45,17 +47,18 @@ struct OverviewView: View {
     private func usageList(_ snapshot: UsageSnapshot) -> some View {
         List {
             Section {
-                HStack {
-                    Spacer()
-                    AppLogo(size: 72)
-                    Spacer()
+                HStack(spacing: 12) {
+                    AppLogo(size: 40)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(snapshot.planDisplayName)
+                            .font(.headline)
+                        Text("Updated \(snapshot.fetchedAt.formatted(date: .omitted, time: .shortened))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 0)
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            Section {
-                LabeledContent("Plan", value: snapshot.planDisplayName)
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
             if store.connections.count > 1 {
@@ -68,43 +71,55 @@ struct OverviewView: View {
                 }
             }
 
-            Section("Included usage") {
-                poolRow("Cursor Models", systemImage: "sparkles", percent: snapshot.cursorModelsPercentUsed, tint: Color(red: 0.22, green: 0.48, blue: 0.86))
-                poolRow("Other Models", systemImage: "cpu", percent: snapshot.otherModelsPercentUsed, tint: Color(red: 0.55, green: 0.35, blue: 0.82))
-                poolRow("Total included", systemImage: "chart.pie.fill", percent: snapshot.totalPercentUsed, tint: Color(red: 0.20, green: 0.55, blue: 0.58))
-            }
-
-            Section("Plan") {
-                if let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
-                    LabeledContent("Spend") {
-                        Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
-                            .monospacedDigit()
+            if layout.cursorModelsPercent || layout.otherModelsPercent || layout.totalPercent {
+                Section("Included usage") {
+                    if layout.cursorModelsPercent {
+                        poolRow("Cursor Models", systemImage: "sparkles", percent: snapshot.cursorModelsPercentUsed)
                     }
-                }
-                if let bonus = snapshot.bonusCents, bonus > 0 {
-                    LabeledContent("Bonus") {
-                        Text("+\(MenuBarFormatter.usd(bonus))")
-                            .monospacedDigit()
+                    if layout.otherModelsPercent {
+                        poolRow("Other Models", systemImage: "cpu", percent: snapshot.otherModelsPercentUsed)
                     }
-                }
-                LabeledContent("On-demand") {
-                    Text(onDemandLabel(snapshot))
-                }
-                if let used = snapshot.onDemandUsedCents {
-                    LabeledContent("Billable") {
-                        Text(MenuBarFormatter.usd(used))
-                            .monospacedDigit()
-                    }
-                }
-                if let days = snapshot.daysRemainingInCycle {
-                    LabeledContent("Cycle") {
-                        Text("\(days)d left")
-                            .monospacedDigit()
+                    if layout.totalPercent {
+                        poolRow("Total included", systemImage: "chart.pie.fill", percent: snapshot.totalPercentUsed)
                     }
                 }
             }
 
-            if !snapshot.modelBreakdown.isEmpty {
+            if layout.planSpend || layout.bonus || layout.onDemand || layout.daysRemaining {
+                Section("Spend") {
+                    if layout.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
+                        LabeledContent("Spend") {
+                            Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
+                                .monospacedDigit()
+                        }
+                    }
+                    if layout.bonus, let bonus = snapshot.bonusCents, bonus > 0 {
+                        LabeledContent("Bonus") {
+                            Text("+\(MenuBarFormatter.usd(bonus))")
+                                .monospacedDigit()
+                        }
+                    }
+                    if layout.onDemand {
+                        LabeledContent("On-demand") {
+                            Text(onDemandLabel(snapshot))
+                        }
+                        if let used = snapshot.onDemandUsedCents {
+                            LabeledContent("Billable") {
+                                Text(MenuBarFormatter.usd(used))
+                                    .monospacedDigit()
+                            }
+                        }
+                    }
+                    if layout.daysRemaining, let days = snapshot.daysRemainingInCycle {
+                        LabeledContent("Cycle") {
+                            Text("\(days)d left")
+                                .monospacedDigit()
+                        }
+                    }
+                }
+            }
+
+            if layout.modelsThisPeriod, !snapshot.modelBreakdown.isEmpty {
                 Section("Models this period") {
                     ForEach(Array(snapshot.modelBreakdown.prefix(8))) { row in
                         LabeledContent(row.model) {
@@ -122,12 +137,6 @@ struct OverviewView: View {
                 }
             }
 
-            Section {
-                Text("Updated \(snapshot.fetchedAt.formatted(date: .abbreviated, time: .shortened))")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
             if let error = account?.lastError ?? store.lastError {
                 Section {
                     Label(error, systemImage: "exclamationmark.triangle.fill")
@@ -139,20 +148,17 @@ struct OverviewView: View {
     }
 
     private func unsignedHero(title: String, detail: String) -> some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                AppLogo(size: 120)
-                    .padding(.top, 36)
-                Text(title)
-                    .font(.title2.weight(.semibold))
-                Text(detail)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 28)
-            }
-            .frame(maxWidth: .infinity)
+        VStack(spacing: 12) {
+            AppLogo(size: 64)
+            Text(title)
+                .font(.title3.weight(.semibold))
+            Text(detail)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 28)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var activeBinding: Binding<UUID> {
@@ -162,8 +168,9 @@ struct OverviewView: View {
         )
     }
 
-    private func poolRow(_ title: String, systemImage: String, percent: Double?, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+    private func poolRow(_ title: String, systemImage: String, percent: Double?) -> some View {
+        let tint = theme.color(forPool: title, percent: percent ?? 0)
+        return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Label(title, systemImage: systemImage)
                     .foregroundStyle(tint)
@@ -172,15 +179,11 @@ struct OverviewView: View {
                     .font(.body.monospacedDigit().weight(.semibold))
                     .foregroundStyle(tint)
             }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.primary.opacity(0.12))
-                    Capsule()
-                        .fill(tint)
-                        .frame(width: geo.size.width * min(1, max(0, (percent ?? 0) / 100)))
-                }
-            }
-            .frame(height: 8)
+            UsageProgressBar(
+                percent: percent ?? 0,
+                tint: tint,
+                pattern: .forPool(title)
+            )
         }
         .padding(.vertical, 4)
     }

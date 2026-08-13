@@ -10,6 +10,7 @@ struct CursorUsageiOSApp: App {
         WindowGroup {
             RootTabView()
                 .environmentObject(store)
+                .appThemed(store.preferences)
                 .task {
                     store.onWidgetSnapshotWritten = {
                         WidgetReload.afterWritingSnapshot()
