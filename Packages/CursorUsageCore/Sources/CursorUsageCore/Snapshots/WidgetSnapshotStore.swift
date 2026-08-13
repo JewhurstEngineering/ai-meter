@@ -48,23 +48,46 @@ public enum WidgetSnapshotStore {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
     }
 
-    /// Sandboxed widgets can read Library/ inside the group; a file at the container root often fails.
-    private static var groupSupportFileURL: URL? {
-        containerURL?
-            .appendingPathComponent("Library", isDirectory: true)
-            .appendingPathComponent("Application Support", isDirectory: true)
-            .appendingPathComponent("CursorUsageTracker", isDirectory: true)
-            .appendingPathComponent(filename)
+    /// `containerURL` is nil in a sandboxed widget whose profile omitted App Groups.
+    /// The unsandboxed host still writes here; always probe this path too.
+    private static var homeGroupContainerURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Group Containers", isDirectory: true)
+            .appendingPathComponent(appGroupID, isDirectory: true)
     }
 
-    private static var groupRootFileURL: URL? {
-        containerURL?.appendingPathComponent(filename)
+    private static var groupRoots: [URL] {
+        var roots: [URL] = []
+        var seen = Set<String>()
+        for url in [containerURL, homeGroupContainerURL].compactMap({ $0 }) {
+            let path = url.standardizedFileURL.path
+            if seen.insert(path).inserted {
+                roots.append(url)
+            }
+        }
+        return roots
     }
 
-    private static var fallbackFileURL: URL? {
-        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("CursorUsageTracker", isDirectory: true)
-            .appendingPathComponent(filename)
+    private static var candidateFiles: [URL] {
+        var urls: [URL] = []
+        for root in groupRoots {
+            urls.append(
+                root
+                    .appendingPathComponent("Library", isDirectory: true)
+                    .appendingPathComponent("Application Support", isDirectory: true)
+                    .appendingPathComponent("CursorUsageTracker", isDirectory: true)
+                    .appendingPathComponent(filename)
+            )
+            urls.append(root.appendingPathComponent(filename))
+        }
+        if let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            urls.append(
+                support
+                    .appendingPathComponent("CursorUsageTracker", isDirectory: true)
+                    .appendingPathComponent(filename)
+            )
+        }
+        return urls
     }
 
     public static func write(_ snapshot: WidgetSnapshot) throws {
@@ -77,7 +100,7 @@ public enum WidgetSnapshotStore {
 
         var lastError: Error?
         var wrote = false
-        for url in [groupSupportFileURL, groupRootFileURL, fallbackFileURL].compactMap({ $0 }) {
+        for url in candidateFiles {
             do {
                 try FileManager.default.createDirectory(
                     at: url.deletingLastPathComponent(),
@@ -102,7 +125,7 @@ public enum WidgetSnapshotStore {
             return snap
         }
 
-        for url in [groupSupportFileURL, groupRootFileURL, fallbackFileURL].compactMap({ $0 }) {
+        for url in candidateFiles {
             guard let data = try? Data(contentsOf: url), let snap = decode(data) else { continue }
             return snap
         }

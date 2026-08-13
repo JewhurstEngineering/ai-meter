@@ -13,7 +13,7 @@ struct Provider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
         let entry = Entry(date: .now, snapshot: WidgetSnapshotStore.read())
-        let next = Calendar.current.date(byAdding: .minute, value: 15, to: .now) ?? .now.addingTimeInterval(900)
+        let next = Date().addingTimeInterval(60)
         completion(Timeline(entries: [entry], policy: .after(next)))
     }
 }

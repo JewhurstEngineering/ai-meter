@@ -359,7 +359,11 @@ public final class UsageStore: ObservableObject {
             warnings: preferences.menuBarWarnings,
             snoozedChannels: preferences.snoozedWarningChannels
         )
-        try? WidgetSnapshotStore.write(widget)
+        do {
+            try WidgetSnapshotStore.write(widget)
+        } catch {
+            // Widget still probes every known path on the next timeline tick.
+        }
         onWidgetSnapshotWritten?()
     }
 
