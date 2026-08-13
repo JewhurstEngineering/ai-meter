@@ -24,16 +24,18 @@ struct SettingsRootView: View {
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .scaleEffect(store.preferences.interfaceSize.scale, anchor: .topLeading)
         .frame(
-            minWidth: 900 * store.preferences.interfaceSize.scale,
-            idealWidth: 960 * store.preferences.interfaceSize.scale,
+            minWidth: 800,
+            idealWidth: 960,
             maxWidth: .infinity,
-            minHeight: 600 * store.preferences.interfaceSize.scale,
-            idealHeight: 680 * store.preferences.interfaceSize.scale,
+            minHeight: 520,
+            idealHeight: 680,
             maxHeight: .infinity,
             alignment: .topLeading
         )
+        .background(SettingsResizeUnlock())
         .environmentObject(store)
         .appThemed(store.preferences)
         .onAppear {

@@ -15,23 +15,26 @@ struct MenuBarPopoverView: View {
 
             Divider()
 
-            Group {
-                if !store.isAuthenticated {
-                    signInPrompt
-                } else if let snapshot = store.snapshot {
-                    usageBody(snapshot)
-                } else if store.isRefreshing {
-                    ProgressView("Loading usage…")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 28)
-                } else {
-                    Text(store.lastError ?? "No usage data yet.")
-                        .foregroundStyle(.secondary)
-                        .padding(14)
+            ScrollView {
+                Group {
+                    if !store.isAuthenticated {
+                        signInPrompt
+                    } else if let snapshot = store.snapshot {
+                        usageBody(snapshot)
+                    } else if store.isRefreshing {
+                        ProgressView("Loading usage…")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 28)
+                    } else {
+                        Text(store.lastError ?? "No usage data yet.")
+                            .foregroundStyle(.secondary)
+                            .padding(14)
+                    }
                 }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
 
             Divider()
 
@@ -39,8 +42,7 @@ struct MenuBarPopoverView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
         }
-        .frame(width: 360)
-        .fixedSize(horizontal: true, vertical: true)
+        .frame(width: 360, height: 580)
         // Flatten to an opaque bitmap so popover vibrancy cannot bleed editor content through.
         .background(Color(nsColor: .windowBackgroundColor))
         .compositingGroup()

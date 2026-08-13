@@ -38,5 +38,5 @@ MIT — see [LICENSE](LICENSE).
 
 ## Version
 
-Current: **0.1.28**
+Current: **0.1.29**
 

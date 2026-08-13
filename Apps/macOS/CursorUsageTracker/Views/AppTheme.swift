@@ -475,20 +475,66 @@ enum WindowAppearanceApplier {
     }
 
     /// Restore a usable Settings size and allow the user to resize it.
+    /// SwiftUI Settings often sets contentMinSize == contentMaxSize, which makes
+    /// `.resizable` a no-op even when the style mask looks right.
     static func configureChrome(scale: CGFloat) {
         let s = max(scale, 1)
-        let minContent = NSSize(width: 900 * s, height: 560 * s)
+        let minContent = NSSize(width: 800, height: 520)
         let idealContent = NSSize(width: 960 * s, height: 680 * s)
         for window in NSApp.windows where shouldTheme(window) {
-            window.styleMask.insert(.resizable)
-            let minFrame = window.frameRect(forContentRect: NSRect(origin: .zero, size: minContent)).size
-            window.minSize = minFrame
-            window.maxSize = NSSize(width: 4000, height: 3000)
+            unlockResize(window, minContent: minContent)
             let current = window.contentLayoutRect.size
             if current.width < minContent.width - 8 || current.height < minContent.height - 8 {
                 window.setContentSize(idealContent)
             }
         }
+    }
+
+    static func unlockResize(_ window: NSWindow, minContent: NSSize = NSSize(width: 800, height: 520)) {
+        if !window.styleMask.contains(.resizable) {
+            window.styleMask.insert([.titled, .closable, .miniaturizable, .resizable])
+        }
+        if window.contentMaxSize.width < 10_000 || window.contentMaxSize.height < 10_000 {
+            window.contentMaxSize = NSSize(width: 12_000, height: 12_000)
+            window.maxSize = NSSize(width: 12_000, height: 12_000)
+        }
+        if abs(window.contentMinSize.width - minContent.width) > 1
+            || abs(window.contentMinSize.height - minContent.height) > 1
+        {
+            window.contentMinSize = minContent
+            window.minSize = window.frameRect(forContentRect: NSRect(origin: .zero, size: minContent)).size
+        }
+        window.standardWindowButton(.zoomButton)?.isHidden = false
+        window.standardWindowButton(.zoomButton)?.isEnabled = true
+    }
+}
+
+/// Keeps re-applying resize unlock; SwiftUI Settings resets contentMaxSize on layout.
+struct SettingsResizeUnlock: NSViewRepresentable {
+    func makeNSView(context: Context) -> SettingsResizeUnlockView {
+        SettingsResizeUnlockView()
+    }
+
+    func updateNSView(_ nsView: SettingsResizeUnlockView, context: Context) {
+        nsView.unlock()
+    }
+}
+
+final class SettingsResizeUnlockView: NSView {
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        unlock()
+        DispatchQueue.main.async { [weak self] in self?.unlock() }
+    }
+
+    override func layout() {
+        super.layout()
+        unlock()
+    }
+
+    func unlock() {
+        guard let window else { return }
+        WindowAppearanceApplier.unlockResize(window)
     }
 }
 
@@ -519,10 +565,9 @@ private final class AppearanceProbeView: NSView {
 
     func apply() {
         WindowAppearanceApplier.apply(appearanceToApply)
-        // NSPopover chrome is owned by StatusItemController. Applying nil (System)
-        // onto the popover window can reset it to aqua and leave a light panel on a dark Mac.
         guard let window, WindowAppearanceApplier.shouldTheme(window) else { return }
         WindowAppearanceApplier.apply(appearanceToApply, to: window)
+        WindowAppearanceApplier.unlockResize(window)
     }
 }
 

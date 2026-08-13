@@ -261,7 +261,7 @@ struct PaidUsageSettingsView: View {
 struct AboutSettingsView: View {
     @Environment(\.appTheme) private var theme
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.28"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.29"
     }
 
     @State private var installMessage: String?

@@ -8,10 +8,11 @@ import CursorUsageCore
 final class StatusItemController: NSObject {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
-    private var popoverHost: (any PopoverSizing)?
     private var store: UsageStore?
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
+
+    private static let popoverSize = NSSize(width: 360, height: 580)
 
     func start(store: UsageStore) {
         self.store = store
@@ -26,21 +27,20 @@ final class StatusItemController: NSObject {
             button.sendAction(on: [.leftMouseUp])
         }
 
-        let hosting = FittingHostingController(
+        let hosting = NSHostingController(
             rootView: MenuBarPopoverView()
                 .environmentObject(store)
         )
-        // NSPopover sizes from preferredContentSize, not Auto Layout intrinsic size.
-        hosting.sizingOptions = .preferredContentSize
+        hosting.sizingOptions = []
+        hosting.preferredContentSize = Self.popoverSize
         hosting.view.wantsLayer = true
 
         let pop = NSPopover()
         pop.behavior = .transient
         pop.animates = true
+        pop.contentSize = Self.popoverSize
         pop.contentViewController = hosting
-        hosting.popover = pop
         popover = pop
-        popoverHost = hosting
 
         store.objectWillChange
             .receive(on: DispatchQueue.main)
@@ -51,12 +51,7 @@ final class StatusItemController: NSObject {
 
         store.$snapshot
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.refreshTitle()
-                if self?.popover?.isShown == true {
-                    self?.popoverHost?.updateSize()
-                }
-            }
+            .sink { [weak self] _ in self?.refreshTitle() }
             .store(in: &cancellables)
         store.$preferences
             .receive(on: DispatchQueue.main)
@@ -93,9 +88,6 @@ final class StatusItemController: NSObject {
                 view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
             }
         }
-        if popover?.isShown == true {
-            popoverHost?.updateSize()
-        }
     }
 
     func refreshTitle() {
@@ -124,9 +116,10 @@ final class StatusItemController: NSObject {
             if let store {
                 applyPopoverAppearance(store.preferences)
             }
+            popover.contentSize = Self.popoverSize
+            popover.contentViewController?.preferredContentSize = Self.popoverSize
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             Self.hardenPopoverBackground(popover)
-            popoverHost?.updateSize()
             addEventMonitor()
         }
     }
@@ -259,39 +252,5 @@ final class StatusItemController: NSObject {
                 .font: NSFont.menuBarFont(ofSize: 0),
             ]))
         }
-    }
-}
-
-@MainActor
-private protocol PopoverSizing: AnyObject {
-    func updateSize()
-}
-
-/// Sizes the popover from SwiftUI’s unconstrained ideal height.
-/// `view.fittingSize` is wrong here: once the popover is short, fittingSize reports that short frame.
-private final class FittingHostingController<Content: View>: NSHostingController<Content>, PopoverSizing {
-    weak var popover: NSPopover?
-    private var lastHeight: CGFloat = 0
-
-    override func viewDidAppear() {
-        super.viewDidAppear()
-        updateSize()
-        DispatchQueue.main.async { [weak self] in self?.updateSize() }
-    }
-
-    override func viewDidLayout() {
-        super.viewDidLayout()
-        updateSize()
-    }
-
-    func updateSize() {
-        let fitted = sizeThatFits(in: CGSize(width: 360, height: 10_000))
-        guard fitted.height > 80 else { return }
-        let height = min(fitted.height.rounded(.up), 720)
-        guard abs(height - lastHeight) > 2 else { return }
-        lastHeight = height
-        let size = NSSize(width: 360, height: height)
-        preferredContentSize = size
-        popover?.contentSize = size
     }
 }
