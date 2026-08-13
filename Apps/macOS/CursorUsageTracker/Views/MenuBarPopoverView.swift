@@ -66,7 +66,7 @@ struct MenuBarPopoverView: View {
                 .padding(.vertical, 10)
         }
         .frame(width: store.preferences.interfaceSize.popoverWidth)
-        .fixedSize(horizontal: true, vertical: true)
+        .fixedSize(horizontal: false, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor))
         .appThemed(store.preferences)
         .onAppear {
@@ -90,7 +90,7 @@ struct MenuBarPopoverView: View {
                     }
                 } label: {
                     Text(account.connection.displayLabel)
-                        .font(.caption.weight(.semibold))
+                        .appFont(.caption, weight: .semibold)
                         .lineLimit(1)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
@@ -112,18 +112,18 @@ struct MenuBarPopoverView: View {
             AppLogo(size: 34)
             VStack(alignment: .leading, spacing: 2) {
                 Text(snapshot?.planDisplayName ?? "Cursor")
-                    .font(.headline)
+                    .appFont(.headline)
                 if let fetched = snapshot?.fetchedAt {
                     Text("Updated \(fetched.formatted(date: .omitted, time: .shortened))")
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                 } else if let email = displayed?.connection.email {
                     Text(email)
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                 } else {
                     Text("Subscription")
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -152,9 +152,9 @@ struct MenuBarPopoverView: View {
     private var signInPrompt: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Not signed in", systemImage: "person.crop.circle.badge.exclamationmark")
-                .font(.subheadline.weight(.semibold))
+                .appFont(.subheadline, weight: .semibold)
             Text("Open Settings → Authentication to connect with Cursor, local session, or a pasted token.")
-                .font(.caption)
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
             SettingsOpenLink {
                 Label("Open Settings", systemImage: "gearshape")
@@ -181,7 +181,7 @@ struct MenuBarPopoverView: View {
                         AppActivation.openSettingsViaLinkFallback()
                     } label: {
                         Text("\(hit.channel.title) \(hit.current)  ·  alert \(hit.threshold)")
-                            .font(.caption)
+                            .appFont(.caption)
                             .foregroundStyle(theme.danger)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -193,7 +193,7 @@ struct MenuBarPopoverView: View {
                         store.snoozeMenuBarWarning(hit.channel)
                     } label: {
                         Image(systemName: "xmark")
-                            .font(.caption2.weight(.bold))
+                            .appFont(.caption2, weight: .bold)
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
@@ -206,7 +206,7 @@ struct MenuBarPopoverView: View {
                 Button("Clear") {
                     store.snoozeAllMenuBarWarnings()
                 }
-                .font(.caption2.weight(.semibold))
+                .appFont(.caption2, weight: .semibold)
                 .foregroundStyle(.secondary)
                 .buttonStyle(.plain)
                 .help("Hide until usage drops back under the alert. Does not change the threshold.")
@@ -229,7 +229,7 @@ struct MenuBarPopoverView: View {
 
             if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
                 Text("Included usage")
-                    .font(.caption.weight(.semibold))
+                    .appFont(.caption, weight: .semibold)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
@@ -265,9 +265,9 @@ struct MenuBarPopoverView: View {
                         Label {
                             HStack {
                                 Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
-                                    .font(.subheadline.monospacedDigit().weight(.semibold))
+                                    .appFont(.subheadline, weight: .semibold, mono: true)
                                 Text("base")
-                                    .font(.caption)
+                                    .appFont(.caption)
                                     .foregroundStyle(.secondary)
                             }
                         } icon: {
@@ -276,7 +276,7 @@ struct MenuBarPopoverView: View {
                         }
                         if t.bonus, let bonus = snapshot.bonusCents, bonus > 0 {
                             Label("+\(MenuBarFormatter.usd(bonus)) bonus", systemImage: "gift.fill")
-                                .font(.caption)
+                                .appFont(.caption)
                                 .foregroundStyle(theme.spend)
                         }
                     }
@@ -287,7 +287,7 @@ struct MenuBarPopoverView: View {
                                 Label("On-demand", systemImage: "creditcard.fill")
                                 Spacer()
                                 Text(snapshot.onDemandEnabled ? "Enabled" : "Disabled")
-                                    .font(.caption.weight(.bold))
+                                    .appFont(.caption, weight: .bold)
                                     .padding(.horizontal, 8)
                                     .padding(.vertical, 3)
                                     .background(
@@ -297,7 +297,7 @@ struct MenuBarPopoverView: View {
                                     )
                                     .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
                             }
-                            .font(.subheadline)
+                            .appFont(.subheadline)
 
                             if let used = snapshot.onDemandUsedCents {
                                 HStack {
@@ -305,9 +305,9 @@ struct MenuBarPopoverView: View {
                                         .foregroundStyle(.secondary)
                                     Spacer()
                                     Text(MenuBarFormatter.usd(used))
-                                        .font(.subheadline.monospacedDigit().weight(.semibold))
+                                        .appFont(.subheadline, weight: .semibold, mono: true)
                                 }
-                                .font(.caption)
+                                .appFont(.caption)
                             }
 
                             HStack {
@@ -315,9 +315,9 @@ struct MenuBarPopoverView: View {
                                     .foregroundStyle(.secondary)
                                 Spacer()
                                 Text(onDemandLimitLabel(snapshot))
-                                    .font(.caption.monospacedDigit().weight(.semibold))
+                                    .appFont(.caption, weight: .semibold, mono: true)
                             }
-                            .font(.caption)
+                            .appFont(.caption)
                         }
                     }
 
@@ -326,7 +326,7 @@ struct MenuBarPopoverView: View {
                             "Ends \(end.formatted(date: .abbreviated, time: .shortened)) · \(days)d left",
                             systemImage: "calendar"
                         )
-                        .font(.caption)
+                        .appFont(.caption)
                         .foregroundStyle(.secondary)
                     }
                 }
@@ -344,7 +344,7 @@ struct MenuBarPopoverView: View {
 
             if let error = displayed?.lastError ?? store.lastError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
+                    .appFont(.caption)
                     .foregroundStyle(.orange)
             }
         }
@@ -366,13 +366,21 @@ struct MenuBarPopoverView: View {
                 Label("Settings", systemImage: "gearshape")
             }
             .keyboardShortcut(",", modifiers: .command)
-            Spacer()
+            Spacer(minLength: 8)
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {
                 Label("Quit", systemImage: "xmark.circle")
             }
             .keyboardShortcut("q", modifiers: .command)
+        }
+        .overlay {
+            Text("Made by \(AppAbout.copyrightHolder)")
+                .appFont(.caption2)
+                .foregroundStyle(.tertiary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .allowsHitTesting(false)
         }
         .labelStyle(.titleAndIcon)
         .controlSize(.small)
@@ -394,16 +402,16 @@ private struct PopoverPoolRow: View {
                     .foregroundStyle(tint)
                     .frame(width: 16)
                 Text(title)
-                    .font(.subheadline.weight(.semibold))
+                    .appFont(.subheadline, weight: .semibold)
                 Spacer()
                 Text("\(Int(percent.rounded()))%")
-                    .font(.subheadline.monospacedDigit().weight(.bold))
+                    .appFont(.subheadline, weight: .bold, mono: true)
                     .foregroundStyle(tint)
             }
             UsageProgressBar(percent: percent, tint: tint, pattern: .forPool(title))
             if let caption {
                 Text(caption)
-                    .font(.caption2)
+                    .appFont(.caption2)
                     .foregroundStyle(.secondary)
                     .padding(.leading, 24)
             }
@@ -427,33 +435,33 @@ private struct PopoverModelsThisPeriodCard: View {
 
         VStack(alignment: .leading, spacing: 8) {
             Label("Models this period", systemImage: "list.bullet.rectangle")
-                .font(.caption.weight(.semibold))
+                .appFont(.caption, weight: .semibold)
                 .foregroundStyle(.secondary)
 
             if rows.isEmpty {
                 Text("No model spend yet this period.")
-                    .font(.caption)
+                    .appFont(.caption)
                     .foregroundStyle(.secondary)
             } else {
                 VStack(spacing: 6) {
                     ForEach(rows) { row in
                         HStack(spacing: 8) {
                             Image(systemName: "chevron.right.circle.fill")
-                                .font(.caption)
+                                .appFont(.caption)
                                 .foregroundStyle(theme.otherModels.opacity(0.75))
                             Text(row.model)
-                                .font(.caption)
+                                .appFont(.caption)
                                 .lineLimit(1)
                                 .truncationMode(.middle)
                             Spacer(minLength: 8)
                             Text(MenuBarFormatter.usd(row.totalCents))
-                                .font(.caption.monospacedDigit().weight(.medium))
+                                .appFont(.caption, weight: .medium, mono: true)
                         }
                     }
 
                     if overflow > 0 {
                         Text("+\(overflow) more in Settings → Included")
-                            .font(.caption2)
+                            .appFont(.caption2)
                             .foregroundStyle(.secondary)
                     }
 
@@ -461,10 +469,10 @@ private struct PopoverModelsThisPeriodCard: View {
                         Divider()
                         HStack {
                             Text("Total")
-                                .font(.caption.weight(.semibold))
+                                .appFont(.caption, weight: .semibold)
                             Spacer()
                             Text(MenuBarFormatter.usd(total))
-                                .font(.caption.monospacedDigit().weight(.bold))
+                                .appFont(.caption, weight: .bold, mono: true)
                         }
                     }
                 }

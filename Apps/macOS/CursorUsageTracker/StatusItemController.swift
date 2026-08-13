@@ -31,9 +31,12 @@ final class StatusItemController: NSObject {
     private func syncPopoverSize(_ popover: NSPopover?, hosting: NSHostingController<AnyView>?) {
         guard let hosting else { return }
         let width = popoverWidth
-        let fitted = hosting.sizeThatFits(in: CGSize(width: width, height: 10_000))
-        // A little extra height so the arrow/chrome doesn’t eat the header.
-        let height = min(max(fitted.height.rounded(.up) + 8, 160), 720)
+        hosting.view.layoutSubtreeIfNeeded()
+        let fitted = hosting.sizeThatFits(
+            in: CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
+        )
+        let screenCap = (NSScreen.main?.visibleFrame.height ?? 900) * 0.88
+        let height = min(max(fitted.height.rounded(.up) + 12, 160), screenCap)
         let size = NSSize(width: width, height: height)
         hosting.preferredContentSize = size
         popover?.contentSize = size
@@ -71,7 +74,7 @@ final class StatusItemController: NSObject {
                 self?.refreshTitles()
                 self?.applyAllPopoverAppearances(prefs)
                 WindowAppearanceApplier.apply(prefs.appearanceMode.nsAppearance)
-                self?.syncShownPopovers()
+                self?.syncAllPopoverSizes()
             }
             .store(in: &cancellables)
         store.$connections
@@ -154,7 +157,7 @@ final class StatusItemController: NSObject {
                     .environmentObject(store)
             )
         )
-        hosting.sizingOptions = .preferredContentSize
+        hosting.sizingOptions = [.intrinsicContentSize]
         hosting.view.wantsLayer = true
 
         let pop = NSPopover()
@@ -204,6 +207,15 @@ final class StatusItemController: NSObject {
         }
     }
 
+    private func syncAllPopoverSizes() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            for slot in self.slots.values {
+                self.syncPopoverSize(slot.popover, hosting: slot.hosting)
+            }
+        }
+    }
+
     private func syncShownPopovers() {
         for slot in slots.values where slot.popover.isShown {
             syncPopoverSize(slot.popover, hosting: slot.hosting)
@@ -239,6 +251,9 @@ final class StatusItemController: NSObject {
         Self.hardenPopoverBackground(slot.popover)
         syncPopoverSize(slot.popover, hosting: slot.hosting)
         DispatchQueue.main.async { [weak self] in
+            self?.syncPopoverSize(slot.popover, hosting: slot.hosting)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { [weak self] in
             self?.syncPopoverSize(slot.popover, hosting: slot.hosting)
         }
         addEventMonitor()
