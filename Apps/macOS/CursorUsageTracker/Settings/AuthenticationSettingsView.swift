@@ -5,17 +5,20 @@ import CursorUsageCore
 struct AuthenticationSettingsView: View {
     @EnvironmentObject private var store: UsageStore
     @State private var showLogin = false
+    @State private var reauthAccountID: UUID?
     @State private var pasteToken = ""
     @State private var statusMessage: String?
+    @State private var editingLabelID: UUID?
+    @State private var draftLabel = ""
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 SettingsPanel(
-                    title: "Session",
+                    title: "Active session",
                     systemImage: "person.badge.shield.checkmark",
                     subtitle: store.isAuthenticated
-                        ? "Connected — re-auth if usage stops updating."
+                        ? "Tokens stay in Keychain. Add another account without signing this one out."
                         : "Sign in once; tokens stay in Keychain on this Mac.",
                     compact: true
                 ) {
@@ -49,6 +52,7 @@ struct AuthenticationSettingsView: View {
                         spacing: 8
                     ) {
                         authButton("Sign in with Cursor", systemImage: "globe") {
+                            reauthAccountID = nil
                             showLogin = true
                         }
                         authButton("Connect from Cursor IDE", systemImage: "laptopcomputer") {
@@ -65,6 +69,7 @@ struct AuthenticationSettingsView: View {
                             }
                         }
                         authButton("Re-authenticate", systemImage: "arrow.triangle.2.circlepath") {
+                            reauthAccountID = store.activeAccountID
                             showLogin = true
                         }
                         .disabled(!store.isAuthenticated)
@@ -75,7 +80,7 @@ struct AuthenticationSettingsView: View {
                         .disabled(!store.isAuthenticated)
                     }
 
-                    Text("Prefers Cursor IDE (state.vscdb). Agent keychain can be a different account.")
+                    Text("Prefers Cursor IDE (state.vscdb). Agent keychain can be a different account. Sign in again to add a second session.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -83,7 +88,7 @@ struct AuthenticationSettingsView: View {
                 SettingsPanel(
                     title: "Paste token",
                     systemImage: "key",
-                    subtitle: "Escape hatch if WebView or IDE connect fails.",
+                    subtitle: "Escape hatch if WebView or IDE connect fails. Saves as a new account unless the email already exists.",
                     compact: true
                 ) {
                     HStack(spacing: 8) {
@@ -107,32 +112,45 @@ struct AuthenticationSettingsView: View {
                     }
                 }
 
-                HStack(alignment: .top, spacing: 10) {
-                    SettingsPanel(
-                        title: "Team / Enterprise",
-                        systemImage: "building.2",
-                        subtitle: "Not available yet.",
-                        compact: true
-                    ) {
-                        Text(TeamAdminAPIConnectorStub.statusMessage)
-                            .font(.caption2)
+                SettingsPanel(
+                    title: "Accounts",
+                    systemImage: "person.2",
+                    subtitle: store.connections.isEmpty
+                        ? "No saved sessions yet."
+                        : "\(store.connections.count) saved. Active drives the widget and the default menu bar.",
+                    compact: true
+                ) {
+                    if store.connections.isEmpty {
+                        Text("Add an account with Sign in, Connect from Cursor IDE, or paste a token.")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(store.accounts) { account in
+                                accountRow(account)
+                            }
+                        }
+                        HStack {
+                            Spacer()
+                            Button("Sign out all", role: .destructive) {
+                                store.signOutAll()
+                                statusMessage = "Signed out all accounts."
+                            }
+                            .controlSize(.small)
+                        }
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
 
-                    SettingsPanel(
-                        title: "Multiple accounts",
-                        systemImage: "person.2",
-                        subtitle: "One session at a time.",
-                        compact: true
-                    ) {
-                        Text("Sign out and re-auth to switch accounts. Side-by-side multi-account is planned.")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                SettingsPanel(
+                    title: "Team / Enterprise",
+                    systemImage: "building.2",
+                    subtitle: "Not available yet.",
+                    compact: true
+                ) {
+                    Text(TeamAdminAPIConnectorStub.statusMessage)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .padding(12)
@@ -141,7 +159,7 @@ struct AuthenticationSettingsView: View {
         .sheet(isPresented: $showLogin) {
             VStack(spacing: 0) {
                 HStack {
-                    Text("Sign in to Cursor")
+                    Text(reauthAccountID == nil ? "Sign in to Cursor" : "Re-authenticate")
                         .font(.headline)
                     Spacer()
                     Button("Cancel") { showLogin = false }
@@ -151,10 +169,12 @@ struct AuthenticationSettingsView: View {
                 Divider()
                 LoginWebView { token in
                     showLogin = false
+                    let replacing = reauthAccountID
+                    reauthAccountID = nil
                     Task {
                         do {
-                            try await store.saveSessionToken(token)
-                            statusMessage = "Signed in."
+                            try await store.saveSessionToken(token, replacing: replacing)
+                            statusMessage = replacing == nil ? "Signed in." : "Session updated."
                         } catch {
                             statusMessage = "Login failed: \(error.localizedDescription)"
                         }
@@ -165,6 +185,67 @@ struct AuthenticationSettingsView: View {
             }
             .frame(width: 720, height: 640)
         }
+    }
+
+    private func accountRow(_ account: AccountRuntime) -> some View {
+        let isActive = account.id == store.activeAccountID
+        return HStack(spacing: 10) {
+            Circle()
+                .fill(account.isAuthenticated ? Color.green : Color.orange.opacity(0.85))
+                .frame(width: 7, height: 7)
+            VStack(alignment: .leading, spacing: 2) {
+                if editingLabelID == account.id {
+                    TextField("Label", text: $draftLabel)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(maxWidth: 180)
+                        .onSubmit {
+                            store.renameAccount(id: account.id, label: draftLabel)
+                            editingLabelID = nil
+                        }
+                } else {
+                    Text(account.connection.displayLabel)
+                        .font(.caption.weight(.semibold))
+                }
+                if let email = account.connection.email {
+                    Text(email)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+            }
+            if isActive {
+                Text("Active")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.accentColor.opacity(0.15)))
+                    .foregroundStyle(Color.accentColor)
+            }
+            Spacer(minLength: 0)
+            if !isActive {
+                Button("Set active") {
+                    store.setActive(id: account.id)
+                }
+                .controlSize(.small)
+            }
+            Button("Rename") {
+                editingLabelID = account.id
+                draftLabel = account.connection.label.isEmpty
+                    ? account.connection.displayLabel
+                    : account.connection.label
+            }
+            .controlSize(.small)
+            Button("Sign out", role: .destructive) {
+                store.signOut(id: account.id)
+                statusMessage = "Signed out \(account.connection.displayLabel)."
+            }
+            .controlSize(.small)
+        }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.primary.opacity(isActive ? 0.06 : 0.03))
+        )
     }
 
     private func authButton(

@@ -52,6 +52,24 @@ struct LayoutSettingsView: View {
                             .labelsHidden()
                         }
 
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Accounts")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Picker("Accounts", selection: accountModeBinding) {
+                                Text("Active").tag(DisplayPreferences.MenuBarAccountMode.activeOnly)
+                                Text("Combined").tag(DisplayPreferences.MenuBarAccountMode.combined)
+                                Text("Separate").tag(DisplayPreferences.MenuBarAccountMode.separateItems)
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+                        }
+
+                        Text(accountModeHelp)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
                         Text(labelStyleHelp)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -139,6 +157,17 @@ struct LayoutSettingsView: View {
         }
     }
 
+    private var accountModeHelp: String {
+        switch store.preferences.menuBarAccountMode {
+        case .activeOnly:
+            return "One account in the menu bar. Switch in Authentication or with popover tabs."
+        case .combined:
+            return "One item stacks a headline % for each saved account, e.g. work 12% · personal 88%."
+        case .separateItems:
+            return "One menu bar extra per account, each with its own popover."
+        }
+    }
+
     private var showMenuBarBinding: Binding<Bool> {
         Binding(
             get: { store.preferences.showInMenuBar },
@@ -167,6 +196,17 @@ struct LayoutSettingsView: View {
             set: { value in
                 var prefs = store.preferences
                 prefs.menuBarLabelStyle = value
+                store.applyPreferences(prefs)
+            }
+        )
+    }
+
+    private var accountModeBinding: Binding<DisplayPreferences.MenuBarAccountMode> {
+        Binding(
+            get: { store.preferences.menuBarAccountMode },
+            set: { value in
+                var prefs = store.preferences
+                prefs.menuBarAccountMode = value
                 store.applyPreferences(prefs)
             }
         )

@@ -42,40 +42,74 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
 public enum WidgetSnapshotStore {
     public static let appGroupID = "group.com.cursorusagetracker.shared"
     public static let filename = "widget-snapshot.json"
+    private static let defaultsKey = "widgetSnapshotJSON"
 
     public static var containerURL: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
     }
 
+    /// Sandboxed widgets can read Library/ inside the group; a file at the container root often fails.
+    private static var groupSupportFileURL: URL? {
+        containerURL?
+            .appendingPathComponent("Library", isDirectory: true)
+            .appendingPathComponent("Application Support", isDirectory: true)
+            .appendingPathComponent("CursorUsageTracker", isDirectory: true)
+            .appendingPathComponent(filename)
+    }
+
+    private static var groupRootFileURL: URL? {
+        containerURL?.appendingPathComponent(filename)
+    }
+
+    private static var fallbackFileURL: URL? {
+        FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
+            .appendingPathComponent("CursorUsageTracker", isDirectory: true)
+            .appendingPathComponent(filename)
+    }
+
     public static func write(_ snapshot: WidgetSnapshot) throws {
-        guard let dir = containerURL else {
-            // Fall back to Application Support so macOS-only builds still work before App Group is provisioned.
-            let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-                .appendingPathComponent("CursorUsageTracker", isDirectory: true)
-            try FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
-            let url = support.appendingPathComponent(filename)
-            let data = try JSONEncoder().encode(snapshot)
-            try data.write(to: url, options: .atomic)
-            return
-        }
-        let url = dir.appendingPathComponent(filename)
         let data = try JSONEncoder().encode(snapshot)
-        try data.write(to: url, options: .atomic)
+
+        if let suite = UserDefaults(suiteName: appGroupID) {
+            suite.set(data, forKey: defaultsKey)
+            suite.synchronize()
+        }
+
+        var lastError: Error?
+        var wrote = false
+        for url in [groupSupportFileURL, groupRootFileURL, fallbackFileURL].compactMap({ $0 }) {
+            do {
+                try FileManager.default.createDirectory(
+                    at: url.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
+                try data.write(to: url, options: .atomic)
+                wrote = true
+            } catch {
+                lastError = error
+            }
+        }
+        if !wrote, let lastError {
+            throw lastError
+        }
     }
 
     public static func read() -> WidgetSnapshot? {
-        let urls: [URL] = [
-            containerURL?.appendingPathComponent(filename),
-            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-                .appendingPathComponent("CursorUsageTracker/\(filename)"),
-        ].compactMap { $0 }
+        if let suite = UserDefaults(suiteName: appGroupID),
+           let data = suite.data(forKey: defaultsKey),
+           let snap = decode(data)
+        {
+            return snap
+        }
 
-        for url in urls {
-            guard let data = try? Data(contentsOf: url),
-                  let snap = try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
-            else { continue }
+        for url in [groupSupportFileURL, groupRootFileURL, fallbackFileURL].compactMap({ $0 }) {
+            guard let data = try? Data(contentsOf: url), let snap = decode(data) else { continue }
             return snap
         }
         return nil
+    }
+
+    private static func decode(_ data: Data) -> WidgetSnapshot? {
+        try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
     }
 }

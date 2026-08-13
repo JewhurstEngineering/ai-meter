@@ -5,27 +5,53 @@ import CursorUsageCore
 struct MenuBarPopoverView: View {
     @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
+    /// When set (separate menu bar items), lock this popover to one account — no tabs.
+    var focusedAccountID: UUID? = nil
+    @State private var selectedTab: UUID?
+
+    private var displayed: AccountRuntime? {
+        if let focusedAccountID {
+            return store.account(focusedAccountID)
+        }
+        if let selectedTab, let account = store.account(selectedTab) {
+            return account
+        }
+        return store.activeAccount
+    }
+
+    private var showAccountTabs: Bool {
+        focusedAccountID == nil
+            && store.connections.count > 1
+            && store.preferences.menuBarAccountMode != .separateItems
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            if showAccountTabs {
+                accountTabs
+                    .padding(.horizontal, 14)
+                    .padding(.top, 10)
+                    .padding(.bottom, 4)
+            }
+
             header
                 .padding(.horizontal, 14)
-                .padding(.top, 12)
+                .padding(.top, showAccountTabs ? 4 : 12)
                 .padding(.bottom, 8)
 
             Divider()
 
             Group {
-                if !store.isAuthenticated {
+                if displayed?.isAuthenticated != true {
                     signInPrompt
-                } else if let snapshot = store.snapshot {
+                } else if let snapshot = displayed?.snapshot {
                     usageBody(snapshot)
-                } else if store.isRefreshing {
+                } else if displayed?.isRefreshing == true || store.isRefreshing {
                     ProgressView("Loading usage…")
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.vertical, 28)
                 } else {
-                    Text(store.lastError ?? "No usage data yet.")
+                    Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
                         .foregroundStyle(.secondary)
                         .padding(14)
                 }
@@ -41,20 +67,60 @@ struct MenuBarPopoverView: View {
         }
         .frame(width: 360)
         .fixedSize(horizontal: true, vertical: true)
-        // Flatten to an opaque bitmap so popover vibrancy cannot bleed editor content through.
         .background(Color(nsColor: .windowBackgroundColor))
         .compositingGroup()
         .appThemed(store.preferences)
+        .onAppear {
+            selectedTab = focusedAccountID ?? store.activeAccountID
+        }
+        .onChange(of: store.activeAccountID) { _, newValue in
+            if focusedAccountID == nil, selectedTab == nil {
+                selectedTab = newValue
+            }
+        }
+    }
+
+    private var accountTabs: some View {
+        HStack(spacing: 6) {
+            ForEach(store.accounts) { account in
+                let selected = (selectedTab ?? store.activeAccountID) == account.id
+                Button {
+                    selectedTab = account.id
+                    if store.preferences.menuBarAccountMode == .activeOnly {
+                        store.setActive(id: account.id)
+                    }
+                } label: {
+                    Text(account.connection.displayLabel)
+                        .font(.caption.weight(.semibold))
+                        .lineLimit(1)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule()
+                                .fill(selected ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.06))
+                        )
+                        .foregroundStyle(selected ? Color.accentColor : Color.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer(minLength: 0)
+        }
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 8) {
+        let snapshot = displayed?.snapshot
+        let presentation = displayed.map { store.menuBarPresentation(for: $0.id) } ?? store.menuBarPresentation
+        return HStack(alignment: .center, spacing: 8) {
             AppLogo(size: 34)
             VStack(alignment: .leading, spacing: 2) {
-                Text(store.snapshot?.planDisplayName ?? "Cursor")
+                Text(snapshot?.planDisplayName ?? "Cursor")
                     .font(.headline)
-                if let fetched = store.snapshot?.fetchedAt {
+                if let fetched = snapshot?.fetchedAt {
                     Text("Updated \(fetched.formatted(date: .omitted, time: .shortened))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if let email = displayed?.connection.email {
+                    Text(email)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {
@@ -67,19 +133,25 @@ struct MenuBarPopoverView: View {
 
             Spacer(minLength: 6)
 
-            if store.menuBarPresentation.showWarningDot {
-                headerAlarms(store.menuBarPresentation.warningHits)
+            if presentation.showWarningDot {
+                headerAlarms(presentation.warningHits)
                     .layoutPriority(1)
             }
 
             Button {
-                Task { await store.refresh() }
+                Task {
+                    if let id = displayed?.id {
+                        await store.refreshAccount(id)
+                    } else {
+                        await store.refresh()
+                    }
+                }
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
-            .disabled(store.isRefreshing || !store.isAuthenticated)
+            .disabled(displayed?.isRefreshing == true || displayed?.isAuthenticated != true)
             .help("Refresh")
         }
     }
@@ -278,7 +350,7 @@ struct MenuBarPopoverView: View {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
-            if let error = store.lastError {
+            if let error = displayed?.lastError ?? store.lastError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .font(.caption)
                     .foregroundStyle(.orange)

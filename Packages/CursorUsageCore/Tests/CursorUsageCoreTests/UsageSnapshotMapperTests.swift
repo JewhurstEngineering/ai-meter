@@ -89,6 +89,87 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertTrue(MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true).showWarningDot)
     }
 
+    func testMenuBarFormatterCombinedPrefixesLabels() {
+        let work = UsageSnapshot(
+            membershipType: "pro",
+            planDisplayName: "Pro",
+            cursorModelsPercentUsed: 12,
+            otherModelsPercentUsed: 12
+        )
+        let personal = UsageSnapshot(
+            membershipType: "ultra",
+            planDisplayName: "Ultra",
+            cursorModelsPercentUsed: 4,
+            otherModelsPercentUsed: 88
+        )
+        var prefs = DisplayPreferences.default
+        prefs.menuBarAccountMode = .combined
+        prefs.menuBar.otherModelsPercent = true
+
+        let presentation = MenuBarFormatter.formatCombined(
+            entries: [
+                (label: "work", snapshot: work, authenticated: true),
+                (label: "personal", snapshot: personal, authenticated: true),
+            ],
+            preferences: prefs
+        )
+        XCTAssertEqual(presentation.segments.map(\.text), ["work 12%", "personal 88%"])
+        XCTAssertFalse(presentation.showWarningDot)
+
+        prefs.menuBarWarnings.otherModelsPercent = 80
+        let warned = MenuBarFormatter.formatCombined(
+            entries: [
+                (label: "work", snapshot: work, authenticated: true),
+                (label: "personal", snapshot: personal, authenticated: true),
+            ],
+            preferences: prefs
+        )
+        XCTAssertTrue(warned.showWarningDot)
+        XCTAssertTrue(warned.warningHits.contains(where: { $0.channel == .otherModels }))
+    }
+
+    func testAccountLegacyMigrationPlansUUIDConnection() {
+        let empty = AccountRegistry.empty
+        XCTAssertNil(AccountRegistryStore.planLegacyMigration(existing: empty, legacyTokenPresent: false))
+
+        let planned = AccountRegistryStore.planLegacyMigration(existing: empty, legacyTokenPresent: true)
+        XCTAssertEqual(planned?.connections.count, 1)
+        XCTAssertEqual(planned?.activeAccountID, planned?.connections.first?.id)
+
+        var filled = AccountRegistry.empty
+        filled.connections = [AccountConnection(email: "a@b.com")]
+        filled.normalizeActive()
+        XCTAssertNil(AccountRegistryStore.planLegacyMigration(existing: filled, legacyTokenPresent: true))
+    }
+
+    func testAccountDisplayLabelUsesEmailLocalPart() {
+        let unnamed = AccountConnection(email: "james@shift.example")
+        XCTAssertEqual(unnamed.displayLabel, "james")
+        XCTAssertEqual(unnamed.menuBarLabel, "james")
+        var labeled = unnamed
+        labeled.label = "Work Ultra"
+        XCTAssertEqual(labeled.displayLabel, "Work Ultra")
+        XCTAssertEqual(labeled.menuBarLabel, "Work Ultra")
+    }
+
+    func testWidgetSnapshotRoundTrip() throws {
+        let snap = UsageSnapshot(
+            membershipType: "ultra",
+            planDisplayName: "Ultra",
+            cursorModelsPercentUsed: 3,
+            otherModelsPercentUsed: 37,
+            totalPercentUsed: 10,
+            planUsedCents: 24041,
+            planLimitCents: 40000
+        )
+        let widget = WidgetSnapshot(from: snap, warnings: .default)
+        let data = try JSONEncoder().encode(widget)
+        let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: data)
+        XCTAssertEqual(decoded.planDisplayName, "Ultra")
+        XCTAssertEqual(decoded.otherModelsPercentUsed!, 37, accuracy: 0.01)
+        XCTAssertEqual(decoded.planUsedCents, 24041)
+    }
+
     func testSessionCookieBuilder() throws {
         // minimal fake JWT with sub user_01ABC (header.payload.sig)
         let payload = Data(#"{"sub":"google-oauth2|user_01ABC"}"#.utf8).base64EncodedString()

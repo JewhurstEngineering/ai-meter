@@ -6,17 +6,28 @@ import CursorUsageCore
 /// AppKit status item — SwiftUI `MenuBarExtra` labels get clipped/`…` truncated.
 @MainActor
 final class StatusItemController: NSObject {
-    private var statusItem: NSStatusItem?
-    private var popover: NSPopover?
-    private var popoverHosting: NSHostingController<AnyView>?
+    private enum SlotKey: Hashable {
+        case single
+        case account(UUID)
+    }
+
+    private struct Slot {
+        var item: NSStatusItem
+        var popover: NSPopover
+        var hosting: NSHostingController<AnyView>
+        var accountID: UUID?
+    }
+
+    private var slots: [SlotKey: Slot] = [:]
     private var store: UsageStore?
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
+    private var lastLayoutSignature = ""
 
     private static let popoverWidth: CGFloat = 360
 
-    private func syncPopoverSize() {
-        guard let hosting = popoverHosting else { return }
+    private func syncPopoverSize(_ popover: NSPopover?, hosting: NSHostingController<AnyView>?) {
+        guard let hosting else { return }
         let fitted = hosting.sizeThatFits(in: CGSize(width: Self.popoverWidth, height: 10_000))
         let height = min(max(fitted.height.rounded(.up), 160), 640)
         let size = NSSize(width: Self.popoverWidth, height: height)
@@ -26,9 +37,105 @@ final class StatusItemController: NSObject {
 
     func start(store: UsageStore) {
         self.store = store
+        rebuildSlotsIfNeeded()
 
+        store.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.rebuildSlotsIfNeeded()
+                    self?.refreshTitles()
+                }
+            }
+            .store(in: &cancellables)
+
+        store.$runtimes
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.refreshTitles()
+                self?.syncShownPopovers()
+            }
+            .store(in: &cancellables)
+        store.$activeAccountID
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.refreshTitles() }
+            .store(in: &cancellables)
+        store.$preferences
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] prefs in
+                self?.rebuildSlotsIfNeeded()
+                self?.refreshTitles()
+                self?.applyAllPopoverAppearances(prefs)
+                WindowAppearanceApplier.apply(prefs.appearanceMode.nsAppearance)
+                self?.syncShownPopovers()
+            }
+            .store(in: &cancellables)
+        store.$connections
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.rebuildSlotsIfNeeded()
+                self?.refreshTitles()
+            }
+            .store(in: &cancellables)
+
+        SystemAppearanceMonitor.shared.$isDark
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, let prefs = self.store?.preferences else { return }
+                self.applyAllPopoverAppearances(prefs)
+            }
+            .store(in: &cancellables)
+
+        refreshTitles()
+        Task { await store.bootstrap() }
+    }
+
+    private func layoutSignature(store: UsageStore) -> String {
+        let ids = store.connections.map(\.id.uuidString).joined(separator: ",")
+        return "\(store.preferences.menuBarAccountMode.rawValue)|\(ids)"
+    }
+
+    private func rebuildSlotsIfNeeded() {
+        guard let store else { return }
+        let signature = layoutSignature(store: store)
+        guard signature != lastLayoutSignature else { return }
+        lastLayoutSignature = signature
+
+        let mode = store.preferences.menuBarAccountMode
+        let desired: [SlotKey]
+        switch mode {
+        case .activeOnly, .combined:
+            desired = [.single]
+        case .separateItems:
+            if store.connections.isEmpty {
+                desired = [.single]
+            } else {
+                desired = store.connections.map { .account($0.id) }
+            }
+        }
+
+        let desiredSet = Set(desired)
+        for (key, slot) in slots where !desiredSet.contains(key) {
+            slot.popover.performClose(nil)
+            NSStatusBar.system.removeStatusItem(slot.item)
+            slots[key] = nil
+        }
+
+        for key in desired where slots[key] == nil {
+            let accountID: UUID?
+            switch key {
+            case .single: accountID = nil
+            case .account(let id): accountID = id
+            }
+            slots[key] = makeSlot(store: store, accountID: accountID)
+        }
+
+        applyAllPopoverAppearances(store.preferences)
+        refreshTitles()
+    }
+
+    private func makeSlot(store: UsageStore, accountID: UUID?) -> Slot {
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        statusItem = item
         if let button = item.button {
             button.imagePosition = .imageLeft
             button.imageScaling = .scaleProportionallyDown
@@ -39,7 +146,7 @@ final class StatusItemController: NSObject {
 
         let hosting = NSHostingController(
             rootView: AnyView(
-                MenuBarPopoverView()
+                MenuBarPopoverView(focusedAccountID: accountID)
                     .environmentObject(store)
             )
         )
@@ -50,59 +157,21 @@ final class StatusItemController: NSObject {
         pop.behavior = .transient
         pop.animates = true
         pop.contentViewController = hosting
-        popover = pop
-        popoverHosting = hosting
-        syncPopoverSize()
+        syncPopoverSize(pop, hosting: hosting)
 
-        store.objectWillChange
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                DispatchQueue.main.async { self?.refreshTitle() }
-            }
-            .store(in: &cancellables)
-
-        store.$snapshot
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.refreshTitle()
-                if self?.popover?.isShown == true {
-                    self?.syncPopoverSize()
-                }
-            }
-            .store(in: &cancellables)
-        store.$preferences
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] prefs in
-                self?.refreshTitle()
-                self?.applyPopoverAppearance(prefs)
-                WindowAppearanceApplier.apply(prefs.appearanceMode.nsAppearance)
-                if self?.popover?.isShown == true {
-                    self?.syncPopoverSize()
-                }
-            }
-            .store(in: &cancellables)
-        store.$isAuthenticated
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.refreshTitle() }
-            .store(in: &cancellables)
-
-        SystemAppearanceMonitor.shared.$isDark
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self, let prefs = self.store?.preferences else { return }
-                self.applyPopoverAppearance(prefs)
-            }
-            .store(in: &cancellables)
-
-        refreshTitle()
-        applyPopoverAppearance(store.preferences)
-        Task { await store.bootstrap() }
+        return Slot(item: item, popover: pop, hosting: hosting, accountID: accountID)
     }
 
-    private func applyPopoverAppearance(_ prefs: DisplayPreferences) {
+    private func applyAllPopoverAppearances(_ prefs: DisplayPreferences) {
+        for slot in slots.values {
+            applyPopoverAppearance(slot.popover, prefs: prefs)
+        }
+    }
+
+    private func applyPopoverAppearance(_ popover: NSPopover, prefs: DisplayPreferences) {
         let appearance = prefs.appearanceMode.nsAppearance ?? NSApp.effectiveAppearance
-        popover?.appearance = appearance
-        if let view = popover?.contentViewController?.view {
+        popover.appearance = appearance
+        if let view = popover.contentViewController?.view {
             view.appearance = appearance
             appearance.performAsCurrentDrawingAppearance {
                 view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
@@ -110,38 +179,61 @@ final class StatusItemController: NSObject {
         }
     }
 
-    func refreshTitle() {
-        guard let store, let button = statusItem?.button else { return }
-        let presentation = store.menuBarPresentation
-        button.image = Self.menuBarLogo()
-        button.imagePosition = .imageLeft
-        button.attributedTitle = Self.makeAttributedTitle(
-            presentation: presentation,
-            showText: store.preferences.showInMenuBar
-        )
-        button.toolTip = presentation.accessibilityTitle
+    func refreshTitles() {
+        guard let store else { return }
+        for (key, slot) in slots {
+            guard let button = slot.item.button else { continue }
+            let presentation: MenuBarPresentation
+            switch key {
+            case .single:
+                presentation = store.menuBarPresentation
+            case .account(let id):
+                presentation = store.menuBarPresentation(for: id)
+            }
+            button.image = Self.menuBarLogo()
+            button.imagePosition = .imageLeft
+            button.attributedTitle = Self.makeAttributedTitle(
+                presentation: presentation,
+                showText: store.preferences.showInMenuBar
+            )
+            button.toolTip = presentation.accessibilityTitle
+        }
+    }
+
+    private func syncShownPopovers() {
+        for slot in slots.values where slot.popover.isShown {
+            syncPopoverSize(slot.popover, hosting: slot.hosting)
+        }
     }
 
     func closePopover() {
-        popover?.performClose(nil)
+        for slot in slots.values {
+            slot.popover.performClose(nil)
+        }
         removeEventMonitor()
     }
 
     @objc private func togglePopover(_ sender: Any?) {
-        guard let button = statusItem?.button, let popover else { return }
-        if popover.isShown {
+        guard let store else { return }
+        let button = sender as? NSStatusBarButton
+        let slot = slots.values.first { $0.item.button === button } ?? slots[.single]
+        guard let slot, let button = slot.item.button else { return }
+
+        if slot.popover.isShown {
             closePopover()
-        } else {
-            AppActivation.bringToFront()
-            if let store {
-                applyPopoverAppearance(store.preferences)
-            }
-            popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            Self.hardenPopoverBackground(popover)
-            syncPopoverSize()
-            DispatchQueue.main.async { [weak self] in self?.syncPopoverSize() }
-            addEventMonitor()
+            return
         }
+
+        closePopover()
+        AppActivation.bringToFront()
+        applyPopoverAppearance(slot.popover, prefs: store.preferences)
+        slot.popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        Self.hardenPopoverBackground(slot.popover)
+        syncPopoverSize(slot.popover, hosting: slot.hosting)
+        DispatchQueue.main.async { [weak self] in
+            self?.syncPopoverSize(slot.popover, hosting: slot.hosting)
+        }
+        addEventMonitor()
     }
 
     /// NSPopover wraps content in a vibrant effect view; force an opaque material so dark apps don't show through.

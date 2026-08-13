@@ -50,6 +50,63 @@ public enum MenuBarFormatter {
             return .init(segments: [.init(text: "…")], showWarningDot: false)
         }
 
+        var segments = metricSegments(snapshot: snapshot, preferences: preferences)
+
+        if segments.isEmpty {
+            segments = [.init(text: snapshot.planDisplayName)]
+        }
+
+        let hits = snapshot.menuBarWarningHits(preferences.menuBarWarnings)
+            .filter { !preferences.snoozedWarningChannels.contains($0.channel.rawValue) }
+        return .init(segments: segments, showWarningDot: !hits.isEmpty, warningHits: hits)
+    }
+
+    /// Stacked menu bar: `work 12% · personal 88%` using each account's headline metric.
+    public static func formatCombined(
+        entries: [(label: String, snapshot: UsageSnapshot?, authenticated: Bool)],
+        preferences: DisplayPreferences
+    ) -> MenuBarPresentation {
+        if entries.isEmpty || entries.allSatisfy({ !$0.authenticated }) {
+            return .init(
+                segments: [.init(systemImage: "person.crop.circle.badge.questionmark", text: "Sign in")],
+                showWarningDot: false
+            )
+        }
+
+        var segments: [MenuBarSegment] = []
+        var hits: [UsageSnapshot.MenuBarWarningHit] = []
+
+        for entry in entries {
+            if !entry.authenticated {
+                segments.append(.init(text: "\(entry.label) Sign in"))
+                continue
+            }
+            guard let snapshot = entry.snapshot else {
+                segments.append(.init(text: "\(entry.label) …"))
+                continue
+            }
+            let metric = headlineMetric(snapshot: snapshot, preferences: preferences)
+            segments.append(.init(text: "\(entry.label) \(metric)"))
+            hits.append(contentsOf: snapshot.menuBarWarningHits(preferences.menuBarWarnings).filter {
+                !preferences.snoozedWarningChannels.contains($0.channel.rawValue)
+            })
+        }
+
+        return .init(segments: segments, showWarningDot: !hits.isEmpty, warningHits: hits)
+    }
+
+    private static func headlineMetric(snapshot: UsageSnapshot, preferences: DisplayPreferences) -> String {
+        let toggles = preferences.menuBar
+        if toggles.otherModelsPercent, let p = snapshot.otherModelsPercentUsed { return pct(p) }
+        if toggles.cursorModelsPercent, let p = snapshot.cursorModelsPercentUsed { return pct(p) }
+        if toggles.totalPercent, let p = snapshot.totalPercentUsed { return pct(p) }
+        if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
+            return "\(usd(used))/\(usd(limit))"
+        }
+        return snapshot.planDisplayName
+    }
+
+    private static func metricSegments(snapshot: UsageSnapshot, preferences: DisplayPreferences) -> [MenuBarSegment] {
         let toggles = preferences.menuBar
         let style = preferences.menuBarLabelStyle
         var segments: [MenuBarSegment] = []
@@ -101,14 +158,7 @@ public enum MenuBarFormatter {
                 segments.append(segment(style: style, kind: .days, text: "\(days)d"))
             }
         }
-
-        if segments.isEmpty {
-            segments = [.init(text: snapshot.planDisplayName)]
-        }
-
-        let hits = snapshot.menuBarWarningHits(preferences.menuBarWarnings)
-            .filter { !preferences.snoozedWarningChannels.contains($0.channel.rawValue) }
-        return .init(segments: segments, showWarningDot: !hits.isEmpty, warningHits: hits)
+        return segments
     }
 
     private enum Kind {

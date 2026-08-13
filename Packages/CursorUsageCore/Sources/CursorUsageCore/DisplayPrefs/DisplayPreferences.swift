@@ -21,6 +21,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
 
     public var menuBar: SurfaceToggles
     public var popover: SurfaceToggles
+    /// How multiple saved sessions appear in the menu bar.
+    public var menuBarAccountMode: MenuBarAccountMode
     /// Settings + popover chrome: follow macOS, or lock light/dark.
     public var appearanceMode: AppearanceMode
     /// Color language for pools, tints, and warnings.
@@ -234,6 +236,20 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public enum MenuBarLabelStyle: String, Codable, Sendable, CaseIterable {
         case icons
         case shortWords
+    }
+
+    public enum MenuBarAccountMode: String, Codable, Sendable, CaseIterable {
+        case activeOnly
+        case combined
+        case separateItems
+
+        public var title: String {
+            switch self {
+            case .activeOnly: return "Active"
+            case .combined: return "Combined"
+            case .separateItems: return "Separate"
+            }
+        }
     }
 
     public struct MenuBarWarningThresholds: Codable, Sendable, Equatable {
@@ -477,6 +493,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationContent: .default,
         menuBar: .menuBarDefault,
         popover: .popoverDefault,
+        menuBarAccountMode: .activeOnly,
         appearanceMode: .system,
         colorTheme: .cursor,
         customThemeColors: .default,
@@ -502,6 +519,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationContent: NotificationContent = .default,
         menuBar: SurfaceToggles,
         popover: SurfaceToggles,
+        menuBarAccountMode: MenuBarAccountMode = .activeOnly,
         appearanceMode: AppearanceMode = .system,
         colorTheme: ColorTheme = .cursor,
         customThemeColors: CustomThemeColors = .default,
@@ -525,6 +543,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.notificationContent = notificationContent
         self.menuBar = menuBar
         self.popover = popover
+        self.menuBarAccountMode = menuBarAccountMode
         self.appearanceMode = appearanceMode
         self.colorTheme = colorTheme
         self.customThemeColors = customThemeColors
@@ -558,6 +577,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         notificationContent = try c.decodeIfPresent(NotificationContent.self, forKey: .notificationContent) ?? .default
         menuBar = try c.decodeIfPresent(SurfaceToggles.self, forKey: .menuBar) ?? .menuBarDefault
         popover = try c.decodeIfPresent(SurfaceToggles.self, forKey: .popover) ?? .popoverDefault
+        menuBarAccountMode = try c.decodeIfPresent(MenuBarAccountMode.self, forKey: .menuBarAccountMode) ?? .activeOnly
         appearanceMode = try c.decodeIfPresent(AppearanceMode.self, forKey: .appearanceMode) ?? .system
         colorTheme = try c.decodeIfPresent(ColorTheme.self, forKey: .colorTheme) ?? .cursor
         customThemeColors = try c.decodeIfPresent(CustomThemeColors.self, forKey: .customThemeColors) ?? .default

@@ -30,14 +30,24 @@ public enum UsageNotificationService {
         #endif
     }
 
-    public static func clearSessionExpiredDedupe(defaults: UserDefaults = .standard) {
-        defaults.removeObject(forKey: sessionExpiredFiredKey)
+    public static func clearSessionExpiredDedupe(accountID: UUID? = nil, defaults: UserDefaults = .standard) {
+        if let accountID {
+            defaults.removeObject(forKey: sessionExpiredKey(accountID))
+        } else {
+            defaults.removeObject(forKey: sessionExpiredFiredKey)
+        }
+    }
+
+    private static func sessionExpiredKey(_ accountID: UUID) -> String {
+        "\(sessionExpiredFiredKey).\(accountID.uuidString)"
     }
 
     @MainActor
     public static func evaluate(
         snapshot: UsageSnapshot,
         preferences: DisplayPreferences,
+        accountEmail: String? = nil,
+        accountID: UUID? = nil,
         defaults: UserDefaults = .standard
     ) async {
         guard preferences.notificationsEnabled else { return }
@@ -46,6 +56,7 @@ public enum UsageNotificationService {
         guard authorized else { return }
 
         let cycleKey = cycleIdentity(for: snapshot)
+        let accountKey = accountID?.uuidString ?? "default"
         let channels = preferences.notificationChannels
         let warnings = preferences.menuBarWarnings
         let contentOptions = preferences.notificationContent
@@ -62,14 +73,15 @@ public enum UsageNotificationService {
             guard let status = snapshot.warningChannelStatus(channel, warnings: warnings), status.triggered else {
                 continue
             }
-            let key = "\(firedKeyPrefix)\(cycleKey).\(channel.rawValue)"
+            let key = "\(firedKeyPrefix)\(accountKey).\(cycleKey).\(channel.rawValue)"
             if defaults.bool(forKey: key) { continue }
             await postChannelNotification(
                 channelLabel: label,
                 detail: status.detail,
                 thresholdDescription: thresholdDescription(for: channel, warnings: warnings, snapshot: snapshot),
                 snapshot: snapshot,
-                contentOptions: contentOptions
+                contentOptions: contentOptions,
+                accountEmail: accountEmail
             )
             defaults.set(true, forKey: key)
         }
@@ -99,11 +111,13 @@ public enum UsageNotificationService {
     public static func notifySessionExpiredIfNeeded(
         preferences: DisplayPreferences,
         accountEmail: String?,
+        accountID: UUID? = nil,
         defaults: UserDefaults = .standard
     ) async {
         guard preferences.notificationsEnabled else { return }
         guard preferences.notifyOnSessionExpired else { return }
-        if defaults.bool(forKey: sessionExpiredFiredKey) { return }
+        let firedKey = accountID.map { sessionExpiredKey($0) } ?? sessionExpiredFiredKey
+        if defaults.bool(forKey: firedKey) { return }
 
         let authorized = await requestAuthorizationIfNeeded()
         guard authorized else { return }
@@ -119,12 +133,12 @@ public enum UsageNotificationService {
         content.sound = preferences.notificationContent.playSound ? .default : nil
 
         let request = UNNotificationRequest(
-            identifier: "cursor-usage-session-expired-\(UUID().uuidString)",
+            identifier: "cursor-usage-session-expired-\(accountID?.uuidString ?? UUID().uuidString)",
             content: content,
             trigger: nil
         )
         try? await UNUserNotificationCenter.current().add(request)
-        defaults.set(true, forKey: sessionExpiredFiredKey)
+        defaults.set(true, forKey: firedKey)
         #endif
     }
 
@@ -141,13 +155,21 @@ public enum UsageNotificationService {
         detail: String,
         thresholdDescription: String,
         snapshot: UsageSnapshot,
-        contentOptions: DisplayPreferences.NotificationContent
+        contentOptions: DisplayPreferences.NotificationContent,
+        accountEmail: String?
     ) async {
         let content = UNMutableNotificationContent()
+        let who: String
         if contentOptions.includePlanName {
-            content.title = "Cursor \(snapshot.planDisplayName) · \(channelLabel)"
+            who = "Cursor \(snapshot.planDisplayName)"
         } else {
-            content.title = "Cursor usage · \(channelLabel)"
+            who = "Cursor usage"
+        }
+        if let accountEmail, !accountEmail.isEmpty {
+            content.title = "\(who) · \(channelLabel)"
+            content.subtitle = accountEmail
+        } else {
+            content.title = "\(who) · \(channelLabel)"
         }
 
         var parts: [String] = []
