@@ -21,12 +21,9 @@ public struct CursorProcessSnapshot: Sendable, Equatable {
         var parts: [String] = []
         if appCount > 0 {
             if appCount > 1 {
-                let apps = "\(appCount) apps"
-                let windows = windowCount == 1 ? "1 window" : "\(windowCount) windows"
-                parts.append("Cursor · \(apps) · \(windows)")
+                parts.append("Cursor · \(appCount) apps · \(windowPhrase)")
             } else {
-                let windows = windowCount == 1 ? "1 window" : "\(max(windowCount, 1)) windows"
-                parts.append("Cursor · \(windows)")
+                parts.append("Cursor · \(windowPhrase)")
             }
         } else {
             parts.append("Cursor not running")
@@ -36,6 +33,10 @@ public struct CursorProcessSnapshot: Sendable, Equatable {
         }
         return parts.joined(separator: " · ")
     }
+
+    public var windowPhrase: String {
+        windowCount == 1 ? "1 window" : "\(windowCount) windows"
+    }
 }
 
 public enum CursorProcessMonitor {
@@ -43,10 +44,11 @@ public enum CursorProcessMonitor {
         let running = NSWorkspace.shared.runningApplications
         let helpersAndApp = running.filter(isCursorProcess)
         let apps = helpersAndApp.filter { $0.activationPolicy == .regular }
-        let pids = Set(helpersAndApp.map(\.processIdentifier))
+        let workspaces = running.filter(isCursorFileWatcher).count
+        let windows = max(onscreenEditorWindows(), workspaces)
         return CursorProcessSnapshot(
-            appCount: max(apps.count, apps.isEmpty && !helpersAndApp.isEmpty ? 1 : 0),
-            windowCount: windowCount(for: pids),
+            appCount: max(apps.count, apps.isEmpty && windows > 0 ? 1 : 0),
+            windowCount: windows,
             cliRunning: running.contains(where: isCursorCLI)
         )
     }
@@ -63,8 +65,31 @@ public enum CursorProcessMonitor {
         return name == "cursor" || name.hasPrefix("cursor helper") || name == "cursor nightly"
     }
 
-    private static func isCursorApp(_ app: NSRunningApplication) -> Bool {
-        isCursorProcess(app) && app.activationPolicy == .regular
+    /// Electron file-watchers are 1:1 with open Cursor windows/workspaces,
+    /// including windows on other Spaces that `CGWindowList` on-screen misses.
+    private static func isCursorFileWatcher(_ app: NSRunningApplication) -> Bool {
+        (app.localizedName ?? "").lowercased().hasPrefix("cursor helper: filewatcher")
+    }
+
+    /// Visible Cursor editor frames. Ignores 32pt titlebar strips, overlay
+    /// layers, and Apple’s `CursorUIViewService`.
+    private static func onscreenEditorWindows() -> Int {
+        let options: CGWindowListOption = [.optionAll]
+        guard let info = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
+            return 0
+        }
+        return info.filter { dict in
+            let owner = (dict[kCGWindowOwnerName as String] as? String) ?? ""
+            guard owner == "Cursor" else { return false }
+            let layer = dict[kCGWindowLayer as String] as? Int ?? 0
+            guard layer == 0 else { return false }
+            let alpha = (dict[kCGWindowAlpha as String] as? NSNumber)?.doubleValue ?? 1
+            guard alpha >= 0.5 else { return false }
+            let bounds = dict[kCGWindowBounds as String] as? [String: Any]
+            let width = (bounds?["Width"] as? NSNumber)?.doubleValue ?? 0
+            let height = (bounds?["Height"] as? NSNumber)?.doubleValue ?? 0
+            return width >= 200 && height >= 200
+        }.count
     }
 
     private static func isCursorCLI(_ app: NSRunningApplication) -> Bool {
@@ -77,21 +102,6 @@ public enum CursorProcessMonitor {
             return exec == "cursor-agent" || exec.hasPrefix("cursor-agent")
         }
         return false
-    }
-
-    private static func windowCount(for pids: Set<pid_t>) -> Int {
-        guard !pids.isEmpty else { return 0 }
-        let options: CGWindowListOption = [.optionOnScreenOnly, .excludeDesktopElements]
-        guard let info = CGWindowListCopyWindowInfo(options, kCGNullWindowID) as? [[String: Any]] else {
-            return 0
-        }
-        return info.filter { dict in
-            guard let pid = dict[kCGWindowOwnerPID as String] as? pid_t, pids.contains(pid) else {
-                return false
-            }
-            let layer = dict[kCGWindowLayer as String] as? Int ?? 0
-            return layer == 0
-        }.count
     }
 }
 #endif

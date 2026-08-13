@@ -547,6 +547,14 @@ private struct PopoverThisMacCard: View {
                 .appFont(.caption)
                 .foregroundStyle(snapshot.isRunning ? Color.primary : Color.secondary)
             Spacer(minLength: 0)
+            if snapshot.windowCount > 0 {
+                Text("\(snapshot.windowCount)")
+                    .appFont(.caption2, weight: .bold, mono: true)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Capsule().fill(Color.accentColor.opacity(0.18)))
+                    .foregroundStyle(Color.accentColor)
+            }
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
