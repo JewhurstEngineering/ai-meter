@@ -396,6 +396,11 @@ extension EnvironmentValues {
         get { self[AppScaleKey.self] }
         set { self[AppScaleKey.self] = newValue }
     }
+
+    var appTextScale: CGFloat {
+        get { self[AppTextScaleKey.self] }
+        set { self[AppTextScaleKey.self] = newValue }
+    }
 }
 
 private struct UsePatternsKey: EnvironmentKey {
@@ -407,6 +412,10 @@ private struct HighContrastKey: EnvironmentKey {
 }
 
 private struct AppScaleKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 1
+}
+
+private struct AppTextScaleKey: EnvironmentKey {
     static let defaultValue: CGFloat = 1
 }
 
@@ -437,22 +446,14 @@ struct AppThemed<Content: View>: View {
             .environment(\.appUsePatterns, preferences.distinguishWithoutColor || preferences.colorVision != .typical)
             .environment(\.appHighContrast, preferences.highContrast)
             .environment(\.appScale, preferences.interfaceSize.scale)
+            .environment(\.appTextScale, preferences.textSize.textScale)
             .preferredColorScheme(scheme)
             .tint(palette.tint)
-        #if os(macOS)
         themed
-            .transformEnvironment(\.dynamicTypeSize) { $0 = .large }
+            .dynamicTypeSize(preferences.textSize.dynamicTypeSize)
+            #if os(macOS)
             .background(WindowAppearanceBridge(appearance: preferences.appearanceMode.nsAppearance))
-        #else
-        themed
-            .transformEnvironment(\.dynamicTypeSize) { size in
-                switch preferences.interfaceSize {
-                case .defaultSize: size = .large
-                case .large: size = .xLarge
-                case .extraLarge: size = .xxLarge
-                }
-            }
-        #endif
+            #endif
     }
 }
 
@@ -511,15 +512,12 @@ enum WindowAppearanceApplier {
     /// SwiftUI Settings often sets contentMinSize == contentMaxSize, which makes
     /// `.resizable` a no-op even when the style mask looks right.
     static func configureChrome(scale: CGFloat) {
-        let s = max(scale, 1)
+        let s = max(scale, 0.5)
         let minContent = NSSize(width: 800, height: 520)
-        let idealContent = NSSize(width: 960 * s, height: 680 * s)
+        let idealContent = NSSize(width: (960 * s).rounded(), height: (680 * s).rounded())
         for window in NSApp.windows where shouldTheme(window) {
             unlockResize(window, minContent: minContent)
-            let current = window.contentLayoutRect.size
-            if current.width < minContent.width - 8 || current.height < minContent.height - 8 {
-                window.setContentSize(idealContent)
-            }
+            window.setContentSize(idealContent)
         }
     }
 
@@ -640,6 +638,23 @@ extension DisplayPreferences.InterfaceSize {
     var settingsMinWidth: CGFloat { 900 }
 
     var settingsMinHeight: CGFloat { 600 }
+
+    var dynamicTypeSize: DynamicTypeSize {
+        switch self {
+        case .defaultSize: return .large
+        case .large: return .xLarge
+        case .extraLarge: return .xxLarge
+        }
+    }
+
+    /// Point-size multiplier for labels. Dynamic Type is a no-op for most macOS SwiftUI fonts.
+    var textScale: CGFloat {
+        switch self {
+        case .defaultSize: return 1.0
+        case .large: return 1.22
+        case .extraLarge: return 1.44
+        }
+    }
 }
 
 extension View {
@@ -654,6 +669,41 @@ extension View {
 
     func appIntrinsicScale(_ scale: CGFloat) -> some View {
         modifier(IntrinsicLayoutScale(scale: scale))
+    }
+
+    func appFont(_ style: Font.TextStyle, weight: Font.Weight = .regular, mono: Bool = false) -> some View {
+        modifier(AppFontModifier(style: style, weight: weight, mono: mono))
+    }
+}
+
+private struct AppFontModifier: ViewModifier {
+    @Environment(\.appTextScale) private var scale
+    let style: Font.TextStyle
+    var weight: Font.Weight
+    var mono: Bool
+
+    func body(content: Content) -> some View {
+        let font = Font.system(size: AppTypeMetrics.pointSize(style) * scale, weight: weight)
+        content.font(mono ? font.monospacedDigit() : font)
+    }
+}
+
+private enum AppTypeMetrics {
+    static func pointSize(_ style: Font.TextStyle) -> CGFloat {
+        switch style {
+        case .largeTitle: return 26
+        case .title: return 21
+        case .title2: return 17
+        case .title3: return 15
+        case .headline: return 13
+        case .body: return 13
+        case .callout: return 12
+        case .subheadline: return 11
+        case .footnote: return 10
+        case .caption: return 10
+        case .caption2: return 10
+        @unknown default: return 13
+        }
     }
 }
 
@@ -671,11 +721,16 @@ private struct FillLayoutScale: ViewModifier {
                     alignment: .topLeading
                 )
                 .scaleEffect(s, anchor: .topLeading)
+                .frame(
+                    width: geo.size.width,
+                    height: geo.size.height,
+                    alignment: .topLeading
+                )
         }
     }
 }
 
-/// Popover: keep 1× layout, magnify drawing, then claim scaled space (can shrink).
+/// Popover: lay out at 360pt, magnify drawing, then claim scaled space.
 private struct IntrinsicLayoutScale: ViewModifier {
     let scale: CGFloat
     @State private var height: CGFloat = 240
@@ -683,8 +738,9 @@ private struct IntrinsicLayoutScale: ViewModifier {
     func body(content: Content) -> some View {
         let s = max(scale, 0.5)
         content
-            .fixedSize(horizontal: false, vertical: true)
-            .overlay(
+            .frame(width: 360, alignment: .topLeading)
+            .fixedSize(horizontal: true, vertical: true)
+            .background(
                 GeometryReader { proxy in
                     Color.clear
                         .onAppear { height = proxy.size.height }
@@ -692,6 +748,6 @@ private struct IntrinsicLayoutScale: ViewModifier {
                 }
             )
             .scaleEffect(s, anchor: .topLeading)
-            .frame(width: 360 * s, height: height * s, alignment: .topLeading)
+            .frame(width: 360 * s, height: max(height, 1) * s, alignment: .topLeading)
     }
 }

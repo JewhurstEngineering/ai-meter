@@ -25,13 +25,13 @@ struct SettingsRootView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .scaleEffect(store.preferences.interfaceSize.scale, anchor: .topLeading)
+        .appLayoutScale(store.preferences.interfaceSize.scale)
         .frame(
             minWidth: 800,
-            idealWidth: 960,
+            idealWidth: 960 * store.preferences.interfaceSize.scale,
             maxWidth: .infinity,
             minHeight: 520,
-            idealHeight: 680,
+            idealHeight: 680 * store.preferences.interfaceSize.scale,
             maxHeight: .infinity,
             alignment: .topLeading
         )

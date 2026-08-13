@@ -7,13 +7,12 @@ struct IncludedUsageSettingsView: View {
 
     var body: some View {
         ScrollView {
-            Group {
+            VStack(alignment: .leading, spacing: 10) {
+                SettingsAccountPicker()
                 if let snapshot = store.snapshot {
-                    VStack(alignment: .leading, spacing: 10) {
-                        subscriptionHero(snapshot)
-                        pools(snapshot)
-                        models(snapshot)
-                    }
+                    subscriptionHero(snapshot)
+                    pools(snapshot)
+                    models(snapshot)
                 } else {
                     ContentUnavailableView(
                         "No usage yet",
@@ -212,18 +211,44 @@ private struct IncludedPoolCard: View {
     }
 }
 
+struct SettingsAccountPicker: View {
+    @EnvironmentObject private var store: UsageStore
+
+    var body: some View {
+        if store.accounts.count > 1 {
+            SettingsPanel(
+                title: "Account",
+                systemImage: "person.crop.circle",
+                subtitle: "Numbers on this page are for the selected account.",
+                compact: true
+            ) {
+                Picker("Account", selection: Binding(
+                    get: { store.activeAccountID ?? store.connections.first?.id ?? UUID() },
+                    set: { store.setActive(id: $0) }
+                )) {
+                    ForEach(store.accounts) { item in
+                        Text(item.connection.displayLabel).tag(item.id)
+                    }
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+}
+
 struct PaidUsageSettingsView: View {
     @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
 
     var body: some View {
         ScrollView {
-            Group {
+            VStack(alignment: .leading, spacing: 10) {
+                SettingsAccountPicker()
                 if let snapshot = store.snapshot {
-                    VStack(alignment: .leading, spacing: 10) {
-                        status(snapshot)
-                        meters(snapshot)
-                    }
+                    status(snapshot)
+                    meters(snapshot)
                 } else {
                     ContentUnavailableView(
                         "No paid usage data",
@@ -494,17 +519,11 @@ struct AboutSettingsView: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    HStack(spacing: 8) {
-                        Link(destination: URL(string: "https://cursor.com/dashboard")!) {
-                            Label("Cursor dashboard", systemImage: "globe")
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.small)
-                        Spacer()
-                        Text("MIT license · open source")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                    Link(destination: URL(string: "https://cursor.com/dashboard")!) {
+                        Label("Cursor dashboard", systemImage: "globe")
                     }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
             }
             .padding(12)
@@ -514,25 +533,35 @@ struct AboutSettingsView: View {
 
     private var hero: some View {
         HStack(alignment: .center, spacing: 14) {
-            AppLogo(size: 56)
+            AppLogo(fillHeight: true)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Cursor Usage Tracker")
                     .font(.title2.weight(.bold))
                 Text("Menu bar meter for Cursor usage — unofficial, local-first.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                HStack(spacing: 6) {
-                    Text("v\(version)")
-                        .font(.caption.monospacedDigit().weight(.semibold))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(theme.cursorModels.opacity(0.15)))
-                        .foregroundStyle(theme.cursorModels)
-                    Text("macOS 14+")
+                    HStack(spacing: 6) {
+                        Text("v\(version)")
+                            .font(.caption.monospacedDigit().weight(.semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(theme.cursorModels.opacity(0.15)))
+                            .foregroundStyle(theme.cursorModels)
+                        Text("macOS 14+")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(AppAbout.organization)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                }
+                    Text(AppAbout.copyrightLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("License: \(AppAbout.licenseName)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
             }
+            .layoutPriority(1)
             Spacer(minLength: 0)
         }
         .padding(14)

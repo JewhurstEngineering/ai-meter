@@ -19,10 +19,10 @@ struct SettingsPanel<Content: View>: View {
                     .frame(width: compact ? 22 : 28, height: compact ? 22 : 28)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
-                        .font(compact ? .subheadline.weight(.semibold) : .headline)
+                        .appFont(compact ? .subheadline : .headline, weight: .semibold)
                     if let subtitle {
                         Text(subtitle)
-                            .font(.caption2)
+                            .appFont(.caption2)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -55,7 +55,7 @@ struct MetricToggleRow: View {
         HStack(spacing: 10) {
             Label(title, systemImage: systemImage)
                 .labelStyle(.titleAndIcon)
-                .font(.subheadline)
+                .appFont(.subheadline)
             Spacer(minLength: 8)
             Toggle("", isOn: $isOn)
                 .labelsHidden()

@@ -11,7 +11,7 @@ struct AccessibilitySettingsView: View {
                 SettingsPanel(
                     title: "Interface size",
                     systemImage: "textformat.size",
-                    subtitle: "Magnifies Settings and the popover. Default always returns to 100%. macOS Zoom (Control–scroll) still works for the whole screen."
+                    subtitle: "Zooms Settings and the popover, including icons and bars. Default always returns to 100%. macOS Zoom (Control–scroll) still works for the whole screen."
                 ) {
                     Picker("Interface size", selection: sizeBinding) {
                         ForEach(DisplayPreferences.InterfaceSize.allCases) { size in
@@ -22,8 +22,27 @@ struct AccessibilitySettingsView: View {
                     .labelsHidden()
                     .accessibilityLabel("Interface size")
 
-                    Text("This whole page, and the menu-bar popover, should match the size you pick.")
-                        .font(.caption2)
+                    Text("Zooms Settings and the popover — icons, bars, and padding included. Default is 100%.")
+                        .appFont(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                SettingsPanel(
+                    title: "Text size",
+                    systemImage: "textformat",
+                    subtitle: "Makes labels larger without zooming the window or controls."
+                ) {
+                    Picker("Text size", selection: textSizeBinding) {
+                        ForEach(DisplayPreferences.InterfaceSize.allCases) { size in
+                            Text(size.title).tag(size)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .accessibilityLabel("Text size")
+
+                    Text("Use this if you only want bigger type. Interface size still zooms everything.")
+                        .appFont(.caption2)
                         .foregroundStyle(.secondary)
                 }
 
@@ -33,7 +52,7 @@ struct AccessibilitySettingsView: View {
                     subtitle: "Replaces Theme accents with palettes that stay distinct. Does not change the menu bar."
                 ) {
                     LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 200), spacing: 10)],
+                        columns: [GridItem(.adaptive(minimum: 160), spacing: 10)],
                         spacing: 10
                     ) {
                         ForEach(DisplayPreferences.ColorVision.allCases) { option in
@@ -60,7 +79,7 @@ struct AccessibilitySettingsView: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Preview")
-                            .font(.caption2.weight(.semibold))
+                            .appFont(.caption2, weight: .semibold)
                             .foregroundStyle(.secondary)
                         previewBar("Cursor Models", 24)
                         previewBar("Other Models", 62)
@@ -78,10 +97,10 @@ struct AccessibilitySettingsView: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack {
                 Text(title)
-                    .font(.caption.weight(.semibold))
+                    .appFont(.caption, weight: .semibold)
                 Spacer()
                 Text("\(Int(percent))%")
-                    .font(.caption.monospacedDigit().weight(.bold))
+                    .appFont(.caption, weight: .bold, mono: true)
                     .foregroundStyle(theme.color(forPool: title, percent: percent))
             }
             UsageProgressBar(
@@ -115,11 +134,11 @@ struct AccessibilitySettingsView: View {
                     }
                 }
                 Text(option.title)
-                    .font(.subheadline.weight(.semibold))
+                    .appFont(.subheadline, weight: .semibold)
                     .foregroundStyle(.primary)
                     .fixedSize(horizontal: false, vertical: true)
                 Text(option.subtitle)
-                    .font(.caption2)
+                    .appFont(.caption2)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -142,6 +161,17 @@ struct AccessibilitySettingsView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityLabel(option.title)
         .accessibilityHint(option.subtitle)
+    }
+
+    private var textSizeBinding: Binding<DisplayPreferences.InterfaceSize> {
+        Binding(
+            get: { store.preferences.textSize },
+            set: { value in
+                var prefs = store.preferences
+                prefs.textSize = value
+                store.applyPreferences(prefs)
+            }
+        )
     }
 
     private var sizeBinding: Binding<DisplayPreferences.InterfaceSize> {
