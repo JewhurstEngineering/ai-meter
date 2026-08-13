@@ -10,8 +10,29 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var planUsedCents: Int?
     public var planLimitCents: Int?
     public var onDemandEnabled: Bool
+    public var onDemandUsedCents: Int?
+    public var onDemandLimitCents: Int?
+    public var bonusCents: Int?
     public var daysRemaining: Int?
+    public var billingCycleEnd: Date?
     public var showWarning: Bool
+    public var modelBreakdown: [WidgetModelCost]?
+    public var totalModelCostCents: Double?
+
+    public struct WidgetModelCost: Codable, Sendable, Equatable, Identifiable {
+        public var id: String { model }
+        public var model: String
+        public var totalCents: Double
+
+        public init(model: String, totalCents: Double) {
+            self.model = model
+            self.totalCents = totalCents
+        }
+    }
+
+    public var isOnDemandUnlimited: Bool {
+        onDemandEnabled && (onDemandLimitCents == nil || (onDemandLimitCents ?? 0) <= 0)
+    }
 
     public init(
         from snapshot: UsageSnapshot,
@@ -26,11 +47,21 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         planUsedCents = snapshot.planUsedCents
         planLimitCents = snapshot.planLimitCents
         onDemandEnabled = snapshot.onDemandEnabled
+        onDemandUsedCents = snapshot.onDemandUsedCents
+        onDemandLimitCents = snapshot.onDemandLimitCents
+        bonusCents = snapshot.bonusCents
         daysRemaining = snapshot.daysRemainingInCycle
+        billingCycleEnd = snapshot.billingCycleEnd
         let snoozed = Set(snoozedChannels)
         showWarning = snapshot.menuBarWarningHits(warnings).contains {
             !snoozed.contains($0.channel.rawValue)
         }
+        let models = snapshot.modelBreakdown
+        modelBreakdown = models.prefix(6).map {
+            WidgetModelCost(model: $0.model, totalCents: $0.totalCents)
+        }
+        totalModelCostCents = snapshot.totalModelCostCents
+            ?? (models.isEmpty ? nil : models.reduce(0) { $0 + $1.totalCents })
     }
 
     @available(*, deprecated, message: "Use init(from:warnings:)")

@@ -388,7 +388,7 @@ private struct PaidStatCard: View {
 struct AboutSettingsView: View {
     @Environment(\.appTheme) private var theme
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.7"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.8"
     }
 
     @State private var installMessage: String?
@@ -422,7 +422,7 @@ struct AboutSettingsView: View {
                     SettingsPanel(
                         title: "Desktop widget",
                         systemImage: "rectangle.on.rectangle",
-                        subtitle: "Small, medium, and large. Edit Widget to pick the highlighted metric.",
+                        subtitle: "Gallery presets for Cursor, Other, Total, On-demand, and Rotate. Overview is small, medium, and large.",
                         compact: true
                     ) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -470,7 +470,7 @@ struct AboutSettingsView: View {
 
                             aboutBullet("1.circle", "Install (button above) — does not launch a second copy")
                             aboutBullet("2.circle", "Quit this Xcode build, then open Applications ▸ Cursor Usage Tracker")
-                            aboutBullet("3.circle", "Right-click desktop → Edit Widgets → “Cursor Usage”")
+                            aboutBullet("3.circle", "Right-click desktop → Edit Widgets → Cursor Usage presets. Re-add after this update.")
 
                             if let installMessage {
                                 Text(installMessage)

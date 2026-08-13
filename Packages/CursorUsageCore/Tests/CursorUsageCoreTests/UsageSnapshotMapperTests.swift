@@ -156,11 +156,21 @@ final class UsageSnapshotMapperTests: XCTestCase {
         let snap = UsageSnapshot(
             membershipType: "ultra",
             planDisplayName: "Ultra",
+            billingCycleEnd: Date(timeIntervalSince1970: 1_789_200_000),
             cursorModelsPercentUsed: 3,
             otherModelsPercentUsed: 37,
             totalPercentUsed: 10,
             planUsedCents: 24041,
-            planLimitCents: 40000
+            planLimitCents: 40000,
+            bonusCents: 1200,
+            onDemandEnabled: true,
+            onDemandUsedCents: 500,
+            onDemandLimitCents: 10_000,
+            modelBreakdown: [
+                .init(model: "claude-fable-5-thinking-high", totalCents: 18602),
+                .init(model: "cursor-grok-4.6-high", totalCents: 4604),
+            ],
+            totalModelCostCents: 23206
         )
         let widget = WidgetSnapshot(from: snap, warnings: .default)
         let data = try JSONEncoder().encode(widget)
@@ -168,6 +178,25 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(decoded.planDisplayName, "Ultra")
         XCTAssertEqual(decoded.otherModelsPercentUsed!, 37, accuracy: 0.01)
         XCTAssertEqual(decoded.planUsedCents, 24041)
+        XCTAssertEqual(decoded.onDemandUsedCents, 500)
+        XCTAssertEqual(decoded.onDemandLimitCents, 10_000)
+        XCTAssertEqual(decoded.bonusCents, 1200)
+        XCTAssertEqual(decoded.modelBreakdown?.count, 2)
+        XCTAssertEqual(decoded.modelBreakdown?.first?.model, "claude-fable-5-thinking-high")
+        XCTAssertEqual(decoded.totalModelCostCents, 23206)
+        XCTAssertFalse(decoded.isOnDemandUnlimited)
+        XCTAssertEqual(decoded.billingCycleEnd, Date(timeIntervalSince1970: 1_789_200_000))
+    }
+
+    func testLegacyWidgetSnapshotJSONStillDecodes() throws {
+        let json = """
+        {"generatedAt":0,"planDisplayName":"Ultra","onDemandEnabled":false,"showWarning":false,"planUsedCents":24041}
+        """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(WidgetSnapshot.self, from: json)
+        XCTAssertEqual(decoded.planDisplayName, "Ultra")
+        XCTAssertEqual(decoded.planUsedCents, 24041)
+        XCTAssertNil(decoded.onDemandUsedCents)
+        XCTAssertNil(decoded.modelBreakdown)
     }
 
     func testSessionCookieBuilder() throws {
