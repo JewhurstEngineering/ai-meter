@@ -529,7 +529,7 @@ final class SettingsResizeUnlockView: NSView {
 
     override func layout() {
         super.layout()
-        unlock()
+        DispatchQueue.main.async { [weak self] in self?.unlock() }
     }
 
     func unlock() {
