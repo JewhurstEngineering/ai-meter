@@ -7,35 +7,83 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02EB60E893769050B911E8E8 /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EB19D7295D17C38B246024 /* AppLogo.swift */; };
 		04361D3C3E751EF4831F2280 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E8CCBE505DA6FB97811519 /* ThemeSettingsView.swift */; };
+		083E8835F8A015A81C3E90F1 /* PhoneSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF182AD4824A5BC1D1D58C1 /* PhoneSettingsView.swift */; };
 		085A847B91556F58F0799339 /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 42920EBF770ADCA233569FB2 /* CursorUsageCore */; };
+		0919A45264A2CC298B27FF99 /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = A7936D58A9606C4372FFA7F2 /* CursorUsageCore */; };
 		123E7B69D607CF80EA22C68E /* CursorUsageWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 877B0F967CCC1D8C34B40F9D /* CursorUsageWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		144990F9D4B37606A2AA7DBC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 004A0AB76CED04B1F3A58AE9 /* Assets.xcassets */; };
+		184C98E29E0BA45CA0D3DBA8 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */; };
 		1B01F21650D42319A09252DF /* AccessibilitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBCA4386F4AF35D267C6C9E7 /* AccessibilitySettingsView.swift */; };
-		2B007A75C0CECFFB837F728E /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D6343547B0FDEF9BC426FC /* WidgetReload.swift */; };
+		238DEFAE50D169E7F6662602 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D41A3D3EE8C92641973A0BF /* Assets.xcassets */; };
+		2A6CE8E63E61FFF2CB3BF6E5 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B32C760289517BDB5692CEAB /* PrivacyInfo.xcprivacy */; };
+		2A886FD45571143A08F77CCE /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EB19D7295D17C38B246024 /* AppLogo.swift */; };
+		2B87F8768B4D57D0A63D8296 /* CursorUsageWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 090EF8559100A4A993082B0A /* CursorUsageWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		2CDC8CFA7CE83B777B1B1928 /* WatchSessionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04551066C7CF7A9F8B0ED76 /* WatchSessionBridge.swift */; };
+		309EECA9C9D458B813A1D586 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B25AA171BE5C07F2A934BAF3 /* WatchConnectivity.framework */; };
 		38BEB562C58CFAE068095C59 /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A905F4E400E7A3C109C2AF57 /* SettingsRootView.swift */; };
 		3933C207398C16291FD86AC6 /* AppInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE94E74981ECECD132D34781 /* AppInstall.swift */; };
+		399B4894783E03F07141035C /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */; };
+		3AF4AB0FEB4679B6C6EF70ED /* WatchOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A17C8D85A726B23ADB04052 /* WatchOverviewView.swift */; };
+		400F185BECA0F09C11ECA325 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 948D49D49FCB9D3FDA048F94 /* PrivacyInfo.xcprivacy */; };
+		409D70B19BB27DB6AC3B650E /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EB19D7295D17C38B246024 /* AppLogo.swift */; };
+		412A2C4BB2BA5DEA10F225A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
+		41D20FDBBDE52E023500DAE2 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */; };
 		44D27C3EB943F82E0B4DC7AD /* IncludedPaidAboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */; };
+		46F7D44C7FE9EE10AFA2CADF /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 48DBE5173D95E86B452D5D95 /* CursorUsageCore */; };
 		4DBD41D473BA56E5DF08370B /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD38FF7739F2FCF0BBAAC89F /* MenuBarLabelView.swift */; };
 		50D97270BD876C1A51743BBB /* LayoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DA406888DC9DD69FBB6D6E /* LayoutSettingsView.swift */; };
+		523AFF71A2CD5409221620E7 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FA2934E5148189FF43A4946 /* LoginWebView.swift */; };
+		599F1AB689BF3D61B9E4D606 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */; };
 		5B4AD42BFBAD2229B02D10AF /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4989DDFD29C5D141D8DCCF02 /* AppTheme.swift */; };
 		5E1E126E24564CD7A93D864A /* CursorUsageWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0023361D50A46D8DFCBE0AA /* CursorUsageWidgets.swift */; };
+		62990F3039701FA5F9AABF51 /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CE734E4DE9F39681746E85 /* BackgroundRefresh.swift */; };
 		62EBF769AC08D801C50E4DD6 /* AppActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29B9DD0ED7FCE3CDA2F412A5 /* AppActivation.swift */; };
+		6EDF5A388A6710387722B96C /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B25AA171BE5C07F2A934BAF3 /* WatchConnectivity.framework */; };
 		7051E2B79F32EE8488762A06 /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EB19D7295D17C38B246024 /* AppLogo.swift */; };
+		7A52AFF409F2B1B0BF6BA2C4 /* PhoneWatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C626AF39CA9855E44380538 /* PhoneWatchBridge.swift */; };
+		7A5ACF30E51A57CFBBD71A60 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DE1F2690408B162371E3BCE /* RootTabView.swift */; };
+		7D6F851141385C464A2A5487 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DC16A6A57AB8FEBED771749D /* Assets.xcassets */; };
+		805A937F4A7C1580A1C745A6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D6B1EEB458C5925954DEB520 /* PrivacyInfo.xcprivacy */; };
+		80BC96AD16CAB8E0D1A0AFEF /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BD22F248322A14355D0DA81 /* WidgetKit.framework */; };
 		83D458D131794A28ADB71B07 /* SettingsOpenLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84C0068DCEE8809551F3FF6 /* SettingsOpenLink.swift */; };
 		8C409FE10EFE01E694FCCB41 /* UsageUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BD98FB6EECD4B00188EC604 /* UsageUIComponents.swift */; };
+		8CD3CF880A505B1DCBD7A179 /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 9C561D720F594515508EBEC4 /* CursorUsageCore */; };
 		8E349FE64FC6A88D9E042E7B /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 414F463E688494BCCD06CB18 /* StatusItemController.swift */; };
+		92D2917C6C1FC08F9109D798 /* CursorUsageWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A5BB8022F036A47E9CA426D /* CursorUsageWatchApp.swift */; };
+		9D3AAD39ED3EFC142F2AE3A1 /* CursorUsageiOSWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D4C818C42AEFE04779C5D7DE /* CursorUsageiOSWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9DE3DBC135091E37E312850C /* CursorUsageWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3C1E496282CCEC11AC44C350 /* CursorUsageWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A2824C34788AD42C2385733D /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC72E88939ABE69249070845 /* OverviewView.swift */; };
 		AB1CD943F35327A3FB09F25C /* CursorUsageTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */; };
+		AE5C090C9E154B56360D7C9A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D056BFB5D0276D0C9EABCF5C /* PrivacyInfo.xcprivacy */; };
 		AFEC5C3C5F53090198248BBA /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BD22F248322A14355D0DA81 /* WidgetKit.framework */; };
 		B8B07B749C82E504A37C9388 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10B4DC6481D9FBB53CB9194 /* MenuBarPopoverView.swift */; };
 		B93138226CBBE76B87E007C4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
 		C31824068E33904B649A3594 /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1C35E5E6634A287A0971CC6F /* CursorUsageCore */; };
+		C54D76172A5308290F0988D1 /* CursorUsageWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0023361D50A46D8DFCBE0AA /* CursorUsageWidgets.swift */; };
+		CA9B5B05338FD60A6A28CE9D /* CursorUsageWatchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 187AF10A1A9E4D443DA9CFF1 /* CursorUsageWatchWidgets.swift */; };
+		CD4418AA969514551FE216C3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BD22F248322A14355D0DA81 /* WidgetKit.framework */; };
 		D896CBE48F91EBBBCAC93E51 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF872466A93EEF6AE698D30A /* GeneralSettingsView.swift */; };
+		E2E59DB52BA783D8F489583C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF74C6401908A65BBCD44C8 /* AccountsView.swift */; };
 		E6CCE91BDB1D611E63C47A66 /* AuthenticationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8161504B9ED6174A8DF8349F /* AuthenticationSettingsView.swift */; };
 		EC29E8744DF6A536E16FE733 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
+		ED163B73E90DC9B7EB6C2AFD /* CursorUsageiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA594D67C54BEA585DC20BE5 /* CursorUsageiOSApp.swift */; };
+		EF86FC29258679B884789690 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
+		F47D266C99F7B78B9A78A1E0 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */; };
+		F680E4A6FC83BAAA3D1CE253 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
+		F86BB3965F5CCC01CF66A24E /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = F71A6ACCF75918CD6999C02B /* CursorUsageCore */; };
 		F9430DD912FFD33E2CEF40D6 /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EB19D7295D17C38B246024 /* AppLogo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		015E3EF12AC997BB079DF8CA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7B96D75EAFF9B198E8FED4BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DF7482B521344F26BA1084C8;
+			remoteInfo = CursorUsageiOSWidgets;
+		};
 		4E3678A05FBDD575288A9E38 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 7B96D75EAFF9B198E8FED4BC /* Project object */;
@@ -43,9 +91,34 @@
 			remoteGlobalIDString = E1EB33C9031D4460134BC8D6;
 			remoteInfo = CursorUsageWidgets;
 		};
+		E7DB45011224A79E430D3E0E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7B96D75EAFF9B198E8FED4BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 29B26DEE7EB5D6515A41EBBB;
+			remoteInfo = CursorUsageWatchWidgets;
+		};
+		EB9AC385C1C50DA1A13AA177 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7B96D75EAFF9B198E8FED4BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8FBB40E668FED56875F985C9;
+			remoteInfo = CursorUsageWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		10BF2391AD8683CD546793C3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9DE3DBC135091E37E312850C /* CursorUsageWatchWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1F87AD9079F92E24D82123E2 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -57,36 +130,89 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A1855D9C1EBDB87201DB1396 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				9D3AAD39ED3EFC142F2AE3A1 /* CursorUsageiOSWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A52696BDEA9C72BA95905505 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				2B87F8768B4D57D0A63D8296 /* CursorUsageWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		004A0AB76CED04B1F3A58AE9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		016FD019D380CAC5732956C7 /* CursorUsageiOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageiOS.entitlements; sourceTree = "<group>"; };
 		01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageTrackerApp.swift; sourceTree = "<group>"; };
+		090EF8559100A4A993082B0A /* CursorUsageWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CursorUsageWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15C1A86C67D4E7B40D40AE8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		15CE734E4DE9F39681746E85 /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
+		187AF10A1A9E4D443DA9CFF1 /* CursorUsageWatchWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWatchWidgets.swift; sourceTree = "<group>"; };
+		1A5BB8022F036A47E9CA426D /* CursorUsageWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWatchApp.swift; sourceTree = "<group>"; };
 		1BD98FB6EECD4B00188EC604 /* UsageUIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageUIComponents.swift; sourceTree = "<group>"; };
-		26D6343547B0FDEF9BC426FC /* WidgetReload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetReload.swift; sourceTree = "<group>"; };
 		29B9DD0ED7FCE3CDA2F412A5 /* AppActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActivation.swift; sourceTree = "<group>"; };
+		38ECA3677D4BD85CD87AC747 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		3A17C8D85A726B23ADB04052 /* WatchOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOverviewView.swift; sourceTree = "<group>"; };
+		3BF182AD4824A5BC1D1D58C1 /* PhoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsView.swift; sourceTree = "<group>"; };
+		3C1E496282CCEC11AC44C350 /* CursorUsageWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CursorUsageWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		414F463E688494BCCD06CB18 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
 		41E8CCBE505DA6FB97811519 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
 		4238390F852D7D39A70FEF75 /* CursorUsageTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageTracker.entitlements; sourceTree = "<group>"; };
+		48423E4A741FDC00766542BF /* CursorUsageiOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CursorUsageiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4989DDFD29C5D141D8DCCF02 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4FAB8596DD57019AC7B46891 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetReload.swift; sourceTree = "<group>"; };
+		5343AC29248A539C92B1F3D8 /* CursorUsageiOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageiOSWidgets.entitlements; sourceTree = "<group>"; };
 		57EB19D7295D17C38B246024 /* AppLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogo.swift; sourceTree = "<group>"; };
+		5B8BBFA1FA855D3B1902070F /* CursorUsageWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWatch.entitlements; sourceTree = "<group>"; };
+		5FA2934E5148189FF43A4946 /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
+		6DE1F2690408B162371E3BCE /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		7BD22F248322A14355D0DA81 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		7C626AF39CA9855E44380538 /* PhoneWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchBridge.swift; sourceTree = "<group>"; };
+		7D41A3D3EE8C92641973A0BF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7E5AFE99C7EE27A406E96CE5 /* CursorUsageCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CursorUsageCore; path = Packages/CursorUsageCore; sourceTree = SOURCE_ROOT; };
 		8161504B9ED6174A8DF8349F /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
 		877B0F967CCC1D8C34B40F9D /* CursorUsageWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CursorUsageWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		948D49D49FCB9D3FDA048F94 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A0023361D50A46D8DFCBE0AA /* CursorUsageWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWidgets.swift; sourceTree = "<group>"; };
+		A04551066C7CF7A9F8B0ED76 /* WatchSessionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionBridge.swift; sourceTree = "<group>"; };
 		A905F4E400E7A3C109C2AF57 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
+		AC72E88939ABE69249070845 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
 		AD6B180D099DC6CD5691B113 /* CursorUsageWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWidgets.entitlements; sourceTree = "<group>"; };
 		AF872466A93EEF6AE698D30A /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		B10B4DC6481D9FBB53CB9194 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
+		B25AA171BE5C07F2A934BAF3 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
+		B32C760289517BDB5692CEAB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BAB6318BD090C6E7FF509DC3 /* CursorUsageTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CursorUsageTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BCF74C6401908A65BBCD44C8 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
 		C2DA406888DC9DD69FBB6D6E /* LayoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsView.swift; sourceTree = "<group>"; };
+		C45C4F2CBDDB1E586C316DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CBCA4386F4AF35D267C6C9E7 /* AccessibilitySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySettingsView.swift; sourceTree = "<group>"; };
+		CD2835CE2A9853EF4CD311CD /* CursorUsageWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWatchWidgets.entitlements; sourceTree = "<group>"; };
 		CD38FF7739F2FCF0BBAAC89F /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
 		CE94E74981ECECD132D34781 /* AppInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstall.swift; sourceTree = "<group>"; };
+		D056BFB5D0276D0C9EABCF5C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D4C818C42AEFE04779C5D7DE /* CursorUsageiOSWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = CursorUsageiOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6B1EEB458C5925954DEB520 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D84C0068DCEE8809551F3FF6 /* SettingsOpenLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsOpenLink.swift; sourceTree = "<group>"; };
+		DC16A6A57AB8FEBED771749D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncludedPaidAboutSettings.swift; sourceTree = "<group>"; };
+		FA594D67C54BEA585DC20BE5 /* CursorUsageiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageiOSApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +221,22 @@
 			buildActionMask = 2147483647;
 			files = (
 				C31824068E33904B649A3594 /* CursorUsageCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		490AA0FA79ECE44999089862 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F86BB3965F5CCC01CF66A24E /* CursorUsageCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5685D020B0C57C5CC8A11C17 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0919A45264A2CC298B27FF99 /* CursorUsageCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,9 +249,48 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5FFC55016F729864DA3D627F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46F7D44C7FE9EE10AFA2CADF /* CursorUsageCore in Frameworks */,
+				80BC96AD16CAB8E0D1A0AFEF /* WidgetKit.framework in Frameworks */,
+				6EDF5A388A6710387722B96C /* WatchConnectivity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBE46C0F59BC78E7D9F6E1BA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CD3CF880A505B1DCBD7A179 /* CursorUsageCore in Frameworks */,
+				CD4418AA969514551FE216C3 /* WidgetKit.framework in Frameworks */,
+				309EECA9C9D458B813A1D586 /* WatchConnectivity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0DD03297F4A479DC856E6577 /* CursorUsageiOS */ = {
+			isa = PBXGroup;
+			children = (
+				BCF74C6401908A65BBCD44C8 /* AccountsView.swift */,
+				7D41A3D3EE8C92641973A0BF /* Assets.xcassets */,
+				15CE734E4DE9F39681746E85 /* BackgroundRefresh.swift */,
+				016FD019D380CAC5732956C7 /* CursorUsageiOS.entitlements */,
+				FA594D67C54BEA585DC20BE5 /* CursorUsageiOSApp.swift */,
+				38ECA3677D4BD85CD87AC747 /* Info.plist */,
+				5FA2934E5148189FF43A4946 /* LoginWebView.swift */,
+				AC72E88939ABE69249070845 /* OverviewView.swift */,
+				3BF182AD4824A5BC1D1D58C1 /* PhoneSettingsView.swift */,
+				7C626AF39CA9855E44380538 /* PhoneWatchBridge.swift */,
+				948D49D49FCB9D3FDA048F94 /* PrivacyInfo.xcprivacy */,
+				6DE1F2690408B162371E3BCE /* RootTabView.swift */,
+			);
+			path = CursorUsageiOS;
+			sourceTree = "<group>";
+		};
 		128DC51DA8705D39A0DF709D /* Settings */ = {
 			isa = PBXGroup;
 			children = (
@@ -145,21 +326,45 @@
 			children = (
 				57EB19D7295D17C38B246024 /* AppLogo.swift */,
 				4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */,
+				52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */,
 			);
 			path = Shared;
+			sourceTree = "<group>";
+		};
+		3A02C2533F077E3BB4A9F20C /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				DC16A6A57AB8FEBED771749D /* Assets.xcassets */,
+				CD2835CE2A9853EF4CD311CD /* CursorUsageWatchWidgets.entitlements */,
+				187AF10A1A9E4D443DA9CFF1 /* CursorUsageWatchWidgets.swift */,
+				4FAB8596DD57019AC7B46891 /* Info.plist */,
+				B32C760289517BDB5692CEAB /* PrivacyInfo.xcprivacy */,
+			);
+			path = watchOS;
 			sourceTree = "<group>";
 		};
 		485056A51585A6A7AD632932 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
 				832A714BED62EA9FF99CE273 /* CursorUsageWidgets */,
+				76FFE538132AB7DA7AE82C1E /* iOS */,
+				3A02C2533F077E3BB4A9F20C /* watchOS */,
 			);
 			path = Widgets;
+			sourceTree = "<group>";
+		};
+		520045EAA40D104FF7DAC994 /* watchOS */ = {
+			isa = PBXGroup;
+			children = (
+				97DE41B1A5C488DFDE1D5EC2 /* CursorUsageWatch */,
+			);
+			path = watchOS;
 			sourceTree = "<group>";
 		};
 		76A1F59E750BF20655D901C1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				B25AA171BE5C07F2A934BAF3 /* WatchConnectivity.framework */,
 				7BD22F248322A14355D0DA81 /* WidgetKit.framework */,
 			);
 			name = Frameworks;
@@ -174,6 +379,15 @@
 				76A1F59E750BF20655D901C1 /* Frameworks */,
 				9D111D40DB2F25F52624DF42 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		76FFE538132AB7DA7AE82C1E /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				5343AC29248A539C92B1F3D8 /* CursorUsageiOSWidgets.entitlements */,
+				D6B1EEB458C5925954DEB520 /* PrivacyInfo.xcprivacy */,
+			);
+			path = iOS;
 			sourceTree = "<group>";
 		};
 		7A3C43D1F32E634CAE905264 /* Views */ = {
@@ -191,8 +405,10 @@
 		8168134912E191224A05C631 /* Apps */ = {
 			isa = PBXGroup;
 			children = (
+				F818928B05C70BC308FD53E3 /* iOS */,
 				232EADABDDC8CDED829B89F1 /* macOS */,
 				2528085F2A7F9ABA503CB502 /* Shared */,
+				520045EAA40D104FF7DAC994 /* watchOS */,
 			);
 			path = Apps;
 			sourceTree = "<group>";
@@ -207,10 +423,28 @@
 			path = CursorUsageWidgets;
 			sourceTree = "<group>";
 		};
+		97DE41B1A5C488DFDE1D5EC2 /* CursorUsageWatch */ = {
+			isa = PBXGroup;
+			children = (
+				004A0AB76CED04B1F3A58AE9 /* Assets.xcassets */,
+				5B8BBFA1FA855D3B1902070F /* CursorUsageWatch.entitlements */,
+				1A5BB8022F036A47E9CA426D /* CursorUsageWatchApp.swift */,
+				C45C4F2CBDDB1E586C316DAD /* Info.plist */,
+				D056BFB5D0276D0C9EABCF5C /* PrivacyInfo.xcprivacy */,
+				3A17C8D85A726B23ADB04052 /* WatchOverviewView.swift */,
+				A04551066C7CF7A9F8B0ED76 /* WatchSessionBridge.swift */,
+			);
+			path = CursorUsageWatch;
+			sourceTree = "<group>";
+		};
 		9D111D40DB2F25F52624DF42 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				48423E4A741FDC00766542BF /* CursorUsageiOS.app */,
+				D4C818C42AEFE04779C5D7DE /* CursorUsageiOSWidgets.appex */,
 				BAB6318BD090C6E7FF509DC3 /* CursorUsageTracker.app */,
+				090EF8559100A4A993082B0A /* CursorUsageWatch.app */,
+				3C1E496282CCEC11AC44C350 /* CursorUsageWatchWidgets.appex */,
 				877B0F967CCC1D8C34B40F9D /* CursorUsageWidgets.appex */,
 			);
 			name = Products;
@@ -224,11 +458,18 @@
 				4238390F852D7D39A70FEF75 /* CursorUsageTracker.entitlements */,
 				01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */,
 				414F463E688494BCCD06CB18 /* StatusItemController.swift */,
-				26D6343547B0FDEF9BC426FC /* WidgetReload.swift */,
 				128DC51DA8705D39A0DF709D /* Settings */,
 				7A3C43D1F32E634CAE905264 /* Views */,
 			);
 			path = CursorUsageTracker;
+			sourceTree = "<group>";
+		};
+		F818928B05C70BC308FD53E3 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				0DD03297F4A479DC856E6577 /* CursorUsageiOS */,
+			);
+			path = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -255,6 +496,92 @@
 			productName = CursorUsageTracker;
 			productReference = BAB6318BD090C6E7FF509DC3 /* CursorUsageTracker.app */;
 			productType = "com.apple.product-type.application";
+		};
+		29B26DEE7EB5D6515A41EBBB /* CursorUsageWatchWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0504827693480FD4BC59C582 /* Build configuration list for PBXNativeTarget "CursorUsageWatchWidgets" */;
+			buildPhases = (
+				566FEE12C5A3258775CBE97B /* Sources */,
+				836A5E41EC9B67467DA1D13D /* Resources */,
+				5685D020B0C57C5CC8A11C17 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CursorUsageWatchWidgets;
+			packageProductDependencies = (
+				A7936D58A9606C4372FFA7F2 /* CursorUsageCore */,
+			);
+			productName = CursorUsageWatchWidgets;
+			productReference = 3C1E496282CCEC11AC44C350 /* CursorUsageWatchWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		42DBDC4423AB77C7111E0BDF /* CursorUsageiOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 88B7C1AA9D1FE05CE9DC2CCB /* Build configuration list for PBXNativeTarget "CursorUsageiOS" */;
+			buildPhases = (
+				338C8AFC89A551A0336D63B4 /* Sources */,
+				10C1ECBDBAD00B2E4F485D9F /* Resources */,
+				EBE46C0F59BC78E7D9F6E1BA /* Frameworks */,
+				A1855D9C1EBDB87201DB1396 /* Embed Foundation Extensions */,
+				A52696BDEA9C72BA95905505 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7D1A0162235B914FCEB5F824 /* PBXTargetDependency */,
+				ADE7FEB94BAF9ADE97F41ACA /* PBXTargetDependency */,
+			);
+			name = CursorUsageiOS;
+			packageProductDependencies = (
+				9C561D720F594515508EBEC4 /* CursorUsageCore */,
+			);
+			productName = CursorUsageiOS;
+			productReference = 48423E4A741FDC00766542BF /* CursorUsageiOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8FBB40E668FED56875F985C9 /* CursorUsageWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A61E0801A465D79316E1B80 /* Build configuration list for PBXNativeTarget "CursorUsageWatch" */;
+			buildPhases = (
+				03C734C01D10E9367587B100 /* Sources */,
+				4FF8E03A016875E4EFA1CAD8 /* Resources */,
+				5FFC55016F729864DA3D627F /* Frameworks */,
+				10BF2391AD8683CD546793C3 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				6F2FBD57C8AAE35F29950588 /* PBXTargetDependency */,
+			);
+			name = CursorUsageWatch;
+			packageProductDependencies = (
+				48DBE5173D95E86B452D5D95 /* CursorUsageCore */,
+			);
+			productName = CursorUsageWatch;
+			productReference = 090EF8559100A4A993082B0A /* CursorUsageWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DF7482B521344F26BA1084C8 /* CursorUsageiOSWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B3B2A0603B08679D838AC83B /* Build configuration list for PBXNativeTarget "CursorUsageiOSWidgets" */;
+			buildPhases = (
+				26A97F8479F0BD4E782347B0 /* Sources */,
+				9C6FF18C43A759176417654E /* Resources */,
+				490AA0FA79ECE44999089862 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CursorUsageiOSWidgets;
+			packageProductDependencies = (
+				F71A6ACCF75918CD6999C02B /* CursorUsageCore */,
+			);
+			productName = CursorUsageiOSWidgets;
+			productReference = D4C818C42AEFE04779C5D7DE /* CursorUsageiOSWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		E1EB33C9031D4460134BC8D6 /* CursorUsageWidgets */ = {
 			isa = PBXNativeTarget;
@@ -283,9 +610,25 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					0697D446B69B99CCE888C2FF = {
+						DevelopmentTeam = 6998422DKP;
+						ProvisioningStyle = Automatic;
+					};
+					29B26DEE7EB5D6515A41EBBB = {
+						DevelopmentTeam = 6998422DKP;
+						ProvisioningStyle = Automatic;
+					};
+					42DBDC4423AB77C7111E0BDF = {
+						DevelopmentTeam = 6998422DKP;
+						ProvisioningStyle = Automatic;
+					};
+					8FBB40E668FED56875F985C9 = {
+						DevelopmentTeam = 6998422DKP;
+						ProvisioningStyle = Automatic;
+					};
+					DF7482B521344F26BA1084C8 = {
 						DevelopmentTeam = 6998422DKP;
 						ProvisioningStyle = Automatic;
 					};
@@ -314,16 +657,58 @@
 			targets = (
 				0697D446B69B99CCE888C2FF /* CursorUsageTracker */,
 				E1EB33C9031D4460134BC8D6 /* CursorUsageWidgets */,
+				42DBDC4423AB77C7111E0BDF /* CursorUsageiOS */,
+				DF7482B521344F26BA1084C8 /* CursorUsageiOSWidgets */,
+				8FBB40E668FED56875F985C9 /* CursorUsageWatch */,
+				29B26DEE7EB5D6515A41EBBB /* CursorUsageWatchWidgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		10C1ECBDBAD00B2E4F485D9F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				238DEFAE50D169E7F6662602 /* Assets.xcassets in Resources */,
+				412A2C4BB2BA5DEA10F225A6 /* Assets.xcassets in Resources */,
+				400F185BECA0F09C11ECA325 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4FF8E03A016875E4EFA1CAD8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				144990F9D4B37606A2AA7DBC /* Assets.xcassets in Resources */,
+				EF86FC29258679B884789690 /* Assets.xcassets in Resources */,
+				AE5C090C9E154B56360D7C9A /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		836A5E41EC9B67467DA1D13D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D6F851141385C464A2A5487 /* Assets.xcassets in Resources */,
+				2A6CE8E63E61FFF2CB3BF6E5 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		98F1C1874F90FE251D4006DB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				EC29E8744DF6A536E16FE733 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9C6FF18C43A759176417654E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F680E4A6FC83BAAA3D1CE253 /* Assets.xcassets in Resources */,
+				805A937F4A7C1580A1C745A6 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -338,12 +723,52 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		03C734C01D10E9367587B100 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				409D70B19BB27DB6AC3B650E /* AppLogo.swift in Sources */,
+				92D2917C6C1FC08F9109D798 /* CursorUsageWatchApp.swift in Sources */,
+				3AF4AB0FEB4679B6C6EF70ED /* WatchOverviewView.swift in Sources */,
+				2CDC8CFA7CE83B777B1B1928 /* WatchSessionBridge.swift in Sources */,
+				41D20FDBBDE52E023500DAE2 /* WidgetReload.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0EB34F7D51D8685BD9EC4CB9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				F9430DD912FFD33E2CEF40D6 /* AppLogo.swift in Sources */,
 				5E1E126E24564CD7A93D864A /* CursorUsageWidgets.swift in Sources */,
+				599F1AB689BF3D61B9E4D606 /* WidgetReload.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		26A97F8479F0BD4E782347B0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2A886FD45571143A08F77CCE /* AppLogo.swift in Sources */,
+				C54D76172A5308290F0988D1 /* CursorUsageWidgets.swift in Sources */,
+				F47D266C99F7B78B9A78A1E0 /* WidgetReload.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		338C8AFC89A551A0336D63B4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2E59DB52BA783D8F489583C /* AccountsView.swift in Sources */,
+				02EB60E893769050B911E8E8 /* AppLogo.swift in Sources */,
+				62990F3039701FA5F9AABF51 /* BackgroundRefresh.swift in Sources */,
+				ED163B73E90DC9B7EB6C2AFD /* CursorUsageiOSApp.swift in Sources */,
+				523AFF71A2CD5409221620E7 /* LoginWebView.swift in Sources */,
+				A2824C34788AD42C2385733D /* OverviewView.swift in Sources */,
+				083E8835F8A015A81C3E90F1 /* PhoneSettingsView.swift in Sources */,
+				7A52AFF409F2B1B0BF6BA2C4 /* PhoneWatchBridge.swift in Sources */,
+				7A5ACF30E51A57CFBBD71A60 /* RootTabView.swift in Sources */,
+				184C98E29E0BA45CA0D3DBA8 /* WidgetReload.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,13 +793,36 @@
 				8E349FE64FC6A88D9E042E7B /* StatusItemController.swift in Sources */,
 				04361D3C3E751EF4831F2280 /* ThemeSettingsView.swift in Sources */,
 				8C409FE10EFE01E694FCCB41 /* UsageUIComponents.swift in Sources */,
-				2B007A75C0CECFFB837F728E /* WidgetReload.swift in Sources */,
+				399B4894783E03F07141035C /* WidgetReload.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		566FEE12C5A3258775CBE97B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CA9B5B05338FD60A6A28CE9D /* CursorUsageWatchWidgets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		6F2FBD57C8AAE35F29950588 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 29B26DEE7EB5D6515A41EBBB /* CursorUsageWatchWidgets */;
+			targetProxy = E7DB45011224A79E430D3E0E /* PBXContainerItemProxy */;
+		};
+		7D1A0162235B914FCEB5F824 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DF7482B521344F26BA1084C8 /* CursorUsageiOSWidgets */;
+			targetProxy = 015E3EF12AC997BB079DF8CA /* PBXContainerItemProxy */;
+		};
+		ADE7FEB94BAF9ADE97F41ACA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8FBB40E668FED56875F985C9 /* CursorUsageWatch */;
+			targetProxy = EB9AC385C1C50DA1A13AA177 /* PBXContainerItemProxy */;
+		};
 		C8AE9F8E0026FF2007DDF882 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E1EB33C9031D4460134BC8D6 /* CursorUsageWidgets */;
@@ -395,6 +843,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage Tracker";
 				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_LSUIElement = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -402,6 +851,64 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.app;
 				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		22CFFB69435A7ACE144EB1A8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/iOS/CursorUsageiOSWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/CursorUsageWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		277CC0B332AEC3DAB9D0C438 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Apps/iOS/CursorUsageiOS/CursorUsageiOS.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Apps/iOS/CursorUsageiOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		278A84ECE7E93FF6F44FB41C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/watchOS/CursorUsageWatchWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/watchOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Debug;
 		};
@@ -427,6 +934,45 @@
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
+		};
+		4BE567139EFC580EA2D7CFA3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Apps/iOS/CursorUsageiOS/CursorUsageiOS.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Apps/iOS/CursorUsageiOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		65044F01E6D725F52935B895 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/iOS/CursorUsageiOSWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/CursorUsageWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios.widgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
 		};
 		8B144412FB43C6C47B2FC46E /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -482,16 +1028,17 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.2.8;
+				MARKETING_VERSION = 0.3.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Debug;
 		};
@@ -515,6 +1062,25 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.app.widgets;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		8BE98789A5B547ABB95AE909 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/watchOS/CursorUsageWatchWidgets.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widgets/watchOS/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios.watchkitapp.widgets;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
 			};
 			name = Release;
 		};
@@ -566,15 +1132,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.2.8;
+				MARKETING_VERSION = 0.3.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -590,6 +1157,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage Tracker";
 				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_LSUIElement = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -600,9 +1168,48 @@
 			};
 			name = Release;
 		};
+		F5E23BFF312BCFF0602A1D0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Apps/watchOS/CursorUsageWatch/CursorUsageWatch.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Apps/watchOS/CursorUsageWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		FC0F41487BC5A3ADA4C0AA2B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Apps/watchOS/CursorUsageWatch/CursorUsageWatch.entitlements;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Apps/watchOS/CursorUsageWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Cursor Usage";
+				PRODUCT_BUNDLE_IDENTIFIER = com.cursorusagetracker.ios.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0504827693480FD4BC59C582 /* Build configuration list for PBXNativeTarget "CursorUsageWatchWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				278A84ECE7E93FF6F44FB41C /* Debug */,
+				8BE98789A5B547ABB95AE909 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		147011B62A0706BB3FBA8DA9 /* Build configuration list for PBXProject "CursorUsageTracker" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -612,11 +1219,38 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		5A61E0801A465D79316E1B80 /* Build configuration list for PBXNativeTarget "CursorUsageWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5E23BFF312BCFF0602A1D0E /* Debug */,
+				FC0F41487BC5A3ADA4C0AA2B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		667A2DEB8E7AB89631225A18 /* Build configuration list for PBXNativeTarget "CursorUsageWidgets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3E3399260DAC228AB1E30929 /* Debug */,
 				8BB05EB18C8A5DDA7F9A7C80 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		88B7C1AA9D1FE05CE9DC2CCB /* Build configuration list for PBXNativeTarget "CursorUsageiOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				277CC0B332AEC3DAB9D0C438 /* Debug */,
+				4BE567139EFC580EA2D7CFA3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B3B2A0603B08679D838AC83B /* Build configuration list for PBXNativeTarget "CursorUsageiOSWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				22CFFB69435A7ACE144EB1A8 /* Debug */,
+				65044F01E6D725F52935B895 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -645,6 +1279,22 @@
 			productName = CursorUsageCore;
 		};
 		42920EBF770ADCA233569FB2 /* CursorUsageCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CursorUsageCore;
+		};
+		48DBE5173D95E86B452D5D95 /* CursorUsageCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CursorUsageCore;
+		};
+		9C561D720F594515508EBEC4 /* CursorUsageCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CursorUsageCore;
+		};
+		A7936D58A9606C4372FFA7F2 /* CursorUsageCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CursorUsageCore;
+		};
+		F71A6ACCF75918CD6999C02B /* CursorUsageCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = CursorUsageCore;
 		};

@@ -74,14 +74,25 @@ public enum WidgetSnapshotStore {
     /// macOS App Group form is `TEAMID.name` (see Stats.app). iOS-style `group.` is not in the widget profile.
     public static let appGroupID = "6998422DKP.com.cursorusagetracker.shared"
     public static let legacyAppGroupID = "group.com.cursorusagetracker.shared"
+    /// Watch app ↔ Watch complications only. Never holds tokens.
+    public static let watchAppGroupID = "group.com.cursorusagetracker.watch"
     public static let filename = "widget-snapshot.json"
+    public static let watchTransferKey = "widgetSnapshotJSON"
     private static let defaultsKey = "widgetSnapshotJSON"
 
     public static var containerURL: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
     }
 
-    private static var groupIDs: [String] { [appGroupID, legacyAppGroupID] }
+    private static var groupIDs: [String] {
+        #if os(iOS)
+        [legacyAppGroupID]
+        #elseif os(watchOS)
+        [watchAppGroupID]
+        #else
+        [appGroupID, legacyAppGroupID]
+        #endif
+    }
 
     private static var groupRoots: [URL] {
         var roots: [URL] = []
@@ -90,10 +101,12 @@ public enum WidgetSnapshotStore {
             if let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: id) {
                 appendRoot(url, seen: &seen, into: &roots)
             }
+            #if os(macOS)
             let home = FileManager.default.homeDirectoryForCurrentUser
                 .appendingPathComponent("Library/Group Containers", isDirectory: true)
                 .appendingPathComponent(id, isDirectory: true)
             appendRoot(home, seen: &seen, into: &roots)
+            #endif
         }
         return roots
     }
@@ -127,8 +140,20 @@ public enum WidgetSnapshotStore {
         return urls
     }
 
+    public static func data(from snapshot: WidgetSnapshot) throws -> Data {
+        try JSONEncoder().encode(snapshot)
+    }
+
+    public static func snapshot(from data: Data) -> WidgetSnapshot? {
+        decode(data)
+    }
+
     public static func write(_ snapshot: WidgetSnapshot) throws {
-        let data = try JSONEncoder().encode(snapshot)
+        let data = try data(from: snapshot)
+        #if os(watchOS)
+        writeWatchData(data)
+        return
+        #endif
 
         for id in groupIDs {
             if let suite = UserDefaults(suiteName: id) {
@@ -156,7 +181,27 @@ public enum WidgetSnapshotStore {
         }
     }
 
+    public static func writeWatchLocal(_ snapshot: WidgetSnapshot) {
+        guard let data = try? data(from: snapshot) else { return }
+        writeWatchData(data)
+    }
+
+    public static func readWatchLocal() -> WidgetSnapshot? {
+        if let data = UserDefaults(suiteName: watchAppGroupID)?.data(forKey: defaultsKey),
+           let snap = decode(data)
+        {
+            return snap
+        }
+        if let data = UserDefaults.standard.data(forKey: defaultsKey), let snap = decode(data) {
+            return snap
+        }
+        return nil
+    }
+
     public static func read() -> WidgetSnapshot? {
+        #if os(watchOS)
+        return readWatchLocal()
+        #endif
         for id in groupIDs {
             if let suite = UserDefaults(suiteName: id),
                let data = suite.data(forKey: defaultsKey),
@@ -175,5 +220,13 @@ public enum WidgetSnapshotStore {
 
     private static func decode(_ data: Data) -> WidgetSnapshot? {
         try? JSONDecoder().decode(WidgetSnapshot.self, from: data)
+    }
+
+    private static func writeWatchData(_ data: Data) {
+        if let suite = UserDefaults(suiteName: watchAppGroupID) {
+            suite.set(data, forKey: defaultsKey)
+            suite.synchronize()
+        }
+        UserDefaults.standard.set(data, forKey: defaultsKey)
     }
 }

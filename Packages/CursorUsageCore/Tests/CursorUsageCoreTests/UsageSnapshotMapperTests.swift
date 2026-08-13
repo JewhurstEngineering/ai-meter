@@ -188,6 +188,22 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(decoded.billingCycleEnd, Date(timeIntervalSince1970: 1_789_200_000))
     }
 
+    func testWidgetSnapshotTransferPayloadRoundTrip() throws {
+        let snap = UsageSnapshot(
+            membershipType: "pro",
+            planDisplayName: "Pro",
+            otherModelsPercentUsed: 41,
+            planUsedCents: 1200,
+            planLimitCents: 2000
+        )
+        let widget = WidgetSnapshot(from: snap, warnings: .default)
+        let data = try WidgetSnapshotStore.data(from: widget)
+        let decoded = WidgetSnapshotStore.snapshot(from: data)
+        XCTAssertEqual(decoded?.planDisplayName, "Pro")
+        XCTAssertEqual(decoded?.otherModelsPercentUsed ?? 0, 41, accuracy: 0.01)
+        XCTAssertEqual(WidgetSnapshotStore.watchTransferKey, "widgetSnapshotJSON")
+    }
+
     func testLegacyWidgetSnapshotJSONStillDecodes() throws {
         let json = """
         {"generatedAt":0,"planDisplayName":"Ultra","onDemandEnabled":false,"showWarning":false,"planUsedCents":24041}

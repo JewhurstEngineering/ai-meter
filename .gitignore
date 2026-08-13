@@ -10,3 +10,4 @@ xcuserdata/
 *.dSYM.zip
 *.dSYM
 build/
+dist/

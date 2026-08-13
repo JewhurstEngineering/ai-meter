@@ -15,9 +15,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "0697D446B69B99CCE888C2FF"
-               BuildableName = "CursorUsageTracker.app"
-               BlueprintName = "CursorUsageTracker"
+               BlueprintIdentifier = "8FBB40E668FED56875F985C9"
+               BuildableName = "CursorUsageWatch.app"
+               BlueprintName = "CursorUsageWatch"
                ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -29,9 +29,37 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "E1EB33C9031D4460134BC8D6"
-               BuildableName = "CursorUsageWidgets.appex"
-               BlueprintName = "CursorUsageWidgets"
+               BlueprintIdentifier = "29B26DEE7EB5D6515A41EBBB"
+               BuildableName = "CursorUsageWatchWidgets.appex"
+               BlueprintName = "CursorUsageWatchWidgets"
+               ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "42DBDC4423AB77C7111E0BDF"
+               BuildableName = "CursorUsageiOS.app"
+               BlueprintName = "CursorUsageiOS"
+               ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DF7482B521344F26BA1084C8"
+               BuildableName = "CursorUsageiOSWidgets.appex"
+               BlueprintName = "CursorUsageiOSWidgets"
                ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +74,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0697D446B69B99CCE888C2FF"
-            BuildableName = "CursorUsageTracker.app"
-            BlueprintName = "CursorUsageTracker"
+            BlueprintIdentifier = "42DBDC4423AB77C7111E0BDF"
+            BuildableName = "CursorUsageiOS.app"
+            BlueprintName = "CursorUsageiOS"
             ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -56,7 +84,7 @@
       </Testables>
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -69,9 +97,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0697D446B69B99CCE888C2FF"
-            BuildableName = "CursorUsageTracker.app"
-            BlueprintName = "CursorUsageTracker"
+            BlueprintIdentifier = "42DBDC4423AB77C7111E0BDF"
+            BuildableName = "CursorUsageiOS.app"
+            BlueprintName = "CursorUsageiOS"
             ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -88,9 +116,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "0697D446B69B99CCE888C2FF"
-            BuildableName = "CursorUsageTracker.app"
-            BlueprintName = "CursorUsageTracker"
+            BlueprintIdentifier = "42DBDC4423AB77C7111E0BDF"
+            BuildableName = "CursorUsageiOS.app"
+            BlueprintName = "CursorUsageiOS"
             ReferencedContainer = "container:CursorUsageTracker.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
