@@ -365,12 +365,8 @@ private struct PopoverPreviewCard: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
-                if t.burnRateEstimate {
-                    Label(
-                        "Today \(snapshot?.todaySpendCents.map(MenuBarFormatter.usd) ?? "—")",
-                        systemImage: "chart.line.uptrend.xyaxis"
-                    )
-                    .font(.caption2)
+                if t.burnRateEstimate, let snapshot {
+                    DailyUsageCard(snapshot: snapshot, compact: true, includeFootnote: false)
                 }
 
                 if t.modelsThisPeriod {

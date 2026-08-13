@@ -64,22 +64,33 @@ public enum DailyUsageLedger {
         let plan = snapshot.planUsedCents ?? 0
         let onDemand = snapshot.onDemandUsedCents ?? 0
 
+        let previous = samples.last { $0.day < todayKey }
+        let elapsed = snapshot.elapsedDays(now: now, calendar: calendar)
+
         if let idx = samples.firstIndex(where: { $0.day == todayKey }) {
             applyCycleResetIfNeeded(&samples[idx], plan: plan, onDemand: onDemand)
+            repairEmptyFirstBaselineIfNeeded(
+                &samples[idx],
+                previous: previous,
+                plan: plan,
+                onDemand: onDemand,
+                elapsed: elapsed
+            )
             samples[idx].closingPlanCents = plan
             samples[idx].closingOnDemandCents = onDemand
         } else {
-            let previous = samples.last { $0.day < todayKey }
-            var openingPlan = previous?.closingPlanCents ?? plan
-            var openingOnDemand = previous?.closingOnDemandCents ?? onDemand
-            if plan < openingPlan { openingPlan = 0 }
-            if onDemand < openingOnDemand { openingOnDemand = 0 }
+            let opening = openingBaseline(
+                previous: previous,
+                plan: plan,
+                onDemand: onDemand,
+                elapsed: elapsed
+            )
             samples.append(
                 DailySample(
                     day: todayKey,
-                    openingPlanCents: openingPlan,
+                    openingPlanCents: opening.plan,
                     closingPlanCents: plan,
-                    openingOnDemandCents: openingOnDemand,
+                    openingOnDemandCents: opening.onDemand,
                     closingOnDemandCents: onDemand
                 )
             )
@@ -133,6 +144,56 @@ public enum DailyUsageLedger {
             return nil
         }
         return max(0, limit - used)
+    }
+
+    /// First snapshot of a day: use yesterday’s close when we have it. Otherwise even-split
+    /// cycle-to-date spend so “today” isn’t $0 on first install mid-cycle.
+    private static func openingBaseline(
+        previous: DailySample?,
+        plan: Int,
+        onDemand: Int,
+        elapsed: Int?
+    ) -> (plan: Int, onDemand: Int) {
+        var openingPlan: Int
+        var openingOnDemand: Int
+        if let previous {
+            openingPlan = previous.closingPlanCents
+            openingOnDemand = previous.closingOnDemandCents
+        } else if let elapsed, elapsed <= 1 {
+            openingPlan = 0
+            openingOnDemand = 0
+        } else if let elapsed {
+            openingPlan = evenSplitPrior(plan, elapsed: elapsed)
+            openingOnDemand = evenSplitPrior(onDemand, elapsed: elapsed)
+        } else {
+            openingPlan = plan
+            openingOnDemand = onDemand
+        }
+        if plan < openingPlan { openingPlan = 0 }
+        if onDemand < openingOnDemand { openingOnDemand = 0 }
+        return (openingPlan, openingOnDemand)
+    }
+
+    private static func repairEmptyFirstBaselineIfNeeded(
+        _ sample: inout DailySample,
+        previous: DailySample?,
+        plan: Int,
+        onDemand: Int,
+        elapsed: Int?
+    ) {
+        guard previous == nil,
+              sample.spendCents == 0,
+              sample.openingPlanCents == sample.closingPlanCents,
+              let elapsed, elapsed > 1
+        else { return }
+        let opening = openingBaseline(previous: nil, plan: plan, onDemand: onDemand, elapsed: elapsed)
+        sample.openingPlanCents = opening.plan
+        sample.openingOnDemandCents = opening.onDemand
+    }
+
+    private static func evenSplitPrior(_ used: Int, elapsed: Int) -> Int {
+        guard elapsed > 1 else { return 0 }
+        return Int((Double(used) * Double(elapsed - 1) / Double(elapsed)).rounded())
     }
 
     private static func applyCycleResetIfNeeded(_ sample: inout DailySample, plan: Int, onDemand: Int) {

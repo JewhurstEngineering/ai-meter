@@ -23,7 +23,20 @@ final class DailyUsageLedgerTests: XCTestCase {
         super.tearDown()
     }
 
-    func testFirstIngestTodayIsZeroUntilSpendMoves() {
+    func testFirstIngestWithoutCycleDatesStaysZeroUntilSpendMoves() {
+        let now = date(2026, 8, 13, 15)
+        let summary = DailyUsageLedger.ingest(
+            accountID: accountID,
+            snapshot: snapshot(plan: 24_000),
+            now: now,
+            calendar: calendar,
+            defaults: defaults
+        )
+        XCTAssertEqual(summary.todayCents, 0)
+        XCTAssertEqual(summary.last7DaysCents.count, 7)
+    }
+
+    func testFirstIngestMidCycleEstimatesTodayFromEvenSplit() {
         let now = date(2026, 8, 13, 15)
         let summary = DailyUsageLedger.ingest(
             accountID: accountID,
@@ -32,10 +45,41 @@ final class DailyUsageLedgerTests: XCTestCase {
             calendar: calendar,
             defaults: defaults
         )
-        XCTAssertEqual(summary.todayCents, 0)
-        XCTAssertEqual(summary.last7DaysCents.count, 7)
         XCTAssertEqual(summary.cycleDaysElapsed, 13)
+        XCTAssertEqual(summary.todayCents, 24_000 / 13)
         XCTAssertEqual(summary.cycleAverageCents, 24_000 / 13)
+        XCTAssertEqual(summary.last7DaysCents.last, 24_000 / 13)
+    }
+
+    func testFirstIngestOnCycleStartDayUsesFullPlan() {
+        let summary = DailyUsageLedger.ingest(
+            accountID: accountID,
+            snapshot: snapshot(plan: 1_500, start: date(2026, 8, 13), end: date(2026, 9, 12)),
+            now: date(2026, 8, 13, 16),
+            calendar: calendar,
+            defaults: defaults
+        )
+        XCTAssertEqual(summary.cycleDaysElapsed, 1)
+        XCTAssertEqual(summary.todayCents, 1_500)
+    }
+
+    func testRepairStuckZeroBaselineEvenSplits() {
+        _ = DailyUsageLedger.ingest(
+            accountID: accountID,
+            snapshot: snapshot(plan: 24_672),
+            now: date(2026, 8, 13, 9),
+            calendar: calendar,
+            defaults: defaults
+        )
+        let repaired = DailyUsageLedger.ingest(
+            accountID: accountID,
+            snapshot: snapshot(plan: 24_672, start: date(2026, 8, 12), end: date(2026, 9, 11)),
+            now: date(2026, 8, 13, 9, minute: 5),
+            calendar: calendar,
+            defaults: defaults
+        )
+        XCTAssertEqual(repaired.cycleDaysElapsed, 2)
+        XCTAssertEqual(repaired.todayCents, 24_672 / 2)
     }
 
     func testSameDayIncreaseIsTodaySpend() {
@@ -166,7 +210,7 @@ final class DailyUsageLedgerTests: XCTestCase {
         )
     }
 
-    private func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 15) -> Date {
-        calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour))!
+    private func date(_ year: Int, _ month: Int, _ day: Int, _ hour: Int = 15, minute: Int = 0) -> Date {
+        calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute))!
     }
 }

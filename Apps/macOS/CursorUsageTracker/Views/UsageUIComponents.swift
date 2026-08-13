@@ -244,7 +244,7 @@ struct DailyUsageCard: View {
             }
 
             if includeFootnote {
-                Text("Today is measured locally from each refresh. Cursor doesn’t publish personal daily totals.")
+                Text("Today is estimated from cycle spend until a midnight baseline exists, then tracked from each refresh.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -297,12 +297,20 @@ struct DailySparklineView: View {
 
     var body: some View {
         let peak = max(values.max() ?? 0, 1)
-        HStack(alignment: .bottom, spacing: 3) {
-            ForEach(Array(values.enumerated()), id: \.offset) { index, value in
-                Capsule()
-                    .fill(index == values.count - 1 ? accent : accent.opacity(0.32))
-                    .frame(height: max(3, CGFloat(value) / CGFloat(peak) * 36))
+        GeometryReader { geo in
+            let count = max(values.count, 1)
+            let spacing: CGFloat = 3
+            let barWidth = max(3, (geo.size.width - spacing * CGFloat(count - 1)) / CGFloat(count))
+            HStack(alignment: .bottom, spacing: spacing) {
+                ForEach(Array(values.enumerated()), id: \.offset) { index, value in
+                    let ratio = CGFloat(value) / CGFloat(peak)
+                    let barHeight = value == 0 ? 2 : max(6, ratio * geo.size.height)
+                    Capsule()
+                        .fill(index == values.count - 1 ? accent : accent.opacity(value == 0 ? 0.16 : 0.42))
+                        .frame(width: barWidth, height: barHeight)
+                }
             }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
         }
         .accessibilityHidden(true)
     }
