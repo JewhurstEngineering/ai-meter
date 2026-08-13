@@ -5,27 +5,12 @@ struct OverviewView: View {
     @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
 
-    private var account: AccountRuntime? { store.activeAccount }
     private var layout: DisplayPreferences.SurfaceToggles { store.preferences.popover }
 
     var body: some View {
         NavigationStack {
-            Group {
-                if account?.isAuthenticated != true {
-                    unsignedHero(
-                        title: "Not signed in",
-                        detail: "Add a Cursor session in Accounts. Sign in with Cursor or paste a token — this phone cannot read the Mac IDE."
-                    )
-                } else if let snapshot = account?.snapshot {
-                    usageList(snapshot)
-                } else if store.isRefreshing || account?.isRefreshing == true {
-                    ProgressView("Loading usage…")
-                } else {
-                    unsignedHero(
-                        title: "No usage data yet",
-                        detail: account?.lastError ?? store.lastError ?? "Pull to refresh after signing in."
-                    )
-                }
+            PhoneAccountPager { account in
+                accountPage(account)
             }
             .navigationTitle("Cursor Usage Tracker")
             .navigationBarTitleDisplayMode(.inline)
@@ -36,15 +21,36 @@ struct OverviewView: View {
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
-                    .disabled(account?.isAuthenticated != true || store.isRefreshing)
+                    .disabled(store.activeAccount?.isAuthenticated != true || store.isRefreshing)
                 }
             }
-            .refreshable { await store.refresh() }
         }
     }
 
     @ViewBuilder
-    private func usageList(_ snapshot: UsageSnapshot) -> some View {
+    private func accountPage(_ account: AccountRuntime?) -> some View {
+        Group {
+            if account?.isAuthenticated != true {
+                unsignedHero(
+                    title: "Not signed in",
+                    detail: "Add a Cursor session in Accounts. Sign in with Cursor or paste a token — this phone cannot read the Mac IDE."
+                )
+            } else if let snapshot = account?.snapshot {
+                usageList(snapshot, account: account)
+            } else if account?.isRefreshing == true || store.isRefreshing {
+                ProgressView("Loading usage…")
+            } else {
+                unsignedHero(
+                    title: "No usage data yet",
+                    detail: account?.lastError ?? store.lastError ?? "Pull to refresh after signing in."
+                )
+            }
+        }
+        .refreshable { await store.refresh() }
+    }
+
+    @ViewBuilder
+    private func usageList(_ snapshot: UsageSnapshot, account: AccountRuntime?) -> some View {
         List {
             Section {
                 HStack(spacing: 12) {
@@ -52,23 +58,17 @@ struct OverviewView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(snapshot.planDisplayName)
                             .font(.headline)
+                        if let label = account?.connection.displayLabel {
+                            Text(label)
+                                .font(.subheadline.weight(.medium))
+                        }
                         Text("Updated \(snapshot.fetchedAt.formatted(date: .omitted, time: .shortened))")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 0)
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            }
-
-            if store.connections.count > 1 {
-                Section("Account") {
-                    Picker("Active", selection: activeBinding) {
-                        ForEach(store.accounts) { item in
-                            Text(item.connection.displayLabel).tag(item.id)
-                        }
-                    }
-                }
+                PhoneAccountSwitcherChrome()
             }
 
             if layout.cursorModelsPercent || layout.otherModelsPercent || layout.totalPercent {
@@ -157,15 +157,9 @@ struct OverviewView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
+            PhoneAccountSwitcherChrome()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var activeBinding: Binding<UUID> {
-        Binding(
-            get: { store.activeAccountID ?? store.connections.first?.id ?? UUID() },
-            set: { store.setActive(id: $0) }
-        )
     }
 
     private func poolRow(_ title: String, systemImage: String, percent: Double?) -> some View {

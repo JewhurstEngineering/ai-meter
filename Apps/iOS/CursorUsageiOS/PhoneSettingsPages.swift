@@ -311,16 +311,16 @@ struct PhoneAccessibilitySettings: View {
     var body: some View {
         Form {
             Section {
-                Picker("Interface size", selection: sizeBinding) {
+                Picker("Text size", selection: textSizeBinding) {
                     ForEach(DisplayPreferences.InterfaceSize.allCases) { size in
                         Text(size.title).tag(size)
                     }
                 }
                 .pickerStyle(.segmented)
             } header: {
-                Text("Interface size")
+                Text("Text size")
             } footer: {
-                Text("Scales type on iPhone. The Mac app magnifies Settings and the popover.")
+                Text("Makes labels larger. Does not zoom the layout. On Mac, Interface size zooms Settings and the popover.")
             }
 
             Section("Color vision") {
@@ -383,10 +383,10 @@ struct PhoneAccessibilitySettings: View {
         }
     }
 
-    private var sizeBinding: Binding<DisplayPreferences.InterfaceSize> {
+    private var textSizeBinding: Binding<DisplayPreferences.InterfaceSize> {
         Binding(
-            get: { store.preferences.interfaceSize },
-            set: { value in store.updatePreferences { $0.interfaceSize = value } }
+            get: { store.preferences.textSize },
+            set: { value in store.updatePreferences { $0.textSize = value } }
         )
     }
 
@@ -408,73 +408,83 @@ struct PhoneAccessibilitySettings: View {
 // MARK: - Included / paid / about
 
 struct PhoneIncludedSettings: View {
-    @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        Group {
-            if let snapshot = store.snapshot {
-                List {
-                    Section("Subscription") {
-                        LabeledContent("Plan", value: snapshot.planDisplayName)
-                        if let status = snapshot.subscriptionStatus {
-                            LabeledContent("Status", value: status)
-                        }
-                        if let start = snapshot.billingCycleStart, let end = snapshot.billingCycleEnd {
-                            LabeledContent("Cycle") {
-                                Text("\(start.formatted(date: .abbreviated, time: .omitted)) → \(end.formatted(date: .abbreviated, time: .omitted))")
-                            }
-                        }
-                        if let days = snapshot.daysRemainingInCycle {
-                            LabeledContent("Remaining", value: "\(days)d")
-                        }
-                    }
-                    Section("Included pools") {
-                        if let p = snapshot.cursorModelsPercentUsed {
-                            pool("Cursor Models", "sparkles", p, theme.cursorModels)
-                        }
-                        if let p = snapshot.otherModelsPercentUsed {
-                            pool("Other Models", "cpu", p, theme.otherModels)
-                        }
-                        if let p = snapshot.totalPercentUsed {
-                            pool("Total included", "chart.pie.fill", p, theme.total)
-                        }
-                        if let bonus = snapshot.bonusCents, bonus > 0 {
-                            LabeledContent("Bonus credit") {
-                                Text(MenuBarFormatter.usd(bonus)).monospacedDigit()
-                            }
-                        }
-                    }
-                    if !snapshot.modelBreakdown.isEmpty {
-                        Section("Models this period") {
-                            ForEach(snapshot.modelBreakdown) { row in
-                                LabeledContent(row.model) {
-                                    Text(MenuBarFormatter.usd(row.totalCents)).monospacedDigit()
-                                }
-                            }
-                            if let total = snapshot.totalModelCostCents {
-                                LabeledContent("Total") {
-                                    Text(MenuBarFormatter.usd(total))
-                                        .fontWeight(.semibold)
-                                        .monospacedDigit()
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                ContentUnavailableView(
-                    "No usage yet",
-                    systemImage: "chart.bar.doc.horizontal",
-                    description: Text("Sign in and refresh to see included usage.")
-                )
-            }
+        PhoneAccountPager { account in
+            includedPage(account)
         }
         .navigationTitle("Included usage")
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func pool(_ title: String, _ image: String, _ percent: Double, _ accent: Color) -> some View {
+    @ViewBuilder
+    private func includedPage(_ account: AccountRuntime?) -> some View {
+        if let snapshot = account?.snapshot {
+            List {
+                accountHeader(account)
+                Section("Subscription") {
+                    LabeledContent("Plan", value: snapshot.planDisplayName)
+                    if let status = snapshot.subscriptionStatus {
+                        LabeledContent("Status", value: status)
+                    }
+                    if let start = snapshot.billingCycleStart, let end = snapshot.billingCycleEnd {
+                        LabeledContent("Cycle") {
+                            Text("\(start.formatted(date: .abbreviated, time: .omitted)) → \(end.formatted(date: .abbreviated, time: .omitted))")
+                        }
+                    }
+                    if let days = snapshot.daysRemainingInCycle {
+                        LabeledContent("Remaining", value: "\(days)d")
+                    }
+                }
+                Section("Included pools") {
+                    if let p = snapshot.cursorModelsPercentUsed {
+                        pool("Cursor Models", "sparkles", p)
+                    }
+                    if let p = snapshot.otherModelsPercentUsed {
+                        pool("Other Models", "cpu", p)
+                    }
+                    if let p = snapshot.totalPercentUsed {
+                        pool("Total included", "chart.pie.fill", p)
+                    }
+                    if let bonus = snapshot.bonusCents, bonus > 0 {
+                        LabeledContent("Bonus credit") {
+                            Text(MenuBarFormatter.usd(bonus)).monospacedDigit()
+                        }
+                    }
+                }
+                if !snapshot.modelBreakdown.isEmpty {
+                    Section("Models this period") {
+                        ForEach(snapshot.modelBreakdown) { row in
+                            LabeledContent(row.model) {
+                                Text(MenuBarFormatter.usd(row.totalCents)).monospacedDigit()
+                            }
+                        }
+                        if let total = snapshot.totalModelCostCents {
+                            LabeledContent("Total") {
+                                Text(MenuBarFormatter.usd(total))
+                                    .fontWeight(.semibold)
+                                    .monospacedDigit()
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            List {
+                accountHeader(account)
+                Section {
+                    ContentUnavailableView(
+                        "No usage yet",
+                        systemImage: "chart.bar.doc.horizontal",
+                        description: Text("Sign in and refresh to see included usage.")
+                    )
+                }
+            }
+        }
+    }
+
+    private func pool(_ title: String, _ image: String, _ percent: Double) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Label(title, systemImage: image)
@@ -494,50 +504,71 @@ struct PhoneIncludedSettings: View {
 }
 
 struct PhonePaidSettings: View {
-    @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        Group {
-            if let snapshot = store.snapshot {
-                List {
-                    Section("On-demand") {
-                        LabeledContent("Status") {
-                            Text(snapshot.onDemandEnabled ? "Enabled" : "Disabled")
-                                .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
-                        }
-                        if snapshot.isOnDemandUnlimited {
-                            LabeledContent("Limit", value: "Unlimited")
-                        } else if let used = snapshot.onDemandUsedCents, let limit = snapshot.onDemandLimitCents, limit > 0 {
-                            LabeledContent("Billable") {
-                                Text("\(MenuBarFormatter.usd(used)) of \(MenuBarFormatter.usd(limit))")
-                                    .monospacedDigit()
-                            }
-                        } else if let used = snapshot.onDemandUsedCents {
-                            LabeledContent("Billable") {
-                                Text(MenuBarFormatter.usd(used)).monospacedDigit()
-                            }
-                        }
-                    }
-                    if let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
-                        Section("Included plan") {
-                            LabeledContent("Spend") {
-                                Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
-                                    .monospacedDigit()
-                            }
-                        }
-                    }
-                }
-            } else {
-                ContentUnavailableView(
-                    "No paid usage data",
-                    systemImage: "creditcard",
-                    description: Text("Sign in and refresh to see on-demand status.")
-                )
-            }
+        PhoneAccountPager { account in
+            paidPage(account)
         }
         .navigationTitle("Paid usage")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func paidPage(_ account: AccountRuntime?) -> some View {
+        if let snapshot = account?.snapshot {
+            List {
+                accountHeader(account)
+                Section("On-demand") {
+                    LabeledContent("Status") {
+                        Text(snapshot.onDemandEnabled ? "Enabled" : "Disabled")
+                            .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
+                    }
+                    if snapshot.isOnDemandUnlimited {
+                        LabeledContent("Limit", value: "Unlimited")
+                    } else if let used = snapshot.onDemandUsedCents, let limit = snapshot.onDemandLimitCents, limit > 0 {
+                        LabeledContent("Billable") {
+                            Text("\(MenuBarFormatter.usd(used)) of \(MenuBarFormatter.usd(limit))")
+                                .monospacedDigit()
+                        }
+                    } else if let used = snapshot.onDemandUsedCents {
+                        LabeledContent("Billable") {
+                            Text(MenuBarFormatter.usd(used)).monospacedDigit()
+                        }
+                    }
+                }
+                if let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
+                    Section("Included plan") {
+                        LabeledContent("Spend") {
+                            Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
+                                .monospacedDigit()
+                        }
+                    }
+                }
+            }
+        } else {
+            List {
+                accountHeader(account)
+                Section {
+                    ContentUnavailableView(
+                        "No paid usage data",
+                        systemImage: "creditcard",
+                        description: Text("Sign in and refresh to see on-demand status.")
+                    )
+                }
+            }
+        }
+    }
+}
+
+@ViewBuilder
+private func accountHeader(_ account: AccountRuntime?) -> some View {
+    Section {
+        if let label = account?.connection.displayLabel {
+            Text(label)
+                .font(.subheadline.weight(.medium))
+        }
+        PhoneAccountSwitcherChrome()
     }
 }
 
@@ -556,6 +587,9 @@ struct PhoneAboutSettings: View {
                 }
                 .listRowBackground(Color.clear)
                 LabeledContent("Version", value: version)
+                LabeledContent("Developer", value: AppAbout.organization)
+                LabeledContent("Copyright", value: AppAbout.copyrightLine)
+                LabeledContent("License", value: AppAbout.licenseName)
             }
             Section("What it tracks") {
                 Label("Cursor Models included pool", systemImage: "sparkles")
