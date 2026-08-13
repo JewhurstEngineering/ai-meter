@@ -198,14 +198,17 @@ public final class UsageStore: ObservableObject {
         defer { updateRuntime(id: id) { $0.isRefreshing = false } }
         do {
             let snap = try await client.fetchSnapshot(sessionToken: token)
+            let summary = DailyUsageLedger.ingest(accountID: id, snapshot: snap)
+            var decorated = snap
+            decorated.applyDaily(summary)
             updateRuntime(id: id) {
-                $0.snapshot = snap
+                $0.snapshot = decorated
                 $0.lastError = nil
                 $0.isAuthenticated = true
             }
             UsageNotificationService.clearSessionExpiredDedupe(accountID: id)
             await UsageNotificationService.evaluate(
-                snapshot: snap,
+                snapshot: decorated,
                 preferences: preferences,
                 accountEmail: connection.email ?? connection.displayLabel,
                 accountID: id

@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import CursorUsageCore
 
 struct UsageProgressBar: View {
     let percent: Double
@@ -199,5 +200,110 @@ private struct ThemedSwitch: View {
                 }
                 .accessibilityAddTraits(.isButton)
         }
+    }
+}
+
+struct DailyUsageCard: View {
+    let snapshot: UsageSnapshot
+    var compact: Bool = false
+    var includeFootnote: Bool = true
+    @Environment(\.appTheme) private var theme
+
+    var body: some View {
+        let today = snapshot.todaySpendCents
+        let average = snapshot.inferredCycleAverageCents
+        let pace = snapshot.inferredRemainingPaceCents
+        let spark = snapshot.last7DaySpendCents
+
+        VStack(alignment: .leading, spacing: compact ? 8 : 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Label("Daily usage", systemImage: "chart.line.uptrend.xyaxis")
+                    .font(compact ? .caption.weight(.semibold) : .subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                Text(today.map(MenuBarFormatter.usd) ?? "—")
+                    .font(compact ? .title3.monospacedDigit().weight(.bold) : .title2.monospacedDigit().weight(.bold))
+                Text("today")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            HStack(alignment: .bottom, spacing: compact ? 10 : 14) {
+                DailySparklineView(
+                    values: spark.isEmpty ? Array(repeating: 0, count: 7) : spark,
+                    accent: theme.spend
+                )
+                .frame(height: compact ? 28 : 36)
+                .frame(maxWidth: .infinity)
+
+                VStack(alignment: .trailing, spacing: 4) {
+                    metricChip("Yesterday", snapshot.yesterdaySpendCents)
+                    metricChip(averageLabel, average)
+                    metricChip("Pace left", pace)
+                }
+            }
+
+            if includeFootnote {
+                Text("Today is measured locally from each refresh. Cursor doesn’t publish personal daily totals.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(compact ? 10 : 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: compact ? 10 : 12, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: compact ? 10 : 12, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Daily usage")
+        .accessibilityValue(accessibilityValue(today: today, average: average, pace: pace))
+    }
+
+    private var averageLabel: String {
+        if let days = snapshot.cycleDaysElapsed ?? snapshot.elapsedDays() {
+            return "\(days)d avg"
+        }
+        return "Cycle avg"
+    }
+
+    @ViewBuilder
+    private func metricChip(_ title: String, _ cents: Int?) -> some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(cents.map(MenuBarFormatter.usd) ?? "—")
+                .font(.caption.monospacedDigit().weight(.semibold))
+        }
+    }
+
+    private func accessibilityValue(today: Int?, average: Int?, pace: Int?) -> String {
+        let todayText = today.map(MenuBarFormatter.usd) ?? "unknown"
+        let avgText = average.map(MenuBarFormatter.usd) ?? "unknown"
+        let paceText = pace.map(MenuBarFormatter.usd) ?? "unknown"
+        return "Today \(todayText), cycle average \(avgText) per day, remaining pace \(paceText) per day"
+    }
+}
+
+struct DailySparklineView: View {
+    let values: [Int]
+    var accent: Color
+
+    var body: some View {
+        let peak = max(values.max() ?? 0, 1)
+        HStack(alignment: .bottom, spacing: 3) {
+            ForEach(Array(values.enumerated()), id: \.offset) { index, value in
+                Capsule()
+                    .fill(index == values.count - 1 ? accent : accent.opacity(0.32))
+                    .frame(height: max(3, CGFloat(value) / CGFloat(peak) * 36))
+            }
+        }
+        .accessibilityHidden(true)
     }
 }

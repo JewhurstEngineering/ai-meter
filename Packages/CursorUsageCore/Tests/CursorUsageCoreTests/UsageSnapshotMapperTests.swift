@@ -168,6 +168,7 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(decoded.planDisplayName, "Ultra")
         XCTAssertEqual(decoded.otherModelsPercentUsed!, 37, accuracy: 0.01)
         XCTAssertEqual(decoded.planUsedCents, 24041)
+        XCTAssertNil(decoded.todaySpendCents)
     }
 
     func testSessionCookieBuilder() throws {

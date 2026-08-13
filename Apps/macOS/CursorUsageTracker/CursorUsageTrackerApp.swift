@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         store.onWidgetSnapshotWritten = { WidgetReload.afterWritingSnapshot() }
+        AppInstall.registerEmbeddedWidget()
         statusItem.start(store: store)
     }
 

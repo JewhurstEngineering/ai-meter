@@ -11,6 +11,7 @@ struct IncludedUsageSettingsView: View {
                 if let snapshot = store.snapshot {
                     VStack(alignment: .leading, spacing: 10) {
                         subscriptionHero(snapshot)
+                        DailyUsageCard(snapshot: snapshot, compact: true)
                         pools(snapshot)
                         models(snapshot)
                     }
@@ -220,28 +221,32 @@ struct PaidUsageSettingsView: View {
         ScrollView {
             Group {
                 if let snapshot = store.snapshot {
-                    SettingsPanel(
-                        title: "Usage-based pricing",
-                        systemImage: "creditcard.fill",
-                        subtitle: "On-demand spend beyond included pools."
-                    ) {
-                        HStack {
-                            Label(
-                                snapshot.onDemandEnabled ? "Enabled" : "Disabled",
-                                systemImage: snapshot.onDemandEnabled ? "checkmark.circle.fill" : "xmark.octagon.fill"
+                    VStack(alignment: .leading, spacing: 12) {
+                        SettingsPanel(
+                            title: "Usage-based pricing",
+                            systemImage: "creditcard.fill",
+                            subtitle: "On-demand spend beyond included pools."
+                        ) {
+                            HStack {
+                                Label(
+                                    snapshot.onDemandEnabled ? "Enabled" : "Disabled",
+                                    systemImage: snapshot.onDemandEnabled ? "checkmark.circle.fill" : "xmark.octagon.fill"
+                                )
+                                .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
+                                .font(.headline)
+                                Spacer()
+                            }
+                            if let used = snapshot.onDemandUsedCents {
+                                LabeledContent("Billable usage", value: MenuBarFormatter.usd(used))
+                            }
+                            LabeledContent(
+                                "Current usage limit",
+                                value: snapshot.onDemandLimitCents.map(MenuBarFormatter.usd)
+                                    ?? (snapshot.onDemandEnabled ? "—" : "$0")
                             )
-                            .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
-                            .font(.headline)
-                            Spacer()
                         }
-                        if let used = snapshot.onDemandUsedCents {
-                            LabeledContent("Billable usage", value: MenuBarFormatter.usd(used))
-                        }
-                        LabeledContent(
-                            "Current usage limit",
-                            value: snapshot.onDemandLimitCents.map(MenuBarFormatter.usd)
-                                ?? (snapshot.onDemandEnabled ? "—" : "$0")
-                        )
+
+                        DailyUsageCard(snapshot: snapshot, compact: true)
                     }
                 } else {
                     ContentUnavailableView(
@@ -261,10 +266,11 @@ struct PaidUsageSettingsView: View {
 struct AboutSettingsView: View {
     @Environment(\.appTheme) private var theme
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.2"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.5"
     }
 
     @State private var installMessage: String?
+    @State private var installSucceeded = false
 
     private var isRunningFromApplications: Bool {
         Bundle.main.bundleURL.path.hasPrefix("/Applications/")
@@ -285,6 +291,7 @@ struct AboutSettingsView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             aboutBullet("sparkles", "Cursor Models included pool")
                             aboutBullet("cpu", "Other Models included pool")
+                            aboutBullet("chart.line.uptrend.xyaxis", "Daily spend (local, from each refresh)")
                             aboutBullet("creditcard", "On-demand, limits, and spend")
                             aboutBullet("bell.badge", "Menu bar warnings + notifications")
                         }
@@ -294,7 +301,7 @@ struct AboutSettingsView: View {
                     SettingsPanel(
                         title: "Desktop widget",
                         systemImage: "rectangle.on.rectangle",
-                        subtitle: "macOS only lists widgets from /Applications.",
+                        subtitle: "Small, medium, large — plus a daily widget. Edit Widget to pick the highlighted metric.",
                         compact: true
                     ) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -309,7 +316,15 @@ struct AboutSettingsView: View {
                                     .foregroundStyle(.green)
                             } else {
                                 Button {
-                                    installMessage = installToApplications()
+                                    do {
+                                        let dest = try AppInstall.copyRunningAppToApplications()
+                                        installSucceeded = true
+                                        installMessage = "Copied to \(dest.path). Keep this Settings window. Then quit the Xcode copy and open the Applications app."
+                                    } catch {
+                                        installSucceeded = false
+                                        installMessage = "Couldn’t install: \(error.localizedDescription)"
+                                    }
+                                    AppActivation.scheduleSettingsFocus()
                                 } label: {
                                     Label("Install to Applications", systemImage: "square.and.arrow.down")
                                 }
@@ -317,14 +332,29 @@ struct AboutSettingsView: View {
                                 .controlSize(.small)
                             }
 
-                            aboutBullet("1.circle", "Install (button above) or drag this .app into /Applications")
-                            aboutBullet("2.circle", "Open that copy once from Applications")
+                            if installSucceeded, !isRunningFromApplications {
+                                HStack(spacing: 8) {
+                                    Button("Reveal in Finder") {
+                                        NSWorkspace.shared.activateFileViewerSelecting([AppInstall.installedAppURL])
+                                        AppActivation.scheduleSettingsFocus()
+                                    }
+                                    .controlSize(.small)
+                                    Button("Quit this copy & open installed app") {
+                                        AppInstall.launchInstalledAndTerminate()
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .controlSize(.small)
+                                }
+                            }
+
+                            aboutBullet("1.circle", "Install (button above) — does not launch a second copy")
+                            aboutBullet("2.circle", "Quit this Xcode build, then open Applications ▸ Cursor Usage Tracker")
                             aboutBullet("3.circle", "Right-click desktop → Edit Widgets → “Cursor Usage”")
 
                             if let installMessage {
                                 Text(installMessage)
                                     .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                    .foregroundStyle(installSucceeded ? Color.secondary : Color.orange)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -359,21 +389,6 @@ struct AboutSettingsView: View {
             .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
-    }
-
-    private func installToApplications() -> String {
-        let src = Bundle.main.bundleURL
-        let dest = URL(fileURLWithPath: "/Applications/Cursor Usage Tracker.app")
-        do {
-            if FileManager.default.fileExists(atPath: dest.path) {
-                try FileManager.default.removeItem(at: dest)
-            }
-            try FileManager.default.copyItem(at: src, to: dest)
-            NSWorkspace.shared.open(dest)
-            return "Copied to \(dest.path). Quit the Xcode copy, use the Applications one, then Edit Widgets."
-        } catch {
-            return "Couldn’t install: \(error.localizedDescription). Drag the app into /Applications yourself."
-        }
     }
 
     private var hero: some View {

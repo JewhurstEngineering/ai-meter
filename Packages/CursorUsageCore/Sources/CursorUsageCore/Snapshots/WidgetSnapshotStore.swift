@@ -12,6 +12,11 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var onDemandEnabled: Bool
     public var daysRemaining: Int?
     public var showWarning: Bool
+    public var todaySpendCents: Int?
+    public var yesterdaySpendCents: Int?
+    public var cycleAverageCents: Int?
+    public var remainingPaceCents: Int?
+    public var last7DaySpendCents: [Int]?
 
     public init(
         from snapshot: UsageSnapshot,
@@ -31,6 +36,11 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         showWarning = snapshot.menuBarWarningHits(warnings).contains {
             !snoozed.contains($0.channel.rawValue)
         }
+        todaySpendCents = snapshot.todaySpendCents
+        yesterdaySpendCents = snapshot.yesterdaySpendCents
+        cycleAverageCents = snapshot.inferredCycleAverageCents
+        remainingPaceCents = snapshot.inferredRemainingPaceCents
+        last7DaySpendCents = snapshot.last7DaySpendCents
     }
 
     @available(*, deprecated, message: "Use init(from:warnings:)")
@@ -40,7 +50,9 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
 }
 
 public enum WidgetSnapshotStore {
-    public static let appGroupID = "group.com.cursorusagetracker.shared"
+    /// macOS App Group form is `TEAMID.name` (see Stats.app). iOS-style `group.` is not in the widget profile.
+    public static let appGroupID = "6998422DKP.com.cursorusagetracker.shared"
+    public static let legacyAppGroupID = "group.com.cursorusagetracker.shared"
     public static let filename = "widget-snapshot.json"
     private static let defaultsKey = "widgetSnapshotJSON"
 
@@ -48,24 +60,28 @@ public enum WidgetSnapshotStore {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
     }
 
-    /// `containerURL` is nil in a sandboxed widget whose profile omitted App Groups.
-    /// The unsandboxed host still writes here; always probe this path too.
-    private static var homeGroupContainerURL: URL {
-        FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("Library/Group Containers", isDirectory: true)
-            .appendingPathComponent(appGroupID, isDirectory: true)
-    }
+    private static var groupIDs: [String] { [appGroupID, legacyAppGroupID] }
 
     private static var groupRoots: [URL] {
         var roots: [URL] = []
         var seen = Set<String>()
-        for url in [containerURL, homeGroupContainerURL].compactMap({ $0 }) {
-            let path = url.standardizedFileURL.path
-            if seen.insert(path).inserted {
-                roots.append(url)
+        for id in groupIDs {
+            if let url = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: id) {
+                appendRoot(url, seen: &seen, into: &roots)
             }
+            let home = FileManager.default.homeDirectoryForCurrentUser
+                .appendingPathComponent("Library/Group Containers", isDirectory: true)
+                .appendingPathComponent(id, isDirectory: true)
+            appendRoot(home, seen: &seen, into: &roots)
         }
         return roots
+    }
+
+    private static func appendRoot(_ url: URL, seen: inout Set<String>, into roots: inout [URL]) {
+        let path = url.standardizedFileURL.path
+        if seen.insert(path).inserted {
+            roots.append(url)
+        }
     }
 
     private static var candidateFiles: [URL] {
@@ -93,9 +109,11 @@ public enum WidgetSnapshotStore {
     public static func write(_ snapshot: WidgetSnapshot) throws {
         let data = try JSONEncoder().encode(snapshot)
 
-        if let suite = UserDefaults(suiteName: appGroupID) {
-            suite.set(data, forKey: defaultsKey)
-            suite.synchronize()
+        for id in groupIDs {
+            if let suite = UserDefaults(suiteName: id) {
+                suite.set(data, forKey: defaultsKey)
+                suite.synchronize()
+            }
         }
 
         var lastError: Error?
@@ -118,11 +136,13 @@ public enum WidgetSnapshotStore {
     }
 
     public static func read() -> WidgetSnapshot? {
-        if let suite = UserDefaults(suiteName: appGroupID),
-           let data = suite.data(forKey: defaultsKey),
-           let snap = decode(data)
-        {
-            return snap
+        for id in groupIDs {
+            if let suite = UserDefaults(suiteName: id),
+               let data = suite.data(forKey: defaultsKey),
+               let snap = decode(data)
+            {
+                return snap
+            }
         }
 
         for url in candidateFiles {

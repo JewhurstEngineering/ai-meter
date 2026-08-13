@@ -31,6 +31,14 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
     public var modelBreakdown: [ModelCost]
     public var totalModelCostCents: Double?
 
+    /// Local daily spend (plan + on-demand delta since midnight). Nil until the first refresh writes a ledger sample.
+    public var todaySpendCents: Int?
+    public var yesterdaySpendCents: Int?
+    public var cycleAverageCents: Int?
+    public var remainingPaceCents: Int?
+    public var cycleDaysElapsed: Int?
+    public var last7DaySpendCents: [Int]
+
     public var displayMessages: DisplayMessages
 
     public struct DisplayMessages: Codable, Sendable, Equatable {
@@ -76,6 +84,12 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         onDemandLimitCents: Int? = nil,
         modelBreakdown: [ModelCost] = [],
         totalModelCostCents: Double? = nil,
+        todaySpendCents: Int? = nil,
+        yesterdaySpendCents: Int? = nil,
+        cycleAverageCents: Int? = nil,
+        remainingPaceCents: Int? = nil,
+        cycleDaysElapsed: Int? = nil,
+        last7DaySpendCents: [Int] = [],
         displayMessages: DisplayMessages = .init()
     ) {
         self.fetchedAt = fetchedAt
@@ -97,13 +111,51 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         self.onDemandLimitCents = onDemandLimitCents
         self.modelBreakdown = modelBreakdown
         self.totalModelCostCents = totalModelCostCents
+        self.todaySpendCents = todaySpendCents
+        self.yesterdaySpendCents = yesterdaySpendCents
+        self.cycleAverageCents = cycleAverageCents
+        self.remainingPaceCents = remainingPaceCents
+        self.cycleDaysElapsed = cycleDaysElapsed
+        self.last7DaySpendCents = last7DaySpendCents
         self.displayMessages = displayMessages
     }
 
+    public mutating func applyDaily(_ summary: DailyUsageSummary) {
+        todaySpendCents = summary.todayCents
+        yesterdaySpendCents = summary.yesterdayCents
+        cycleAverageCents = summary.cycleAverageCents
+        remainingPaceCents = summary.remainingPaceCents
+        cycleDaysElapsed = summary.cycleDaysElapsed
+        last7DaySpendCents = summary.last7DaysCents
+    }
+
     public var daysRemainingInCycle: Int? {
+        remainingDays(now: Date(), calendar: .current)
+    }
+
+    public func remainingDays(now: Date, calendar: Calendar = .current) -> Int? {
         guard let end = billingCycleEnd else { return nil }
-        let days = Calendar.current.dateComponents([.day], from: Date(), to: end).day
+        let days = calendar.dateComponents([.day], from: now, to: end).day
         return days.map { max(0, $0) }
+    }
+
+    /// Inclusive calendar days from cycle start through `now`.
+    public func elapsedDays(now: Date = .now, calendar: Calendar = .current) -> Int? {
+        guard let start = billingCycleStart else { return nil }
+        let startDay = calendar.startOfDay(for: start)
+        let today = calendar.startOfDay(for: now)
+        let days = calendar.dateComponents([.day], from: startDay, to: today).day ?? 0
+        return max(1, days + 1)
+    }
+
+    public var inferredCycleAverageCents: Int? {
+        if let cycleAverageCents { return cycleAverageCents }
+        return DailyUsageLedger.cycleMetrics(snapshot: self).averageCents
+    }
+
+    public var inferredRemainingPaceCents: Int? {
+        if let remainingPaceCents { return remainingPaceCents }
+        return DailyUsageLedger.cycleMetrics(snapshot: self).paceCents
     }
 
     public var highestWatchedPercent: Double {

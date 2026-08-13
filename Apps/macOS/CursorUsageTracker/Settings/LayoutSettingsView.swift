@@ -75,7 +75,7 @@ struct LayoutSettingsView: View {
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
 
-                        Text("Detailed shows every enabled metric. The live menu bar uses a native status item so macOS is less likely to clip it with “…” (very crowded menu bars can still compress items).")
+                        Text("Detailed shows every enabled metric. Daily usage is estimated locally from each refresh — Cursor doesn’t publish personal daily totals. The live menu bar uses a native status item so macOS is less likely to clip it with “…” (very crowded menu bars can still compress items).")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -138,6 +138,11 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
             MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: binding(\.daysRemaining))
+            MetricToggleRow(
+                title: "Daily usage",
+                systemImage: "chart.line.uptrend.xyaxis",
+                isOn: binding(\.burnRateEstimate)
+            )
             if includeModelsThisPeriod {
                 MetricToggleRow(
                     title: "Models this period",
@@ -359,6 +364,13 @@ private struct PopoverPreviewCard: View {
                     Label("\(days)d left", systemImage: "calendar")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                }
+                if t.burnRateEstimate {
+                    Label(
+                        "Today \(snapshot?.todaySpendCents.map(MenuBarFormatter.usd) ?? "—")",
+                        systemImage: "chart.line.uptrend.xyaxis"
+                    )
+                    .font(.caption2)
                 }
 
                 if t.modelsThisPeriod {
