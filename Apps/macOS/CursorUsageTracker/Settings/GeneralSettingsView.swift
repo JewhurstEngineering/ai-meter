@@ -42,7 +42,7 @@ struct GeneralSettingsView: View {
                 SettingsPanel(
                     title: "Menu bar warning",
                     systemImage: "menubar.rectangle",
-                    subtitle: "Warning triangle in the menu bar when any channel hits its level. Hover the meter or open the popover to see which one.",
+                    subtitle: "Red dot in the menu bar when any channel hits its level. Hover the meter or open the popover to see which one.",
                     compact: true
                 ) {
                     HStack(alignment: .top, spacing: 8) {

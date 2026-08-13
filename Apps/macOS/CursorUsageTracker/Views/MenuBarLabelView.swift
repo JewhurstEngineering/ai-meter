@@ -24,9 +24,9 @@ struct MenuBarLabelView: View {
                 }
             }
             if presentation.showWarningDot {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                    .font(.system(size: 9, weight: .semibold))
+                Circle()
+                    .fill(.red)
+                    .frame(width: 6, height: 6)
                     .accessibilityLabel("Warning")
             }
         }

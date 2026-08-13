@@ -219,13 +219,12 @@ final class StatusItemController: NSObject {
 
         if presentation.showWarningDot {
             result.append(NSAttributedString(string: " ", attributes: textAttrs))
-            appendSymbol(
-                named: "exclamationmark.triangle.fill",
-                to: result,
-                pointSize: 11,
-                color: .systemOrange,
-                trailingSpace: false
-            )
+            let dot = NSMutableAttributedString(string: "●", attributes: [
+                .font: NSFont.systemFont(ofSize: 7, weight: .bold),
+                .foregroundColor: NSColor.systemRed,
+                .baselineOffset: 1,
+            ])
+            result.append(dot)
         }
 
         return result
@@ -243,23 +242,11 @@ final class StatusItemController: NSObject {
         return image
     }
 
-    private static func appendSymbol(
-        named name: String,
-        to result: NSMutableAttributedString,
-        pointSize: CGFloat,
-        color: NSColor? = nil,
-        trailingSpace: Bool = true
-    ) {
+    private static func appendSymbol(named name: String, to result: NSMutableAttributedString, pointSize: CGFloat) {
         guard let base = NSImage(systemSymbolName: name, accessibilityDescription: nil) else { return }
-        let sized = NSImage.SymbolConfiguration(pointSize: pointSize, weight: color == nil ? .medium : .semibold)
-        let config: NSImage.SymbolConfiguration
-        if let color {
-            config = sized.applying(NSImage.SymbolConfiguration(hierarchicalColor: color))
-        } else {
-            config = sized
-        }
+        let config = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .medium)
         let image = (base.withSymbolConfiguration(config) ?? base).copy() as? NSImage ?? base
-        image.isTemplate = color == nil
+        image.isTemplate = true
         image.size = NSSize(width: pointSize + 1, height: pointSize + 1)
 
         let attachment = NSTextAttachment()
@@ -267,10 +254,8 @@ final class StatusItemController: NSObject {
         let y = (NSFont.menuBarFont(ofSize: 0).capHeight - image.size.height) / 2
         attachment.bounds = CGRect(x: 0, y: y, width: image.size.width, height: image.size.height)
         result.append(NSAttributedString(attachment: attachment))
-        if trailingSpace {
-            result.append(NSAttributedString(string: " ", attributes: [
-                .font: NSFont.menuBarFont(ofSize: 0),
-            ]))
-        }
+        result.append(NSAttributedString(string: " ", attributes: [
+            .font: NSFont.menuBarFont(ofSize: 0),
+        ]))
     }
 }

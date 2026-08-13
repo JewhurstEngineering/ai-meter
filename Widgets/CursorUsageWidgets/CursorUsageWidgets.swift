@@ -43,9 +43,7 @@ struct CursorUsageWidgetEntryView: View {
                     .font(.caption.weight(.semibold))
                 Spacer()
                 if entry.snapshot?.showWarning == true {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                        .font(.caption)
+                    Circle().fill(.red).frame(width: 7, height: 7)
                         .accessibilityLabel("Usage warning")
                 }
             }
@@ -91,9 +89,7 @@ struct CursorUsageWidgetEntryView: View {
                         .foregroundStyle(.secondary)
                 }
                 if entry.snapshot?.showWarning == true {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                        .font(.caption)
+                    Circle().fill(.red).frame(width: 7, height: 7)
                         .accessibilityLabel("Usage warning")
                 }
             }

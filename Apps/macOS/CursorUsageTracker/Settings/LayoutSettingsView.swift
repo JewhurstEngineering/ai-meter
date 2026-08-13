@@ -234,8 +234,7 @@ private struct MenuBarPreviewStrip: View {
                         .foregroundStyle(fg.opacity(0.7))
                 }
                 if presentation.showWarningDot {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
+                    Circle().fill(theme.danger).frame(width: 6, height: 6)
                         .help("Warning: a usage alert you set is active")
                         .accessibilityLabel("Warning")
                 }
@@ -256,7 +255,7 @@ private struct MenuBarPreviewStrip: View {
             .help(presentation.accessibilityTitle)
 
             if presentation.showWarningDot {
-                Text("Warning triangle = a usage alert from General (not an error). Hover the menu bar for which channel.")
+                Text("Red dot = a usage alert from General (not an error). Hover the menu bar for which channel.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

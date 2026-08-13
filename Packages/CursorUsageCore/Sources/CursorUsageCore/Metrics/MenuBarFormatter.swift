@@ -21,8 +21,8 @@ public struct MenuBarPresentation: Sendable, Equatable {
         guard showWarningDot else { return base }
         let why = warningHits.map(\.sentence).joined(separator: ". ")
         let reason = why.isEmpty
-            ? "Warning: a usage alert you set is active."
-            : "Warning: \(why)."
+            ? "Red dot: a usage alert you set is active."
+            : "Red dot: \(why)."
         return "\(base)\n\(reason)\nChange alert levels in Settings → General."
     }
 
