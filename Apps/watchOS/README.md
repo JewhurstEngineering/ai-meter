@@ -1,6 +1,6 @@
 # watchOS
 
-Companion to the **iPhone** app (`com.cursorusagetracker.ios`). WatchConnectivity pushes a sanitized `WidgetSnapshot` only.
+Companion to the **iPhone** app (`com.cursorusagetracker.ios`). WatchConnectivity pushes a sanitized `WidgetSnapshot` only. Feature overview: [docs/FEATURES.md](../../docs/FEATURES.md#apple-watch). Data path detail: [docs/HOW_IT_WORKS.md](../../docs/HOW_IT_WORKS.md#widgets--watch).
 
 **Do not** put `WorkosCursorSessionToken` or JWTs on the Watch.
 
