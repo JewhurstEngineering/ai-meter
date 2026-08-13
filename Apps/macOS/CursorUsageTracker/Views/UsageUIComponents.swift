@@ -6,6 +6,8 @@ struct SettingsPanel<Content: View>: View {
     var systemImage: String
     var subtitle: String? = nil
     var compact: Bool = false
+    /// Stretch to the tallest sibling in an `HStack`.
+    var fillsHeight: Bool = false
     @ViewBuilder var content: () -> Content
     @Environment(\.appTheme) private var theme
     @Environment(\.appHighContrast) private var highContrast
@@ -24,14 +26,18 @@ struct SettingsPanel<Content: View>: View {
                         Text(subtitle)
                             .appFont(.caption2)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 Spacer(minLength: 0)
             }
             content()
+            if fillsHeight {
+                Spacer(minLength: 0)
+            }
         }
         .padding(compact ? 10 : 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: fillsHeight ? .infinity : nil, alignment: .topLeading)
         .background(
             RoundedRectangle(cornerRadius: compact ? 12 : 14, style: .continuous)
                 .fill(Color(nsColor: .controlBackgroundColor))
@@ -43,6 +49,28 @@ struct SettingsPanel<Content: View>: View {
                     lineWidth: highContrast ? 2 : 1
                 )
         )
+    }
+}
+
+/// Tallest sibling wins. Use on each column, then `onPreferenceChange` + `minHeight`.
+struct MatchedHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+extension View {
+    func reportMatchedHeight() -> some View {
+        background(
+            GeometryReader { geo in
+                Color.clear.preference(key: MatchedHeightKey.self, value: geo.size.height)
+            }
+        )
+    }
+
+    func fillMatchedHeight(_ height: CGFloat) -> some View {
+        frame(minHeight: height > 0 ? height : nil, alignment: .top)
     }
 }
 

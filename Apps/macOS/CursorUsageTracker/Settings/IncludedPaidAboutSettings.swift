@@ -1,9 +1,11 @@
 import SwiftUI
+import AppKit
 import CursorUsageCore
 
 struct IncludedUsageSettingsView: View {
     @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
+    @State private var splitHeight: CGFloat = 0
 
     var body: some View {
         ScrollView {
@@ -12,7 +14,17 @@ struct IncludedUsageSettingsView: View {
                 if let snapshot = store.snapshot {
                     subscriptionHero(snapshot)
                     pools(snapshot)
-                    models(snapshot)
+                    HStack(alignment: .top, spacing: 10) {
+                        models(snapshot)
+                            .reportMatchedHeight()
+                            .frame(maxWidth: .infinity, alignment: .top)
+                            .fillMatchedHeight(splitHeight)
+                        activityColumn
+                            .reportMatchedHeight()
+                            .frame(width: 320, alignment: .top)
+                            .fillMatchedHeight(splitHeight)
+                    }
+                    .onPreferenceChange(MatchedHeightKey.self) { splitHeight = $0 }
                 } else {
                     ContentUnavailableView(
                         "No usage yet",
@@ -25,6 +37,7 @@ struct IncludedUsageSettingsView: View {
             .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+        .onAppear { store.refreshLocalActivity() }
     }
 
     private func subscriptionHero(_ snapshot: UsageSnapshot) -> some View {
@@ -127,59 +140,206 @@ struct IncludedUsageSettingsView: View {
         }
     }
 
+    @ViewBuilder
+    private var activityColumn: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            thisMacPanel
+            cloudAgentsPanel
+            recentLocalPanel
+                .frame(maxHeight: .infinity, alignment: .top)
+        }
+        .frame(maxHeight: .infinity, alignment: .top)
+    }
+
+    private var thisMacPanel: some View {
+        let mac = store.thisMac
+        return SettingsPanel(
+            title: "This Mac",
+            systemImage: "laptopcomputer",
+            subtitle: mac.isRunning ? nil : "Cursor isn’t running.",
+            compact: true
+        ) {
+            HStack(spacing: 8) {
+                Text(mac.summaryLine)
+                    .font(.caption)
+                Spacer(minLength: 0)
+                if mac.windowCount > 0 {
+                    Text("\(mac.windowCount)")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(theme.cursorModels.opacity(0.18)))
+                        .foregroundStyle(theme.cursorModels)
+                }
+            }
+        }
+    }
+
+    private var cloudAgentsPanel: some View {
+        let account = store.activeAccount
+        return SettingsPanel(
+            title: "Cloud agents",
+            systemImage: "cloud",
+            subtitle: account?.hasCloudAPIKey == true
+                ? nil
+                : "Paste a user API key in Authentication.",
+            compact: true
+        ) {
+            if account?.hasCloudAPIKey != true {
+                Text("Optional. Lists background bc-* agents from api.cursor.com.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            } else if let error = account?.cloudAgentsError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            } else if let agents = account?.cloudAgents, !agents.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(agents.prefix(8)) { agent in
+                        Button {
+                            if let url = agent.url {
+                                NSWorkspace.shared.open(url)
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(agent.isRunning ? theme.ok : Color.secondary.opacity(0.4))
+                                    .frame(width: 7, height: 7)
+                                Text(agent.name)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                    .foregroundStyle(.primary)
+                                Spacer(minLength: 4)
+                                Text(agent.displayStatus.lowercased())
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            } else {
+                Text("No active cloud agents.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var recentLocalPanel: some View {
+        SettingsPanel(
+            title: "Recent on this Mac",
+            systemImage: "bubble.left.and.bubble.right",
+            subtitle: nil,
+            compact: true,
+            fillsHeight: true
+        ) {
+            if store.localComposers.isEmpty {
+                Text("No recent local chats.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(store.localComposers.enumerated()), id: \.element.id) { index, row in
+                        if index > 0 { Divider().opacity(0.5) }
+                        HStack(spacing: 8) {
+                            Text(row.name)
+                                .font(.caption.weight(.medium))
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                            if let folder = row.projectFolder {
+                                Text(folder)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                            Spacer(minLength: 6)
+                            Text(row.modeLabel)
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            Text(row.updatedAt.map { MenuBarFormatter.relative($0) } ?? "—")
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                                .frame(minWidth: 44, alignment: .trailing)
+                        }
+                        .padding(.vertical, 5)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .frame(maxHeight: .infinity, alignment: .top)
+            }
+        }
+    }
+
     private func models(_ snapshot: UsageSnapshot) -> some View {
-        SettingsPanel(title: "Models this period", systemImage: "list.bullet.rectangle", subtitle: nil, compact: true) {
+        SettingsPanel(title: "Models this period", systemImage: "list.bullet.rectangle", subtitle: nil, compact: true, fillsHeight: true) {
             if snapshot.modelBreakdown.isEmpty {
                 Text("No model breakdown yet.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                VStack(spacing: 4) {
-                    ForEach(snapshot.modelBreakdown) { row in
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "chevron.right.circle.fill")
-                                    .font(.caption)
-                                    .foregroundStyle(theme.otherModels.opacity(0.7))
-                                Text(row.model)
-                                    .font(.caption)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                                Spacer()
-                                Text(MenuBarFormatter.usd(row.totalCents))
-                                    .font(.caption.monospacedDigit())
-                            }
-                            if let tokens = MenuBarFormatter.tokenCaption(row) {
-                                Text(tokens)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .padding(.leading, 24)
-                            }
+                Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 10, verticalSpacing: 0) {
+                    ForEach(Array(snapshot.modelBreakdown.enumerated()), id: \.element.id) { index, row in
+                        if index > 0 {
+                            Divider().gridCellUnsizedAxes(.horizontal)
                         }
+                        modelRow(
+                            name: row.model,
+                            tokens: MenuBarFormatter.tokenCaption(row),
+                            amount: MenuBarFormatter.usd(row.totalCents),
+                            emphasize: false
+                        )
                     }
-                    Divider().padding(.vertical, 2)
-                    if let total = snapshot.totalModelCostCents {
-                        HStack {
-                            Text("Total")
-                                .font(.caption.weight(.semibold))
-                            Spacer()
-                            VStack(alignment: .trailing, spacing: 1) {
-                                Text(MenuBarFormatter.usd(total))
-                                    .font(.caption.monospacedDigit().weight(.bold))
-                                if let tokens = MenuBarFormatter.tokenCaption(
-                                    input: snapshot.totalInputTokens,
-                                    output: snapshot.totalOutputTokens
-                                ) {
-                                    Text(tokens)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
+                    Divider()
+                        .padding(.vertical, 4)
+                        .gridCellUnsizedAxes(.horizontal)
+                    modelRow(
+                        name: "Total",
+                        tokens: MenuBarFormatter.tokenCaption(
+                            input: snapshot.totalInputTokens,
+                            output: snapshot.totalOutputTokens
+                        ),
+                        amount: snapshot.totalModelCostCents.map { MenuBarFormatter.usd($0) } ?? "—",
+                        emphasize: true
+                    )
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+    }
+
+    @ViewBuilder
+    private func modelRow(name: String, tokens: String?, amount: String, emphasize: Bool) -> some View {
+        GridRow {
+            Group {
+                if emphasize {
+                    Color.clear.frame(width: 14, height: 1)
+                } else {
+                    Image(systemName: "chevron.right.circle.fill")
+                        .font(.caption)
+                        .foregroundStyle(theme.otherModels.opacity(0.7))
+                }
+            }
+            .frame(width: 14)
+
+            Text(name)
+                .font(emphasize ? .caption.weight(.semibold) : .caption)
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .layoutPriority(1)
+
+            Text(tokens ?? " ")
+                .font(.caption2.monospacedDigit())
+                .foregroundStyle(.secondary)
+                .gridColumnAlignment(.trailing)
+
+            Text(amount)
+                .font(emphasize ? .caption.monospacedDigit().weight(.bold) : .caption.monospacedDigit())
+                .gridColumnAlignment(.trailing)
+        }
+        .padding(.vertical, 4)
     }
 }
 
@@ -436,6 +596,8 @@ struct AboutSettingsView: View {
 
     @State private var installMessage: String?
     @State private var installSucceeded = false
+    @State private var heroTextHeight: CGFloat = 72
+    @State private var aboutSplitHeight: CGFloat = 0
 
     private var isRunningFromApplications: Bool {
         Bundle.main.bundleURL.path.hasPrefix("/Applications/")
@@ -451,22 +613,26 @@ struct AboutSettingsView: View {
                         title: "What it tracks",
                         systemImage: "chart.bar.fill",
                         subtitle: "Personal Pro / Pro+ / Ultra.",
-                        compact: true
+                        compact: true,
+                        fillsHeight: true
                     ) {
-                        VStack(alignment: .leading, spacing: 6) {
+                        VStack(alignment: .leading, spacing: 10) {
                             aboutBullet("sparkles", "Cursor Models included pool")
                             aboutBullet("cpu", "Other Models included pool")
                             aboutBullet("creditcard", "On-demand, limits, and spend")
                             aboutBullet("bell.badge", "Menu bar warnings + notifications")
                         }
                     }
+                    .reportMatchedHeight()
                     .frame(maxWidth: .infinity, alignment: .top)
+                    .fillMatchedHeight(aboutSplitHeight)
 
                     SettingsPanel(
                         title: "Desktop widget",
                         systemImage: "rectangle.on.rectangle",
-                        subtitle: "Gallery presets for Cursor, Other, Total, On-demand, and Rotate. Overview is small, medium, and large.",
-                        compact: true
+                        subtitle: "Gallery presets for Cursor, Other, Total, On-demand, and Rotate.",
+                        compact: true,
+                        fillsHeight: true
                     ) {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Xcode Run copies live in DerivedData, so Edit Widgets search stays empty until the app is installed.")
@@ -478,6 +644,7 @@ struct AboutSettingsView: View {
                                 Label("Installed in Applications — search “Cursor Usage”.", systemImage: "checkmark.circle.fill")
                                     .font(.caption)
                                     .foregroundStyle(.green)
+                                    .fixedSize(horizontal: false, vertical: true)
                             } else {
                                 Button {
                                     do {
@@ -523,8 +690,11 @@ struct AboutSettingsView: View {
                             }
                         }
                     }
+                    .reportMatchedHeight()
                     .frame(maxWidth: .infinity, alignment: .top)
+                    .fillMatchedHeight(aboutSplitHeight)
                 }
+                .onPreferenceChange(MatchedHeightKey.self) { aboutSplitHeight = $0 }
 
                 SettingsPanel(
                     title: "Unofficial & local-first",
@@ -551,36 +721,48 @@ struct AboutSettingsView: View {
 
     private var hero: some View {
         HStack(alignment: .center, spacing: 14) {
-            AppLogo(fillHeight: true)
+            AppLogo(size: heroTextHeight)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {
                 Text("Cursor Usage Tracker")
                     .font(.title2.weight(.bold))
                 Text("Menu bar meter for Cursor usage — unofficial, local-first.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    HStack(spacing: 6) {
-                        Text("v\(version)")
-                            .font(.caption.monospacedDigit().weight(.semibold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(theme.cursorModels.opacity(0.15)))
-                            .foregroundStyle(theme.cursorModels)
-                        Text("macOS 14+")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Text(AppAbout.organization)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 6) {
+                    Text("v\(version)")
+                        .font(.caption.monospacedDigit().weight(.semibold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(theme.cursorModels.opacity(0.15)))
+                        .foregroundStyle(theme.cursorModels)
+                    Text("macOS 14+")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text(AppAbout.copyrightLine)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text("License: \(AppAbout.licenseName)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                }
+                Text(AppAbout.organization)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(AppAbout.copyrightLine)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text("License: \(AppAbout.licenseName)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .layoutPriority(1)
-            Spacer(minLength: 0)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                GeometryReader { geo in
+                    Color.clear.preference(key: HeroTextHeightKey.self, value: geo.size.height)
+                }
+            )
+            .onPreferenceChange(HeroTextHeightKey.self) { newValue in
+                let next = max(newValue, 64)
+                if abs(next - heroTextHeight) > 0.5 {
+                    heroTextHeight = next
+                }
+            }
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -595,8 +777,23 @@ struct AboutSettingsView: View {
     }
 
     private func aboutBullet(_ systemImage: String, _ text: String) -> some View {
-        Label(text, systemImage: systemImage)
-            .font(.caption)
-            .labelStyle(.titleAndIcon)
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: systemImage)
+                .font(.caption)
+                .foregroundStyle(theme.tint)
+                .frame(width: 16, alignment: .center)
+                .padding(.top, 1)
+            Text(text)
+                .font(.caption)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+private struct HeroTextHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 88
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
     }
 }
