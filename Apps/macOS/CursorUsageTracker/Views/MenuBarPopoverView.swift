@@ -65,10 +65,9 @@ struct MenuBarPopoverView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
         }
-        .frame(width: 360)
+        .frame(width: store.preferences.interfaceSize.popoverWidth)
         .fixedSize(horizontal: true, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor))
-        .compositingGroup()
         .appThemed(store.preferences)
         .onAppear {
             selectedTab = focusedAccountID ?? store.activeAccountID
@@ -312,21 +311,43 @@ struct MenuBarPopoverView: View {
                     }
 
                     if t.onDemand {
-                        HStack {
-                            Label("On-demand", systemImage: "creditcard.fill")
-                            Spacer()
-                            Text(snapshot.onDemandEnabled ? "Enabled" : "Disabled")
-                                .font(.caption.weight(.bold))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(
-                                    Capsule().fill(
-                                        (snapshot.onDemandEnabled ? theme.ok : theme.danger).opacity(0.18)
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Label("On-demand", systemImage: "creditcard.fill")
+                                Spacer()
+                                Text(snapshot.onDemandEnabled ? "Enabled" : "Disabled")
+                                    .font(.caption.weight(.bold))
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 3)
+                                    .background(
+                                        Capsule().fill(
+                                            (snapshot.onDemandEnabled ? theme.ok : theme.danger).opacity(0.18)
+                                        )
                                     )
-                                )
-                                .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
+                                    .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
+                            }
+                            .font(.subheadline)
+
+                            if let used = snapshot.onDemandUsedCents {
+                                HStack {
+                                    Text("Billable usage")
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                    Text(MenuBarFormatter.usd(used))
+                                        .font(.subheadline.monospacedDigit().weight(.semibold))
+                                }
+                                .font(.caption)
+                            }
+
+                            HStack {
+                                Text("Usage limit")
+                                    .foregroundStyle(.secondary)
+                                Spacer()
+                                Text(onDemandLimitLabel(snapshot))
+                                    .font(.caption.monospacedDigit().weight(.semibold))
+                            }
+                            .font(.caption)
                         }
-                        .font(.subheadline)
                     }
 
                     if t.daysRemaining, let end = snapshot.billingCycleEnd, let days = snapshot.daysRemainingInCycle {
@@ -356,6 +377,16 @@ struct MenuBarPopoverView: View {
                     .foregroundStyle(.orange)
             }
         }
+    }
+
+    private func onDemandLimitLabel(_ snapshot: UsageSnapshot) -> String {
+        if snapshot.isOnDemandUnlimited {
+            return "Unlimited"
+        }
+        if let limit = snapshot.onDemandLimitCents {
+            return MenuBarFormatter.usd(limit)
+        }
+        return snapshot.onDemandEnabled ? "—" : "$0"
     }
 
     private var footer: some View {

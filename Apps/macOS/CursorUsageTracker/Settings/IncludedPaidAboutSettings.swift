@@ -220,28 +220,9 @@ struct PaidUsageSettingsView: View {
         ScrollView {
             Group {
                 if let snapshot = store.snapshot {
-                    SettingsPanel(
-                        title: "Usage-based pricing",
-                        systemImage: "creditcard.fill",
-                        subtitle: "On-demand spend beyond included pools."
-                    ) {
-                        HStack {
-                            Label(
-                                snapshot.onDemandEnabled ? "Enabled" : "Disabled",
-                                systemImage: snapshot.onDemandEnabled ? "checkmark.circle.fill" : "xmark.octagon.fill"
-                            )
-                            .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
-                            .font(.headline)
-                            Spacer()
-                        }
-                        if let used = snapshot.onDemandUsedCents {
-                            LabeledContent("Billable usage", value: MenuBarFormatter.usd(used))
-                        }
-                        LabeledContent(
-                            "Current usage limit",
-                            value: snapshot.onDemandLimitCents.map(MenuBarFormatter.usd)
-                                ?? (snapshot.onDemandEnabled ? "—" : "$0")
-                        )
+                    VStack(alignment: .leading, spacing: 10) {
+                        status(snapshot)
+                        meters(snapshot)
                     }
                 } else {
                     ContentUnavailableView(
@@ -252,9 +233,155 @@ struct PaidUsageSettingsView: View {
                     .frame(maxWidth: .infinity, minHeight: 240)
                 }
             }
-            .padding(16)
+            .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private func status(_ snapshot: UsageSnapshot) -> some View {
+        let on = snapshot.onDemandEnabled
+        return SettingsPanel(
+            title: "On-demand",
+            systemImage: "creditcard.fill",
+            subtitle: on
+                ? "Usage beyond included pools, billed at list price."
+                : "Off — extra usage is not billed this way.",
+            compact: true
+        ) {
+            HStack(alignment: .center, spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(on ? "Enabled" : "Disabled")
+                        .font(.headline)
+                    if snapshot.isOnDemandUnlimited {
+                        Text("No spend cap on this account.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    } else if let used = snapshot.onDemandUsedCents, let limit = snapshot.onDemandLimitCents, limit > 0 {
+                        Text("\(MenuBarFormatter.usd(used)) of \(MenuBarFormatter.usd(limit)) billed this period")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    } else if let used = snapshot.onDemandUsedCents {
+                        Text("\(MenuBarFormatter.usd(used)) billed this period")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer(minLength: 8)
+                Text(on ? "On" : "Off")
+                    .font(.caption2.weight(.bold))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill((on ? theme.ok : theme.danger).opacity(0.16)))
+                    .foregroundStyle(on ? theme.ok : theme.danger)
+            }
+        }
+    }
+
+    private func meters(_ snapshot: UsageSnapshot) -> some View {
+        let used = snapshot.onDemandUsedCents
+        let limit = snapshot.onDemandLimitCents
+        let percent: Double? = {
+            guard let used, let limit, limit > 0 else { return nil }
+            return min(100, Double(used) / Double(limit) * 100)
+        }()
+
+        return SettingsPanel(
+            title: "This period",
+            systemImage: "dollarsign.circle.fill",
+            subtitle: "Billable on-demand vs the cap Cursor reports.",
+            compact: true
+        ) {
+            HStack(alignment: .top, spacing: 8) {
+                PaidStatCard(
+                    title: "Billable usage",
+                    systemImage: "creditcard",
+                    value: used.map(MenuBarFormatter.usd) ?? "—",
+                    caption: snapshot.onDemandEnabled ? "Beyond included pools" : "None while off",
+                    accent: theme.spend,
+                    percent: percent
+                )
+                PaidStatCard(
+                    title: "Usage limit",
+                    systemImage: "hand.raised.fill",
+                    value: limitLabel(snapshot),
+                    caption: limitCaption(snapshot, percent: percent),
+                    accent: snapshot.onDemandEnabled ? theme.ok : theme.danger,
+                    percent: snapshot.isOnDemandUnlimited ? nil : percent
+                )
+                if let planUsed = snapshot.planUsedCents, let planLimit = snapshot.planLimitCents {
+                    PaidStatCard(
+                        title: "Included plan",
+                        systemImage: "dollarsign.circle",
+                        value: "\(MenuBarFormatter.usd(planUsed))",
+                        caption: "of \(MenuBarFormatter.usd(planLimit)) base",
+                        accent: theme.total,
+                        percent: planLimit > 0 ? min(100, Double(planUsed) / Double(planLimit) * 100) : nil
+                    )
+                }
+            }
+        }
+    }
+
+    private func limitLabel(_ snapshot: UsageSnapshot) -> String {
+        if snapshot.isOnDemandUnlimited { return "Unlimited" }
+        if let limit = snapshot.onDemandLimitCents { return MenuBarFormatter.usd(limit) }
+        return snapshot.onDemandEnabled ? "—" : "$0"
+    }
+
+    private func limitCaption(_ snapshot: UsageSnapshot, percent: Double?) -> String {
+        if snapshot.isOnDemandUnlimited { return "No cap" }
+        if let percent {
+            return "\(Int(percent.rounded()))% of cap"
+        }
+        if !snapshot.onDemandEnabled { return "On-demand off" }
+        return "Cap from Cursor"
+    }
+}
+
+private struct PaidStatCard: View {
+    let title: String
+    let systemImage: String
+    let value: String
+    let caption: String
+    let accent: Color
+    var percent: Double? = nil
+    @Environment(\.appTheme) private var theme
+    @Environment(\.appHighContrast) private var highContrast
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .font(.caption)
+                Text(title)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            Text(value)
+                .font(.title3.monospacedDigit().weight(.bold))
+                .foregroundStyle(accent)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if let percent {
+                UsageProgressBar(percent: percent, tint: accent, pattern: .dashes)
+                    .frame(height: 6)
+            }
+            Text(caption)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+        .padding(8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(accent.opacity(highContrast ? 0.22 : 0.16))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(accent.opacity(highContrast ? 0.55 : 0.35), lineWidth: 1)
+        )
     }
 }
 

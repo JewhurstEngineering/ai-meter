@@ -24,13 +24,17 @@ final class StatusItemController: NSObject {
     private var eventMonitor: Any?
     private var lastLayoutSignature = ""
 
-    private static let popoverWidth: CGFloat = 360
+    private var popoverWidth: CGFloat {
+        store?.preferences.interfaceSize.popoverWidth ?? 360
+    }
 
     private func syncPopoverSize(_ popover: NSPopover?, hosting: NSHostingController<AnyView>?) {
         guard let hosting else { return }
-        let fitted = hosting.sizeThatFits(in: CGSize(width: Self.popoverWidth, height: 10_000))
-        let height = min(max(fitted.height.rounded(.up), 160), 640)
-        let size = NSSize(width: Self.popoverWidth, height: height)
+        let width = popoverWidth
+        let fitted = hosting.sizeThatFits(in: CGSize(width: width, height: 10_000))
+        // A little extra height so the arrow/chrome doesn’t eat the header.
+        let height = min(max(fitted.height.rounded(.up) + 8, 160), 720)
+        let size = NSSize(width: width, height: height)
         hosting.preferredContentSize = size
         popover?.contentSize = size
     }
@@ -155,7 +159,7 @@ final class StatusItemController: NSObject {
 
         let pop = NSPopover()
         pop.behavior = .transient
-        pop.animates = true
+        pop.animates = false
         pop.contentViewController = hosting
         syncPopoverSize(pop, hosting: hosting)
 
@@ -227,7 +231,11 @@ final class StatusItemController: NSObject {
         closePopover()
         AppActivation.bringToFront()
         applyPopoverAppearance(slot.popover, prefs: store.preferences)
-        slot.popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        syncPopoverSize(slot.popover, hosting: slot.hosting)
+        // Attach below the item with a little gap so the rounded top isn’t under the menu bar.
+        var rect = button.bounds
+        rect.origin.y -= 6
+        slot.popover.show(relativeTo: rect, of: button, preferredEdge: .minY)
         Self.hardenPopoverBackground(slot.popover)
         syncPopoverSize(slot.popover, hosting: slot.hosting)
         DispatchQueue.main.async { [weak self] in
@@ -256,9 +264,6 @@ final class StatusItemController: NSObject {
             view.subviews.forEach(walk)
         }
         walk(root)
-        if let frame = root.superview {
-            walk(frame)
-        }
     }
 
     private func addEventMonitor() {

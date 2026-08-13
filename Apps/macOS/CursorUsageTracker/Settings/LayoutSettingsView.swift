@@ -346,12 +346,19 @@ private struct PopoverPreviewCard: View {
                         .foregroundStyle(theme.spend)
                 }
                 if t.onDemand {
-                    HStack {
-                        Label("On-demand", systemImage: "creditcard")
-                        Spacer()
-                        Text(snapshot?.onDemandEnabled == true ? "Enabled" : "Disabled")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(snapshot?.onDemandEnabled == true ? theme.ok : theme.danger)
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack {
+                            Label("On-demand", systemImage: "creditcard")
+                            Spacer()
+                            Text(snapshot?.onDemandEnabled == true ? "Enabled" : "Disabled")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(snapshot?.onDemandEnabled == true ? theme.ok : theme.danger)
+                        }
+                        if let used = snapshot?.onDemandUsedCents {
+                            Text("Billable \(MenuBarFormatter.usd(used))")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                     .font(.caption)
                 }
