@@ -13,7 +13,11 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var daysRemaining: Int?
     public var showWarning: Bool
 
-    public init(from snapshot: UsageSnapshot, warnings: DisplayPreferences.MenuBarWarningThresholds) {
+    public init(
+        from snapshot: UsageSnapshot,
+        warnings: DisplayPreferences.MenuBarWarningThresholds,
+        snoozedChannels: [String] = []
+    ) {
         generatedAt = snapshot.fetchedAt
         planDisplayName = snapshot.planDisplayName
         cursorModelsPercentUsed = snapshot.cursorModelsPercentUsed
@@ -23,7 +27,10 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         planLimitCents = snapshot.planLimitCents
         onDemandEnabled = snapshot.onDemandEnabled
         daysRemaining = snapshot.daysRemainingInCycle
-        showWarning = snapshot.exceedsMenuBarWarnings(warnings)
+        let snoozed = Set(snoozedChannels)
+        showWarning = snapshot.menuBarWarningHits(warnings).contains {
+            !snoozed.contains($0.channel.rawValue)
+        }
     }
 
     @available(*, deprecated, message: "Use init(from:warnings:)")

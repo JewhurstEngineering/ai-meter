@@ -97,7 +97,12 @@ public final class UsageStore: ObservableObject {
             let snap = try await client.fetchSnapshot(sessionToken: token)
             snapshot = snap
             lastError = nil
-            let widget = WidgetSnapshot(from: snap, warnings: preferences.menuBarWarnings)
+            pruneWarningSnoozes(using: snap)
+            let widget = WidgetSnapshot(
+                from: snap,
+                warnings: preferences.menuBarWarnings,
+                snoozedChannels: preferences.snoozedWarningChannels
+            )
             try? WidgetSnapshotStore.write(widget)
             onWidgetSnapshotWritten?()
             await UsageNotificationService.evaluate(snapshot: snap, preferences: preferences)
@@ -134,9 +139,30 @@ public final class UsageStore: ObservableObject {
         preferences = prefs
         startAutoRefresh()
         if let snapshot {
-            let widget = WidgetSnapshot(from: snapshot, warnings: prefs.menuBarWarnings)
+            let widget = WidgetSnapshot(
+                from: snapshot,
+                warnings: prefs.menuBarWarnings,
+                snoozedChannels: prefs.snoozedWarningChannels
+            )
             try? WidgetSnapshotStore.write(widget)
             onWidgetSnapshotWritten?()
+        }
+    }
+
+    public func snoozeMenuBarWarning(_ channel: UsageSnapshot.WarningChannel) {
+        preferences.snoozeWarning(channel)
+    }
+
+    public func snoozeAllMenuBarWarnings() {
+        preferences.snoozeWarnings(menuBarPresentation.warningHits.map(\.channel))
+    }
+
+    private func pruneWarningSnoozes(using snapshot: UsageSnapshot) {
+        let hot = Set(snapshot.menuBarWarningHits(preferences.menuBarWarnings).map(\.channel.rawValue))
+        var prefs = preferences
+        prefs.pruneSnoozedWarnings(stillTriggered: hot)
+        if prefs.snoozedWarningChannels != preferences.snoozedWarningChannels {
+            preferences = prefs
         }
     }
 }

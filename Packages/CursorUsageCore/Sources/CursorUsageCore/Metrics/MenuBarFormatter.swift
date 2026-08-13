@@ -107,6 +107,7 @@ public enum MenuBarFormatter {
         }
 
         let hits = snapshot.menuBarWarningHits(preferences.menuBarWarnings)
+            .filter { !preferences.snoozedWarningChannels.contains($0.channel.rawValue) }
         return .init(segments: segments, showWarningDot: !hits.isEmpty, warningHits: hits)
     }
 

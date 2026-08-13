@@ -50,9 +50,9 @@ struct MenuBarPopoverView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 10) {
+        HStack(alignment: .top, spacing: 10) {
             AppLogo(size: 34)
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text(store.snapshot?.planDisplayName ?? "Cursor")
                     .font(.headline)
                 if let fetched = store.snapshot?.fetchedAt {
@@ -64,8 +64,11 @@ struct MenuBarPopoverView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                if store.menuBarPresentation.showWarningDot {
+                    headerAlarms(store.menuBarPresentation.warningHits)
+                }
             }
-            Spacer()
+            Spacer(minLength: 8)
             Button {
                 Task { await store.refresh() }
             } label: {
@@ -91,42 +94,83 @@ struct MenuBarPopoverView: View {
         }
     }
 
-    private func warningBanner(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                    .font(.subheadline)
-                Text("Menu bar warning")
-                    .font(.subheadline.weight(.semibold))
-            }
-            if hits.isEmpty {
-                Text("A usage alert you set is active.")
-                    .font(.caption)
-            } else {
-                ForEach(hits) { hit in
-                    Text(hit.sentence)
-                        .font(.caption)
+    private func headerAlarms(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
+        HStack(alignment: .center, spacing: 8) {
+            HStack(spacing: 0) {
+                ForEach(Array(hits.enumerated()), id: \.element.id) { index, hit in
+                    if index > 0 {
+                        Text("·")
+                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .foregroundStyle(theme.danger.opacity(0.4))
+                            .padding(.horizontal, 4)
+                    }
+                    alarmReadout(hit)
                 }
             }
-            Text("That’s the warning icon next to the menu bar meter — not an error. Change levels in Settings → General.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            .padding(.leading, 8)
+            .padding(.trailing, 6)
+            .padding(.vertical, 3)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(theme.danger.opacity(0.12))
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(theme.danger.opacity(0.38), lineWidth: 1)
+            )
+
+            Button("Clear") {
+                store.snoozeAllMenuBarWarnings()
+            }
+            .font(.system(size: 10, weight: .bold, design: .rounded))
+            .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
+            .help("Hide until usage drops back under the alert. Does not change the threshold.")
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.orange.opacity(0.14))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.orange.opacity(0.40), lineWidth: 1)
-        )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Menu bar warning")
-        .accessibilityValue(hits.map(\.sentence).joined(separator: ". "))
+        .accessibilityLabel("Usage alarms")
+        .accessibilityValue(hits.map(\.compactLine).joined(separator: ", "))
+    }
+
+    private func alarmReadout(_ hit: UsageSnapshot.MenuBarWarningHit) -> some View {
+        HStack(spacing: 5) {
+            Button {
+                AppActivation.openSettingsViaLinkFallback()
+            } label: {
+                HStack(spacing: 5) {
+                    Circle()
+                        .fill(theme.danger)
+                        .frame(width: 6, height: 6)
+                        .shadow(color: theme.danger.opacity(0.75), radius: 3)
+                    Text(hit.channel.shortTitle.uppercased())
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .tracking(0.6)
+                    Text(hit.current)
+                        .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    Text("@")
+                        .font(.system(size: 9, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                    Text(hit.threshold)
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                }
+                .foregroundStyle(theme.danger)
+            }
+            .buttonStyle(.plain)
+            .help("\(hit.sentence). Click to change the alert in Settings → General.")
+
+            Button {
+                store.snoozeMenuBarWarning(hit.channel)
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(theme.danger.opacity(0.7))
+                    .frame(width: 14, height: 14)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Clear \(hit.channel.shortTitle) until it drops back under \(hit.threshold).")
+        }
     }
 
     @ViewBuilder
@@ -134,10 +178,6 @@ struct MenuBarPopoverView: View {
         let t = store.preferences.popover
 
         VStack(alignment: .leading, spacing: 12) {
-            if store.menuBarPresentation.showWarningDot {
-                warningBanner(store.menuBarPresentation.warningHits)
-            }
-
             if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
                 Text("Included usage")
                     .font(.caption.weight(.semibold))

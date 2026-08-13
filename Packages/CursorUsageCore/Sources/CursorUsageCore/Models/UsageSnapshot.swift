@@ -147,6 +147,15 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
             case .onDemandAndLimits: return "On-demand & limits"
             }
         }
+
+        public var shortTitle: String {
+            switch self {
+            case .cursorModels: return "Cursor"
+            case .otherModels: return "Other"
+            case .totalIncluded: return "Total"
+            case .onDemandAndLimits: return "Spend"
+            }
+        }
     }
 
     public struct MenuBarWarningHit: Sendable, Equatable, Identifiable {
@@ -157,6 +166,10 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
 
         public var sentence: String {
             "\(channel.title) is at \(current) (alert set to \(threshold))"
+        }
+
+        public var compactLine: String {
+            "\(channel.shortTitle) \(current) @ \(threshold)"
         }
 
         public init(channel: WarningChannel, current: String, threshold: String) {

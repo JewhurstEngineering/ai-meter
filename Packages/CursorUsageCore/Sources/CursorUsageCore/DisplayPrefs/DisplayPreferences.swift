@@ -35,6 +35,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var distinguishWithoutColor: Bool
     /// Stronger borders and fills in Settings and the popover.
     public var highContrast: Bool
+    /// Warning channels the user cleared. Re-arms when that channel drops back under its alert.
+    public var snoozedWarningChannels: [String]
 
     public enum AppearanceMode: String, Codable, Sendable, CaseIterable {
         case system
@@ -481,7 +483,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         interfaceSize: .defaultSize,
         colorVision: .typical,
         distinguishWithoutColor: false,
-        highContrast: false
+        highContrast: false,
+        snoozedWarningChannels: []
     )
 
     public init(
@@ -505,7 +508,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         interfaceSize: InterfaceSize = .defaultSize,
         colorVision: ColorVision = .typical,
         distinguishWithoutColor: Bool = false,
-        highContrast: Bool = false
+        highContrast: Bool = false,
+        snoozedWarningChannels: [String] = []
     ) {
         self.refreshIntervalMinutes = refreshIntervalMinutes
         self.launchAtLogin = launchAtLogin
@@ -528,6 +532,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.colorVision = colorVision
         self.distinguishWithoutColor = distinguishWithoutColor
         self.highContrast = highContrast
+        self.snoozedWarningChannels = snoozedWarningChannels
     }
 
     public init(from decoder: Decoder) throws {
@@ -560,6 +565,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         colorVision = try c.decodeIfPresent(ColorVision.self, forKey: .colorVision) ?? .typical
         distinguishWithoutColor = try c.decodeIfPresent(Bool.self, forKey: .distinguishWithoutColor) ?? false
         highContrast = try c.decodeIfPresent(Bool.self, forKey: .highContrast) ?? false
+        snoozedWarningChannels = try c.decodeIfPresent([String].self, forKey: .snoozedWarningChannels) ?? []
     }
 
     public static func normalizeThresholds(_ values: [Double]) -> [Double] {
@@ -575,6 +581,24 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             set.insert(v)
         }
         notificationThresholds = Array(set).sorted()
+    }
+
+    public mutating func snoozeWarning(_ channel: UsageSnapshot.WarningChannel) {
+        let key = channel.rawValue
+        if !snoozedWarningChannels.contains(key) {
+            snoozedWarningChannels.append(key)
+        }
+    }
+
+    public mutating func snoozeWarnings(_ channels: [UsageSnapshot.WarningChannel]) {
+        for channel in channels {
+            snoozeWarning(channel)
+        }
+    }
+
+    /// Drop snoozes for channels that are no longer over their alert (so they can fire again).
+    public mutating func pruneSnoozedWarnings(stillTriggered: Set<String>) {
+        snoozedWarningChannels = snoozedWarningChannels.filter { stillTriggered.contains($0) }
     }
 }
 

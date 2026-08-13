@@ -61,6 +61,27 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertTrue(warned.accessibilityTitle.contains("Other Models"))
         XCTAssertTrue(warned.accessibilityTitle.contains("alert set to 50%"))
         XCTAssertTrue(warned.warningHits.contains(where: { $0.channel == .otherModels }))
+        XCTAssertEqual(
+            warned.warningHits.first(where: { $0.channel == .otherModels })?.compactLine,
+            "Other 61% @ 50%"
+        )
+
+        prefs.menuBarWarnings.cursorModelsPercent = 3
+        let multi = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
+        XCTAssertEqual(Set(multi.warningHits.map(\.channel)), [.cursorModels, .otherModels])
+
+        prefs.snoozedWarningChannels = [UsageSnapshot.WarningChannel.otherModels.rawValue]
+        let snoozed = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
+        XCTAssertEqual(snoozed.warningHits.map(\.channel), [.cursorModels])
+        XCTAssertTrue(snoozed.showWarningDot)
+
+        prefs.snoozedWarningChannels = [
+            UsageSnapshot.WarningChannel.cursorModels.rawValue,
+            UsageSnapshot.WarningChannel.otherModels.rawValue,
+        ]
+        let cleared = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
+        XCTAssertTrue(cleared.warningHits.isEmpty)
+        XCTAssertFalse(cleared.showWarningDot)
 
         prefs.menuBarWarnings.otherModelsPercent = 95
         prefs.menuBarWarnings.onDemandAndLimitsPercent = 40
