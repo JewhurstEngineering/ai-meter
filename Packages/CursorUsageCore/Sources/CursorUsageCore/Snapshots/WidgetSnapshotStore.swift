@@ -12,11 +12,6 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var onDemandEnabled: Bool
     public var daysRemaining: Int?
     public var showWarning: Bool
-    public var todaySpendCents: Int?
-    public var yesterdaySpendCents: Int?
-    public var cycleAverageCents: Int?
-    public var remainingPaceCents: Int?
-    public var last7DaySpendCents: [Int]?
 
     public init(
         from snapshot: UsageSnapshot,
@@ -36,11 +31,6 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         showWarning = snapshot.menuBarWarningHits(warnings).contains {
             !snoozed.contains($0.channel.rawValue)
         }
-        todaySpendCents = snapshot.todaySpendCents
-        yesterdaySpendCents = snapshot.yesterdaySpendCents
-        cycleAverageCents = snapshot.inferredCycleAverageCents
-        remainingPaceCents = snapshot.inferredRemainingPaceCents
-        last7DaySpendCents = snapshot.last7DaySpendCents
     }
 
     @available(*, deprecated, message: "Use init(from:warnings:)")

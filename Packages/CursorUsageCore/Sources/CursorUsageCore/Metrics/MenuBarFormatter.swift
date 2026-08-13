@@ -103,9 +103,6 @@ public enum MenuBarFormatter {
         if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
             return "\(usd(used))/\(usd(limit))"
         }
-        if toggles.burnRateEstimate, let today = snapshot.todaySpendCents {
-            return usd(today)
-        }
         return snapshot.planDisplayName
     }
 
@@ -124,8 +121,6 @@ public enum MenuBarFormatter {
                 segments.append(segment(style: style, kind: .total, text: pct(p)))
             } else if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
                 segments.append(segment(style: style, kind: .spend, text: "\(usd(used))/\(usd(limit))"))
-            } else if toggles.burnRateEstimate, let today = snapshot.todaySpendCents {
-                segments.append(segment(style: style, kind: .today, text: usd(today)))
             }
         case .detailed:
             if toggles.cursorModelsPercent, let p = snapshot.cursorModelsPercentUsed {
@@ -162,15 +157,12 @@ public enum MenuBarFormatter {
             if toggles.daysRemaining, let days = snapshot.daysRemainingInCycle {
                 segments.append(segment(style: style, kind: .days, text: "\(days)d"))
             }
-            if toggles.burnRateEstimate, let today = snapshot.todaySpendCents {
-                segments.append(segment(style: style, kind: .today, text: labeled(style, kind: .today, value: usd(today))))
-            }
         }
         return segments
     }
 
     private enum Kind {
-        case cursorModels, otherModels, total, spend, bonus, onDemand, days, today
+        case cursorModels, otherModels, total, spend, bonus, onDemand, days
     }
 
     private static func pct(_ value: Double) -> String {
@@ -188,7 +180,6 @@ public enum MenuBarFormatter {
             case .otherModels: return "Other \(value)"
             case .total: return "Total \(value)"
             case .onDemand: return "On-demand \(value)"
-            case .today: return "Today \(value)"
             case .spend, .bonus, .days: return value
             }
         }
@@ -204,7 +195,6 @@ public enum MenuBarFormatter {
         case (.icons, .bonus): icon = "gift"
         case (.icons, .onDemand): icon = "creditcard"
         case (.icons, .days): icon = "calendar"
-        case (.icons, .today): icon = "chart.line.uptrend.xyaxis"
         case (.shortWords, _): icon = nil
         }
         return .init(systemImage: icon, text: text)
