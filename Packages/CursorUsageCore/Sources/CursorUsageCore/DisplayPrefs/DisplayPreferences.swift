@@ -29,8 +29,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var colorTheme: ColorTheme
     /// Four metric colors used when `colorTheme == .custom`.
     public var customThemeColors: CustomThemeColors
-    /// Settings + popover type size (not macOS screen zoom).
+    /// Settings + popover chrome magnification (not macOS screen zoom).
     public var interfaceSize: InterfaceSize
+    /// Labels only — independent of `interfaceSize` chrome magnification.
+    public var textSize: InterfaceSize
     /// Replaces theme accents with a palette that stays distinct for this vision type.
     public var colorVision: ColorVision
     /// Hatch / dots on progress bars so metrics are not color-only.
@@ -498,6 +500,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         colorTheme: .cursor,
         customThemeColors: .default,
         interfaceSize: .defaultSize,
+        textSize: .defaultSize,
         colorVision: .typical,
         distinguishWithoutColor: false,
         highContrast: false,
@@ -524,6 +527,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         colorTheme: ColorTheme = .cursor,
         customThemeColors: CustomThemeColors = .default,
         interfaceSize: InterfaceSize = .defaultSize,
+        textSize: InterfaceSize = .defaultSize,
         colorVision: ColorVision = .typical,
         distinguishWithoutColor: Bool = false,
         highContrast: Bool = false,
@@ -548,6 +552,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.colorTheme = colorTheme
         self.customThemeColors = customThemeColors
         self.interfaceSize = interfaceSize
+        self.textSize = textSize
         self.colorVision = colorVision
         self.distinguishWithoutColor = distinguishWithoutColor
         self.highContrast = highContrast
@@ -582,6 +587,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         colorTheme = try c.decodeIfPresent(ColorTheme.self, forKey: .colorTheme) ?? .cursor
         customThemeColors = try c.decodeIfPresent(CustomThemeColors.self, forKey: .customThemeColors) ?? .default
         interfaceSize = try c.decodeIfPresent(InterfaceSize.self, forKey: .interfaceSize) ?? .defaultSize
+        textSize = try c.decodeIfPresent(InterfaceSize.self, forKey: .textSize) ?? interfaceSize
         colorVision = try c.decodeIfPresent(ColorVision.self, forKey: .colorVision) ?? .typical
         distinguishWithoutColor = try c.decodeIfPresent(Bool.self, forKey: .distinguishWithoutColor) ?? false
         highContrast = try c.decodeIfPresent(Bool.self, forKey: .highContrast) ?? false

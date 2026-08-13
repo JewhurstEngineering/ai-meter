@@ -14,6 +14,7 @@ settings:
     CURRENT_PROJECT_VERSION: "35"
     DEVELOPMENT_TEAM: "6998422DKP"
     CODE_SIGN_STYLE: Automatic
+    INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 James Jewhurst"
 packages:
   CursorUsageCore:
     path: Packages/CursorUsageCore
