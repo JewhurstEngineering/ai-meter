@@ -9,8 +9,7 @@ Local-first macOS menu bar meter for **Cursor Pro / Pro+ / Ultra** usage.
 - Cursor Models % vs Other Models % (and on-demand state)
 - Configurable auto-refresh
 - WebView login, local Cursor session auto-connect, or paste token
-- Desktop widgets: configurable highlight, large size, and a daily sparkline widget
-- Daily spend estimated locally from each refresh (Cursor has no personal per-day API)
+- Desktop widgets: configurable highlight, small / medium / large
 - Multiple personal Cursor accounts (switcher, combined menu bar, or separate items)
 - Light / dark lock plus choosable color themes (Original, Cursor, editor palettes, custom)
 - Accessibility: interface size, color-vision palettes, patterns, high contrast
@@ -40,5 +39,5 @@ MIT — see [LICENSE](LICENSE).
 
 ## Version
 
-Current: **0.2.6**
+Current: **0.2.7**
 
