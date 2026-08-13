@@ -144,6 +144,21 @@ struct LayoutSettingsView: View {
                     systemImage: "list.bullet.rectangle",
                     isOn: binding(\.modelsThisPeriod)
                 )
+                MetricToggleRow(
+                    title: "This Mac",
+                    systemImage: "laptopcomputer",
+                    isOn: binding(\.thisMacActivity)
+                )
+                MetricToggleRow(
+                    title: "Recent local chats",
+                    systemImage: "bubble.left.and.bubble.right",
+                    isOn: binding(\.localRecentChats)
+                )
+                MetricToggleRow(
+                    title: "Cloud agents",
+                    systemImage: "cloud",
+                    isOn: binding(\.cloudAgents)
+                )
             }
         }
     }
@@ -400,8 +415,25 @@ private struct PopoverPreviewCard: View {
                     .font(.caption2)
                 }
 
+                if t.thisMacActivity {
+                    Divider()
+                    Label("Cursor · 3 windows", systemImage: "laptopcomputer")
+                        .font(.caption2)
+                }
+                if t.localRecentChats {
+                    Label("Recent on this Mac", systemImage: "bubble.left.and.bubble.right")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+                if t.cloudAgents {
+                    Label("Cloud agents", systemImage: "cloud")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+
                 if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent
                     && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining && !t.modelsThisPeriod
+                    && !t.thisMacActivity && !t.localRecentChats && !t.cloudAgents
                 {
                     Text("Enable a Popover metric above to preview it.")
                         .font(.caption)

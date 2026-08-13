@@ -6,6 +6,7 @@ struct AccountsView: View {
     @State private var showLogin = false
     @State private var reauthAccountID: UUID?
     @State private var pasteToken = ""
+    @State private var pasteCloudKey = ""
     @State private var statusMessage: String?
     @State private var editingLabelID: UUID?
     @State private var draftLabel = ""
@@ -71,6 +72,53 @@ struct AccountsView: View {
                         }
                     }
                     .disabled(pasteToken.isEmpty)
+                }
+
+                Section {
+                    if store.activeAccount?.hasCloudAPIKey == true {
+                        HStack {
+                            Text(store.activeAccount?.cloudAPIKeyName ?? "Key saved")
+                            Spacer()
+                            if let email = store.activeAccount?.cloudAPIKeyEmail {
+                                Text(email)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                        }
+                        if let error = store.activeAccount?.cloudAgentsError {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                        Button("Remove Cloud Agents key", role: .destructive) {
+                            store.removeCloudAPIKey()
+                            statusMessage = "Cloud Agents key removed."
+                        }
+                        .disabled(!store.isAuthenticated)
+                    } else {
+                        SecureField("cursor_… or crsr_… API key", text: $pasteCloudKey)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        Button("Save Cloud Agents key") {
+                            Task {
+                                do {
+                                    try await store.saveCloudAPIKey(pasteCloudKey)
+                                    pasteCloudKey = ""
+                                    statusMessage = "Cloud Agents key saved."
+                                } catch CloudAgentsError.unauthorized {
+                                    statusMessage = "Cloud Agents key rejected."
+                                } catch {
+                                    statusMessage = "Key failed: \(error.localizedDescription)"
+                                }
+                            }
+                        }
+                        .disabled(pasteCloudKey.isEmpty || !store.isAuthenticated)
+                    }
+                } header: {
+                    Text("Cloud Agents API key")
+                } footer: {
+                    Text("Optional. Lists background cloud agents. Create a user key at cursor.com/dashboard/api. This is not the session cookie.")
                 }
 
                 Section("Accounts") {

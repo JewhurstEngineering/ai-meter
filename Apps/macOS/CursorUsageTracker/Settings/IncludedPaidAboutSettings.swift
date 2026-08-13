@@ -136,17 +136,25 @@ struct IncludedUsageSettingsView: View {
             } else {
                 VStack(spacing: 4) {
                     ForEach(snapshot.modelBreakdown) { row in
-                        HStack(spacing: 8) {
-                            Image(systemName: "chevron.right.circle.fill")
-                                .font(.caption)
-                                .foregroundStyle(theme.otherModels.opacity(0.7))
-                            Text(row.model)
-                                .font(.caption)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                            Spacer()
-                            Text(MenuBarFormatter.usd(row.totalCents))
-                                .font(.caption.monospacedDigit())
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "chevron.right.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(theme.otherModels.opacity(0.7))
+                                Text(row.model)
+                                    .font(.caption)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                Spacer()
+                                Text(MenuBarFormatter.usd(row.totalCents))
+                                    .font(.caption.monospacedDigit())
+                            }
+                            if let tokens = MenuBarFormatter.tokenCaption(row) {
+                                Text(tokens)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.leading, 24)
+                            }
                         }
                     }
                     Divider().padding(.vertical, 2)
@@ -155,8 +163,18 @@ struct IncludedUsageSettingsView: View {
                             Text("Total")
                                 .font(.caption.weight(.semibold))
                             Spacer()
-                            Text(MenuBarFormatter.usd(total))
-                                .font(.caption.monospacedDigit().weight(.bold))
+                            VStack(alignment: .trailing, spacing: 1) {
+                                Text(MenuBarFormatter.usd(total))
+                                    .font(.caption.monospacedDigit().weight(.bold))
+                                if let tokens = MenuBarFormatter.tokenCaption(
+                                    input: snapshot.totalInputTokens,
+                                    output: snapshot.totalOutputTokens
+                                ) {
+                                    Text(tokens)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                 }

@@ -416,6 +416,12 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var burnRateEstimate: Bool
         /// Popover-only: per-model spend for the billing period.
         public var modelsThisPeriod: Bool
+        /// Popover-only (Mac): running Cursor app / window count.
+        public var thisMacActivity: Bool
+        /// Popover-only (Mac): recent local Composer/Agent chats.
+        public var localRecentChats: Bool
+        /// Popover / iOS: cloud agents when an API key is saved.
+        public var cloudAgents: Bool
 
         public static let menuBarDefault = SurfaceToggles(
             cursorModelsPercent: true,
@@ -426,7 +432,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             onDemand: false,
             daysRemaining: false,
             burnRateEstimate: false,
-            modelsThisPeriod: false
+            modelsThisPeriod: false,
+            thisMacActivity: false,
+            localRecentChats: false,
+            cloudAgents: false
         )
 
         public static let popoverDefault = SurfaceToggles(
@@ -438,7 +447,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             onDemand: true,
             daysRemaining: true,
             burnRateEstimate: true,
-            modelsThisPeriod: true
+            modelsThisPeriod: true,
+            thisMacActivity: true,
+            localRecentChats: true,
+            cloudAgents: true
         )
 
         public init(
@@ -450,7 +462,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             onDemand: Bool,
             daysRemaining: Bool,
             burnRateEstimate: Bool,
-            modelsThisPeriod: Bool = false
+            modelsThisPeriod: Bool = false,
+            thisMacActivity: Bool = false,
+            localRecentChats: Bool = false,
+            cloudAgents: Bool = false
         ) {
             self.cursorModelsPercent = cursorModelsPercent
             self.otherModelsPercent = otherModelsPercent
@@ -461,6 +476,9 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             self.daysRemaining = daysRemaining
             self.burnRateEstimate = burnRateEstimate
             self.modelsThisPeriod = modelsThisPeriod
+            self.thisMacActivity = thisMacActivity
+            self.localRecentChats = localRecentChats
+            self.cloudAgents = cloudAgents
         }
 
         public init(from decoder: Decoder) throws {
@@ -475,6 +493,9 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             burnRateEstimate = try c.decodeIfPresent(Bool.self, forKey: .burnRateEstimate) ?? false
             // Default on so upgraded installs get the popover section without a reset.
             modelsThisPeriod = try c.decodeIfPresent(Bool.self, forKey: .modelsThisPeriod) ?? true
+            thisMacActivity = try c.decodeIfPresent(Bool.self, forKey: .thisMacActivity) ?? true
+            localRecentChats = try c.decodeIfPresent(Bool.self, forKey: .localRecentChats) ?? true
+            cloudAgents = try c.decodeIfPresent(Bool.self, forKey: .cloudAgents) ?? true
         }
     }
 

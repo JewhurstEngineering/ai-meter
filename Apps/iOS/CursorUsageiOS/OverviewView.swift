@@ -122,19 +122,40 @@ struct OverviewView: View {
             if layout.modelsThisPeriod, !snapshot.modelBreakdown.isEmpty {
                 Section("Models this period") {
                     ForEach(Array(snapshot.modelBreakdown.prefix(8))) { row in
-                        LabeledContent(row.model) {
-                            Text(MenuBarFormatter.usd(row.totalCents))
-                                .monospacedDigit()
+                        VStack(alignment: .leading, spacing: 2) {
+                            LabeledContent(row.model) {
+                                Text(MenuBarFormatter.usd(row.totalCents))
+                                    .monospacedDigit()
+                            }
+                            if let tokens = MenuBarFormatter.tokenCaption(row) {
+                                Text(tokens)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
                     if let total = snapshot.totalModelCostCents {
                         LabeledContent("Total") {
-                            Text(MenuBarFormatter.usd(total))
-                                .fontWeight(.semibold)
-                                .monospacedDigit()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(MenuBarFormatter.usd(total))
+                                    .fontWeight(.semibold)
+                                    .monospacedDigit()
+                                if let tokens = MenuBarFormatter.tokenCaption(
+                                    input: snapshot.totalInputTokens,
+                                    output: snapshot.totalOutputTokens
+                                ) {
+                                    Text(tokens)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                 }
+            }
+
+            if layout.cloudAgents, account?.hasCloudAPIKey == true {
+                cloudAgentsSection(account)
             }
 
             if let error = account?.lastError ?? store.lastError {
@@ -180,6 +201,46 @@ struct OverviewView: View {
             )
         }
         .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func cloudAgentsSection(_ account: AccountRuntime?) -> some View {
+        Section("Cloud agents") {
+            if account?.hasCloudAPIKey != true {
+                Text("Add a Cloud Agents API key in Accounts.")
+                    .foregroundStyle(.secondary)
+            } else if let error = account?.cloudAgentsError {
+                Label(error, systemImage: "exclamationmark.triangle")
+                    .foregroundStyle(.orange)
+            } else if let agents = account?.cloudAgents, !agents.isEmpty {
+                ForEach(agents.prefix(8)) { agent in
+                    if let url = agent.url {
+                        Link(destination: url) {
+                            cloudAgentRow(agent)
+                        }
+                    } else {
+                        cloudAgentRow(agent)
+                    }
+                }
+            } else {
+                Text("No active cloud agents.")
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func cloudAgentRow(_ agent: CloudAgentSummary) -> some View {
+        HStack {
+            Circle()
+                .fill(agent.isRunning ? Color.green : Color.secondary.opacity(0.45))
+                .frame(width: 8, height: 8)
+            Text(agent.name)
+                .lineLimit(1)
+            Spacer()
+            Text(agent.displayStatus.lowercased())
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
     }
 
     private func onDemandLabel(_ snapshot: UsageSnapshot) -> String {

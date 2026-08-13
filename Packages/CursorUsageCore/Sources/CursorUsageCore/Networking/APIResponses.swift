@@ -59,11 +59,45 @@ struct AuthStripeResponse: Decodable, Sendable {
 struct AggregatedUsageResponse: Decodable, Sendable {
     var aggregations: [Aggregation]?
     var totalCostCents: Double?
+    var totalInputTokens: FlexibleInt?
+    var totalOutputTokens: FlexibleInt?
+    var totalCacheWriteTokens: FlexibleInt?
+    var totalCacheReadTokens: FlexibleInt?
 
     struct Aggregation: Decodable, Sendable {
         var modelIntent: String?
         var totalCents: Double?
         var tier: Int?
+        var inputTokens: FlexibleInt?
+        var outputTokens: FlexibleInt?
+        var cacheWriteTokens: FlexibleInt?
+        var cacheReadTokens: FlexibleInt?
+    }
+}
+
+/// Cursor sometimes emits token counts as strings.
+struct FlexibleInt: Decodable, Sendable {
+    var value: Int?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() {
+            value = nil
+            return
+        }
+        if let int = try? container.decode(Int.self) {
+            value = int
+            return
+        }
+        if let double = try? container.decode(Double.self) {
+            value = Int(double.rounded())
+            return
+        }
+        if let string = try? container.decode(String.self) {
+            value = Int(string)
+            return
+        }
+        value = nil
     }
 }
 

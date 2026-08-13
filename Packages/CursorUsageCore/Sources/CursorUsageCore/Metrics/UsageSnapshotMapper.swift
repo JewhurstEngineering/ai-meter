@@ -40,7 +40,15 @@ public enum UsageSnapshotMapper {
 
         let models: [UsageSnapshot.ModelCost] = (aggregated?.aggregations ?? []).compactMap { row in
             guard let name = row.modelIntent, let cents = row.totalCents else { return nil }
-            return .init(model: name, totalCents: cents, tier: row.tier)
+            return .init(
+                model: name,
+                totalCents: cents,
+                tier: row.tier,
+                inputTokens: row.inputTokens?.value,
+                outputTokens: row.outputTokens?.value,
+                cacheWriteTokens: row.cacheWriteTokens?.value,
+                cacheReadTokens: row.cacheReadTokens?.value
+            )
         }
 
         return UsageSnapshot(
@@ -63,6 +71,10 @@ public enum UsageSnapshotMapper {
             onDemandLimitCents: onDemand?.limit,
             modelBreakdown: models.sorted { $0.totalCents > $1.totalCents },
             totalModelCostCents: aggregated?.totalCostCents,
+            totalInputTokens: aggregated?.totalInputTokens?.value,
+            totalOutputTokens: aggregated?.totalOutputTokens?.value,
+            totalCacheWriteTokens: aggregated?.totalCacheWriteTokens?.value,
+            totalCacheReadTokens: aggregated?.totalCacheReadTokens?.value,
             displayMessages: .init(
                 cursorModels: summary.autoModelSelectedDisplayMessage,
                 otherModels: summary.namedModelSelectedDisplayMessage

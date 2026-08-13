@@ -24,6 +24,12 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertFalse(snap.onDemandEnabled)
         XCTAssertEqual(snap.modelBreakdown.count, 3)
         XCTAssertEqual(snap.modelBreakdown.first?.model, "claude-fable-5-thinking-high")
+        XCTAssertEqual(snap.modelBreakdown.first?.inputTokens, 2_421_899)
+        XCTAssertEqual(snap.modelBreakdown.first?.outputTokens, 1_940_439)
+        XCTAssertEqual(snap.totalInputTokens, 13_547_525)
+        XCTAssertEqual(snap.totalOutputTokens, 2_885_782)
+        XCTAssertEqual(MenuBarFormatter.tokenCaption(snap.modelBreakdown[0]), "2.4M in · 1.9M out")
+        XCTAssertEqual(MenuBarFormatter.compactCount(940_605), "940.6K")
     }
 
     func testMenuBarFormatterDetailed() {
@@ -225,6 +231,68 @@ final class UsageSnapshotMapperTests: XCTestCase {
         let cookie = try SessionCookieBuilder.cookieValue(fromStoredToken: jwt)
         XCTAssertEqual(cookie, "user_01ABC%3A%3A\(jwt)")
     }
+
+    func testCompactTokenFormatting() {
+        XCTAssertEqual(MenuBarFormatter.compactCount(999), "999")
+        XCTAssertEqual(MenuBarFormatter.compactCount(1_000), "1K")
+        XCTAssertEqual(MenuBarFormatter.compactCount(12_400), "12.4K")
+        XCTAssertEqual(MenuBarFormatter.compactCount(2_421_899), "2.4M")
+        XCTAssertNil(MenuBarFormatter.tokenCaption(input: nil, output: nil))
+        XCTAssertEqual(MenuBarFormatter.tokenCaption(input: 100, output: nil), "100 in")
+    }
+
+    #if os(macOS)
+    func testLocalComposerHeadersJSON() throws {
+        let json = """
+        {
+          "allComposers": [
+            {
+              "composerId": "abc-123",
+              "name": "Fix login",
+              "unifiedMode": "agent",
+              "lastUpdatedAt": 1737316260000,
+              "modelConfig": { "modelName": "composer-1" },
+              "workspaceIdentifier": {
+                "id": "ws1",
+                "uri": { "fsPath": "/Users/me/Projects/my-app" }
+              }
+            }
+          ]
+        }
+        """.data(using: .utf8)!
+        let rows = CursorLocalComposerReader.decodeHeadersJSON(json)
+        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(rows.first?.name, "Fix login")
+        XCTAssertEqual(rows.first?.modeLabel, "Agent")
+        XCTAssertEqual(rows.first?.model, "composer-1")
+        XCTAssertEqual(rows.first?.projectFolder, "my-app")
+    }
+
+    func testLocalComposerSkipsDraftsAndUsesCheckpointTime() throws {
+        let json = """
+        {
+          "composerId": "abc-123",
+          "name": "Fix login",
+          "unifiedMode": "agent",
+          "createdAt": 1000,
+          "lastUpdatedAt": 2000,
+          "conversationCheckpointLastUpdatedAt": 1786650993746,
+          "isDraft": false,
+          "modelConfig": { "modelName": "grok-4.6" },
+          "workspaceIdentifier": { "uri": { "fsPath": "/Users/me/Projects/my-app" } }
+        }
+        """.data(using: .utf8)!
+        let row = CursorLocalComposerReader.decodeComposerData(json)
+        XCTAssertEqual(row?.name, "Fix login")
+        XCTAssertEqual(row?.model, "grok-4.6")
+        XCTAssertEqual(row?.updatedAt?.timeIntervalSince1970 ?? 0, 1_786_650_993.746, accuracy: 0.01)
+
+        let draft = """
+        { "composerId": "d1", "name": "scratch", "isDraft": true, "createdAt": 999999 }
+        """.data(using: .utf8)!
+        XCTAssertNil(CursorLocalComposerReader.decodeComposerData(draft))
+    }
+    #endif
 
     private func fixture(_ name: String) throws -> Data {
         let url = Bundle.module.url(forResource: name.replacingOccurrences(of: ".json", with: ""), withExtension: "json", subdirectory: "Fixtures")

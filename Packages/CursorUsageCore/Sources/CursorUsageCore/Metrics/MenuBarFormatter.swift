@@ -211,4 +211,47 @@ public enum MenuBarFormatter {
     public static func usd(_ cents: Double) -> String {
         usd(Int(cents.rounded()))
     }
+
+    public static func relative(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+
+    public static func compactCount(_ n: Int) -> String {
+        let absN = abs(n)
+        if absN >= 1_000_000 {
+            let value = Double(n) / 1_000_000
+            return formatCompact(value, suffix: "M")
+        }
+        if absN >= 1_000 {
+            let value = Double(n) / 1_000
+            return formatCompact(value, suffix: "K")
+        }
+        return "\(n)"
+    }
+
+    public static func tokenCaption(input: Int?, output: Int?) -> String? {
+        guard input != nil || output != nil else { return nil }
+        var parts: [String] = []
+        if let input {
+            parts.append("\(compactCount(input)) in")
+        }
+        if let output {
+            parts.append("\(compactCount(output)) out")
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    public static func tokenCaption(_ cost: UsageSnapshot.ModelCost) -> String? {
+        tokenCaption(input: cost.inputTokens, output: cost.outputTokens)
+    }
+
+    private static func formatCompact(_ value: Double, suffix: String) -> String {
+        let rounded = (value * 10).rounded() / 10
+        if rounded == floor(rounded) {
+            return String(format: "%.0f%@", rounded, suffix)
+        }
+        return String(format: "%.1f%@", rounded, suffix)
+    }
 }

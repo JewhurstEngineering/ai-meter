@@ -30,6 +30,10 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
 
     public var modelBreakdown: [ModelCost]
     public var totalModelCostCents: Double?
+    public var totalInputTokens: Int?
+    public var totalOutputTokens: Int?
+    public var totalCacheWriteTokens: Int?
+    public var totalCacheReadTokens: Int?
 
     public var displayMessages: DisplayMessages
 
@@ -48,11 +52,27 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         public var model: String
         public var totalCents: Double
         public var tier: Int?
+        public var inputTokens: Int?
+        public var outputTokens: Int?
+        public var cacheWriteTokens: Int?
+        public var cacheReadTokens: Int?
 
-        public init(model: String, totalCents: Double, tier: Int? = nil) {
+        public init(
+            model: String,
+            totalCents: Double,
+            tier: Int? = nil,
+            inputTokens: Int? = nil,
+            outputTokens: Int? = nil,
+            cacheWriteTokens: Int? = nil,
+            cacheReadTokens: Int? = nil
+        ) {
             self.model = model
             self.totalCents = totalCents
             self.tier = tier
+            self.inputTokens = inputTokens
+            self.outputTokens = outputTokens
+            self.cacheWriteTokens = cacheWriteTokens
+            self.cacheReadTokens = cacheReadTokens
         }
     }
 
@@ -76,6 +96,10 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         onDemandLimitCents: Int? = nil,
         modelBreakdown: [ModelCost] = [],
         totalModelCostCents: Double? = nil,
+        totalInputTokens: Int? = nil,
+        totalOutputTokens: Int? = nil,
+        totalCacheWriteTokens: Int? = nil,
+        totalCacheReadTokens: Int? = nil,
         displayMessages: DisplayMessages = .init()
     ) {
         self.fetchedAt = fetchedAt
@@ -97,6 +121,10 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         self.onDemandLimitCents = onDemandLimitCents
         self.modelBreakdown = modelBreakdown
         self.totalModelCostCents = totalModelCostCents
+        self.totalInputTokens = totalInputTokens
+        self.totalOutputTokens = totalOutputTokens
+        self.totalCacheWriteTokens = totalCacheWriteTokens
+        self.totalCacheReadTokens = totalCacheReadTokens
         self.displayMessages = displayMessages
     }
 

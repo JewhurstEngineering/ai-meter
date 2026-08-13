@@ -16,9 +16,15 @@ public final class UsageStore: ObservableObject {
 
     private let keychain = KeychainStore()
     private let client = PersonalUsageClient.shared
+    private let cloudClient = CloudAgentsClient.shared
     private var refreshTask: Task<Void, Never>?
     /// Host app sets this to reload WidgetKit after a snapshot write.
     public var onWidgetSnapshotWritten: (() -> Void)?
+
+    #if os(macOS)
+    @Published public private(set) var thisMac = CursorProcessSnapshot()
+    @Published public private(set) var localComposers: [LocalComposerSummary] = []
+    #endif
 
     public init() {
         preferences = DisplayPreferenceStore.load()
@@ -95,6 +101,8 @@ public final class UsageStore: ObservableObject {
         if !connections.isEmpty {
             await refresh()
             startAutoRefresh()
+        } else {
+            refreshLocalActivity()
         }
     }
 
@@ -130,6 +138,7 @@ public final class UsageStore: ObservableObject {
 
     public func signOut(id: UUID) {
         keychain.delete(account: id.uuidString)
+        keychain.delete(account: AccountConnection(id: id).cloudAPIKeychainAccount)
         connections.removeAll { $0.id == id }
         runtimes[id] = nil
         if activeAccountID == id {
@@ -147,6 +156,7 @@ public final class UsageStore: ObservableObject {
     public func signOutAll() {
         for connection in connections {
             keychain.delete(account: connection.keychainAccount)
+            keychain.delete(account: connection.cloudAPIKeychainAccount)
         }
         connections = []
         runtimes = [:]
@@ -177,6 +187,7 @@ public final class UsageStore: ObservableObject {
     }
 
     public func refresh() async {
+        refreshLocalActivity()
         let ids = connections.map(\.id)
         guard !ids.isEmpty else { return }
         isRefreshing = true
@@ -210,9 +221,11 @@ public final class UsageStore: ObservableObject {
                 accountEmail: connection.email ?? connection.displayLabel,
                 accountID: id
             )
+            await refreshCloudAgents(id: id)
         } catch PersonalAPIError.unauthorized {
             let email = connection.email
             keychain.delete(account: connection.keychainAccount)
+            keychain.delete(account: connection.cloudAPIKeychainAccount)
             connections.removeAll { $0.id == id }
             runtimes[id] = nil
             if activeAccountID == id {
@@ -231,6 +244,74 @@ public final class UsageStore: ObservableObject {
         } catch {
             updateRuntime(id: id) {
                 $0.lastError = "Refresh failed: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    public func saveCloudAPIKey(_ key: String, for id: UUID? = nil) async throws {
+        let accountID = id ?? activeAccountID
+        guard let accountID, let connection = connections.first(where: { $0.id == accountID }) else {
+            throw CloudAgentsError.httpStatus(-1)
+        }
+        let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        let info = try await cloudClient.validate(apiKey: trimmed)
+        try keychain.save(token: trimmed, account: connection.cloudAPIKeychainAccount)
+        updateRuntime(id: accountID) {
+            $0.hasCloudAPIKey = true
+            $0.cloudAPIKeyName = info.apiKeyName
+            $0.cloudAPIKeyEmail = info.userEmail
+            $0.cloudAgentsError = nil
+        }
+        await refreshCloudAgents(id: accountID)
+    }
+
+    public func removeCloudAPIKey(for id: UUID? = nil) {
+        let accountID = id ?? activeAccountID
+        guard let accountID, let connection = connections.first(where: { $0.id == accountID }) else { return }
+        keychain.delete(account: connection.cloudAPIKeychainAccount)
+        updateRuntime(id: accountID) {
+            $0.hasCloudAPIKey = false
+            $0.cloudAPIKeyName = nil
+            $0.cloudAPIKeyEmail = nil
+            $0.cloudAgents = []
+            $0.cloudAgentsError = nil
+        }
+    }
+
+    public func refreshLocalActivity() {
+        #if os(macOS)
+        thisMac = CursorProcessMonitor.snapshot()
+        localComposers = CursorLocalComposerReader.recent()
+        #endif
+    }
+
+    private func refreshCloudAgents(id: UUID) async {
+        guard let connection = connections.first(where: { $0.id == id }) else { return }
+        guard let apiKey = keychain.load(account: connection.cloudAPIKeychainAccount) else {
+            updateRuntime(id: id) {
+                $0.hasCloudAPIKey = false
+                $0.cloudAgents = []
+                $0.cloudAgentsError = nil
+            }
+            return
+        }
+        do {
+            let agents = try await cloudClient.listAgents(apiKey: apiKey)
+            updateRuntime(id: id) {
+                $0.hasCloudAPIKey = true
+                $0.cloudAgents = agents
+                $0.cloudAgentsError = nil
+            }
+        } catch CloudAgentsError.unauthorized {
+            updateRuntime(id: id) {
+                $0.hasCloudAPIKey = true
+                $0.cloudAgents = []
+                $0.cloudAgentsError = "Cloud Agents API key rejected."
+            }
+        } catch {
+            updateRuntime(id: id) {
+                $0.hasCloudAPIKey = true
+                $0.cloudAgentsError = "Cloud agents unavailable."
             }
         }
     }
@@ -273,13 +354,20 @@ public final class UsageStore: ObservableObject {
     private func rebuildRuntimesFromKeychain() {
         var next: [UUID: AccountRuntime] = [:]
         for connection in connections {
+            let previous = runtimes[connection.id]
             let authed = keychain.load(account: connection.keychainAccount) != nil
+            let hasCloud = keychain.load(account: connection.cloudAPIKeychainAccount) != nil
             next[connection.id] = AccountRuntime(
                 connection: connection,
-                snapshot: runtimes[connection.id]?.snapshot,
-                lastError: runtimes[connection.id]?.lastError,
+                snapshot: previous?.snapshot,
+                lastError: previous?.lastError,
                 isRefreshing: false,
-                isAuthenticated: authed
+                isAuthenticated: authed,
+                hasCloudAPIKey: hasCloud,
+                cloudAPIKeyName: previous?.cloudAPIKeyName,
+                cloudAPIKeyEmail: previous?.cloudAPIKeyEmail,
+                cloudAgents: previous?.cloudAgents ?? [],
+                cloudAgentsError: previous?.cloudAgentsError
             )
         }
         runtimes = next

@@ -9,6 +9,10 @@ struct MenuBarPopoverView: View {
     var focusedAccountID: UUID? = nil
     @State private var selectedTab: UUID?
 
+    private var popoverMaxHeight: CGFloat {
+        (NSScreen.main?.visibleFrame.height ?? 800) * 0.72
+    }
+
     private var displayed: AccountRuntime? {
         if let focusedAccountID {
             return store.account(focusedAccountID)
@@ -38,39 +42,46 @@ struct MenuBarPopoverView: View {
                 .padding(.horizontal, 14)
                 .padding(.top, showAccountTabs ? 4 : 12)
                 .padding(.bottom, 8)
+                .fixedSize(horizontal: false, vertical: true)
 
             Divider()
 
-            Group {
-                if displayed?.isAuthenticated != true {
-                    signInPrompt
-                } else if let snapshot = displayed?.snapshot {
-                    usageBody(snapshot)
-                } else if displayed?.isRefreshing == true || store.isRefreshing {
-                    ProgressView("Loading usage…")
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 28)
-                } else {
-                    Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
-                        .foregroundStyle(.secondary)
-                        .padding(14)
+            ScrollView(.vertical, showsIndicators: true) {
+                Group {
+                    if displayed?.isAuthenticated != true {
+                        signInPrompt
+                    } else if let snapshot = displayed?.snapshot {
+                        usageBody(snapshot)
+                    } else if displayed?.isRefreshing == true || store.isRefreshing {
+                        ProgressView("Loading usage…")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.vertical, 28)
+                    } else {
+                        Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
+                            .foregroundStyle(.secondary)
+                            .padding(14)
+                    }
                 }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .frame(maxHeight: .infinity)
 
             Divider()
 
             footer
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(width: store.preferences.interfaceSize.popoverWidth)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxHeight: popoverMaxHeight)
         .background(Color(nsColor: .windowBackgroundColor))
         .appThemed(store.preferences)
         .onAppear {
             selectedTab = focusedAccountID ?? store.activeAccountID
+            store.refreshLocalActivity()
         }
         .onChange(of: store.activeAccountID) { _, newValue in
             if focusedAccountID == nil, selectedTab == nil {
@@ -156,6 +167,9 @@ struct MenuBarPopoverView: View {
             Text("Open Settings → Authentication to connect with Cursor, local session, or a pasted token.")
                 .appFont(.caption)
                 .foregroundStyle(.secondary)
+            if store.preferences.popover.thisMacActivity {
+                PopoverThisMacCard(snapshot: store.thisMac)
+            }
             SettingsOpenLink {
                 Label("Open Settings", systemImage: "gearshape")
             }
@@ -225,6 +239,10 @@ struct MenuBarPopoverView: View {
         VStack(alignment: .leading, spacing: 12) {
             if !hits.isEmpty {
                 alertList(hits)
+            }
+
+            if t.thisMacActivity {
+                PopoverThisMacCard(snapshot: store.thisMac)
             }
 
             if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
@@ -342,6 +360,14 @@ struct MenuBarPopoverView: View {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
+            if t.localRecentChats {
+                PopoverLocalChatsCard(composers: store.localComposers)
+            }
+
+            if t.cloudAgents, displayed?.hasCloudAPIKey == true {
+                PopoverCloudAgentsCard(account: displayed)
+            }
+
             if let error = displayed?.lastError ?? store.lastError {
                 Label(error, systemImage: "exclamationmark.triangle.fill")
                     .appFont(.caption)
@@ -445,17 +471,25 @@ private struct PopoverModelsThisPeriodCard: View {
             } else {
                 VStack(spacing: 6) {
                     ForEach(rows) { row in
-                        HStack(spacing: 8) {
-                            Image(systemName: "chevron.right.circle.fill")
-                                .appFont(.caption)
-                                .foregroundStyle(theme.otherModels.opacity(0.75))
-                            Text(row.model)
-                                .appFont(.caption)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                            Spacer(minLength: 8)
-                            Text(MenuBarFormatter.usd(row.totalCents))
-                                .appFont(.caption, weight: .medium, mono: true)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "chevron.right.circle.fill")
+                                    .appFont(.caption)
+                                    .foregroundStyle(theme.otherModels.opacity(0.75))
+                                Text(row.model)
+                                    .appFont(.caption)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                                Spacer(minLength: 8)
+                                Text(MenuBarFormatter.usd(row.totalCents))
+                                    .appFont(.caption, weight: .medium, mono: true)
+                            }
+                            if let tokens = MenuBarFormatter.tokenCaption(row) {
+                                Text(tokens)
+                                    .appFont(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .padding(.leading, 24)
+                            }
                         }
                     }
 
@@ -471,11 +505,169 @@ private struct PopoverModelsThisPeriodCard: View {
                             Text("Total")
                                 .appFont(.caption, weight: .semibold)
                             Spacer()
-                            Text(MenuBarFormatter.usd(total))
-                                .appFont(.caption, weight: .bold, mono: true)
+                            VStack(alignment: .trailing, spacing: 1) {
+                                Text(MenuBarFormatter.usd(total))
+                                    .appFont(.caption, weight: .bold, mono: true)
+                                if let tokens = MenuBarFormatter.tokenCaption(
+                                    input: snapshot.totalInputTokens,
+                                    output: snapshot.totalOutputTokens
+                                ) {
+                                    Text(tokens)
+                                        .appFont(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
                 }
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+    }
+}
+
+private struct PopoverThisMacCard: View {
+    let snapshot: CursorProcessSnapshot
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: snapshot.isRunning ? "laptopcomputer" : "laptopcomputer.slash")
+                .foregroundStyle(snapshot.isRunning ? Color.accentColor : Color.secondary)
+                .frame(width: 16)
+            Text(snapshot.summaryLine)
+                .appFont(.caption)
+                .foregroundStyle(snapshot.isRunning ? Color.primary : Color.secondary)
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+    }
+}
+
+private struct PopoverLocalChatsCard: View {
+    let composers: [LocalComposerSummary]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Recent on this Mac", systemImage: "bubble.left.and.bubble.right")
+                .appFont(.caption, weight: .semibold)
+                .foregroundStyle(.secondary)
+
+            if composers.isEmpty {
+                Text("No local Cursor chats found.")
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(composers) { row in
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
+                                Text(row.name)
+                                    .appFont(.caption, weight: .medium)
+                                    .lineLimit(1)
+                                Spacer(minLength: 4)
+                                Text(row.modeLabel)
+                                    .appFont(.caption2, weight: .semibold)
+                                    .foregroundStyle(.secondary)
+                            }
+                            HStack(spacing: 6) {
+                                if let model = row.model {
+                                    Text(model)
+                                        .lineLimit(1)
+                                        .truncationMode(.middle)
+                                }
+                                if let folder = row.projectFolder {
+                                    Text(folder)
+                                        .lineLimit(1)
+                                }
+                                Spacer(minLength: 4)
+                                if let updated = row.updatedAt {
+                                    Text(MenuBarFormatter.relative(updated))
+                                }
+                            }
+                            .appFont(.caption2)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+    }
+}
+
+private struct PopoverCloudAgentsCard: View {
+    let account: AccountRuntime?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Cloud agents", systemImage: "cloud")
+                .appFont(.caption, weight: .semibold)
+                .foregroundStyle(.secondary)
+
+            if account?.hasCloudAPIKey != true {
+                Text("Add a Cloud Agents API key in Settings → Authentication.")
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+            } else if let error = account?.cloudAgentsError {
+                Text(error)
+                    .appFont(.caption)
+                    .foregroundStyle(.orange)
+            } else if let agents = account?.cloudAgents, !agents.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(agents.prefix(8)) { agent in
+                        Button {
+                            if let url = agent.url {
+                                NSWorkspace.shared.open(url)
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(agent.isRunning ? Color.green : Color.secondary.opacity(0.45))
+                                    .frame(width: 7, height: 7)
+                                Text(agent.name)
+                                    .appFont(.caption, weight: .medium)
+                                    .lineLimit(1)
+                                    .foregroundStyle(.primary)
+                                Spacer(minLength: 4)
+                                Text(agent.displayStatus.lowercased())
+                                    .appFont(.caption2, weight: .semibold)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            } else {
+                Text("No active cloud agents.")
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(10)

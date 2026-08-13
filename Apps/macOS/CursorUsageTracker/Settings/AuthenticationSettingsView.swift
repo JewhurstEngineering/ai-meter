@@ -7,6 +7,7 @@ struct AuthenticationSettingsView: View {
     @State private var showLogin = false
     @State private var reauthAccountID: UUID?
     @State private var pasteToken = ""
+    @State private var pasteCloudKey = ""
     @State private var statusMessage: String?
     @State private var editingLabelID: UUID?
     @State private var draftLabel = ""
@@ -140,6 +141,72 @@ struct AuthenticationSettingsView: View {
                                 statusMessage = "Signed out all accounts."
                             }
                             .controlSize(.small)
+                        }
+                    }
+                }
+
+                SettingsPanel(
+                    title: "Cloud Agents API key",
+                    systemImage: "cloud",
+                    subtitle: "Optional. Lists background cloud agents (bc-*). Create a user key at cursor.com/dashboard/api — this is not the session cookie.",
+                    compact: true
+                ) {
+                    if store.activeAccount?.hasCloudAPIKey == true {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 8, height: 8)
+                            Text(store.activeAccount?.cloudAPIKeyName ?? "Key saved")
+                                .font(.caption.weight(.semibold))
+                            if let email = store.activeAccount?.cloudAPIKeyEmail {
+                                Text("· \(email)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
+                            Spacer(minLength: 0)
+                            Button("Remove", role: .destructive) {
+                                store.removeCloudAPIKey()
+                                statusMessage = "Cloud Agents key removed."
+                            }
+                            .controlSize(.small)
+                        }
+                        if let error = store.activeAccount?.cloudAgentsError {
+                            Text(error)
+                                .font(.caption2)
+                                .foregroundStyle(.orange)
+                        } else if let count = store.activeAccount?.cloudAgents.count {
+                            Text(count == 0 ? "No active cloud agents." : "\(count) cloud agent\(count == 1 ? "" : "s").")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        HStack(spacing: 8) {
+                            SecureField("cursor_… or crsr_… API key", text: $pasteCloudKey)
+                                .textFieldStyle(.roundedBorder)
+                            Button {
+                                Task {
+                                    do {
+                                        try await store.saveCloudAPIKey(pasteCloudKey)
+                                        pasteCloudKey = ""
+                                        let name = store.activeAccount?.cloudAPIKeyName ?? "key"
+                                        statusMessage = "Cloud Agents key saved (\(name))."
+                                    } catch CloudAgentsError.unauthorized {
+                                        statusMessage = "Cloud Agents key rejected."
+                                    } catch {
+                                        statusMessage = "Key failed: \(error.localizedDescription)"
+                                    }
+                                }
+                            } label: {
+                                Label("Save", systemImage: "checkmark.circle")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(pasteCloudKey.isEmpty || !store.isAuthenticated)
+                        }
+                        if !store.isAuthenticated {
+                            Text("Sign in with a Cursor session first, then paste the API key for that account.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }

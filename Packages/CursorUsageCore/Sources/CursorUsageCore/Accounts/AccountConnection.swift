@@ -34,6 +34,7 @@ public struct AccountConnection: Codable, Sendable, Equatable, Identifiable {
     }
 
     public var keychainAccount: String { id.uuidString }
+    public var cloudAPIKeychainAccount: String { "\(id.uuidString).cloudApiKey" }
 }
 
 public struct AccountRegistry: Codable, Sendable, Equatable {
@@ -123,6 +124,11 @@ public struct AccountRuntime: Equatable, Identifiable, Sendable {
     public var lastError: String?
     public var isRefreshing: Bool
     public var isAuthenticated: Bool
+    public var hasCloudAPIKey: Bool
+    public var cloudAPIKeyName: String?
+    public var cloudAPIKeyEmail: String?
+    public var cloudAgents: [CloudAgentSummary]
+    public var cloudAgentsError: String?
 
     public var id: UUID { connection.id }
 
@@ -131,12 +137,22 @@ public struct AccountRuntime: Equatable, Identifiable, Sendable {
         snapshot: UsageSnapshot? = nil,
         lastError: String? = nil,
         isRefreshing: Bool = false,
-        isAuthenticated: Bool = false
+        isAuthenticated: Bool = false,
+        hasCloudAPIKey: Bool = false,
+        cloudAPIKeyName: String? = nil,
+        cloudAPIKeyEmail: String? = nil,
+        cloudAgents: [CloudAgentSummary] = [],
+        cloudAgentsError: String? = nil
     ) {
         self.connection = connection
         self.snapshot = snapshot
         self.lastError = lastError
         self.isRefreshing = isRefreshing
         self.isAuthenticated = isAuthenticated
+        self.hasCloudAPIKey = hasCloudAPIKey
+        self.cloudAPIKeyName = cloudAPIKeyName
+        self.cloudAPIKeyEmail = cloudAPIKeyEmail
+        self.cloudAgents = cloudAgents
+        self.cloudAgentsError = cloudAgentsError
     }
 }

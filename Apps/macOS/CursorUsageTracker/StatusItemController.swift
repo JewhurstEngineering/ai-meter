@@ -31,12 +31,18 @@ final class StatusItemController: NSObject {
     private func syncPopoverSize(_ popover: NSPopover?, hosting: NSHostingController<AnyView>?) {
         guard let hosting else { return }
         let width = popoverWidth
+        hosting.sizingOptions = [.intrinsicContentSize]
         hosting.view.layoutSubtreeIfNeeded()
         let fitted = hosting.sizeThatFits(
             in: CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
         )
-        let screenCap = (NSScreen.main?.visibleFrame.height ?? 900) * 0.88
-        let height = min(max(fitted.height.rounded(.up) + 12, 160), screenCap)
+        let screenCap = (NSScreen.main?.visibleFrame.height ?? 900) * 0.72
+        let height = min(max(fitted.height.rounded(.up), 160), screenCap)
+        if fitted.height > screenCap {
+            // Bound the hosting view so the SwiftUI ScrollView actually scrolls
+            // instead of overflowing the screen (which clips the header).
+            hosting.sizingOptions = []
+        }
         let size = NSSize(width: width, height: height)
         hosting.preferredContentSize = size
         popover?.contentSize = size

@@ -190,10 +190,11 @@ struct PhoneLayoutSettings: View {
                 Toggle("On-demand", isOn: popoverBinding(\.onDemand))
                 Toggle("Days remaining", isOn: popoverBinding(\.daysRemaining))
                 Toggle("Models this period", isOn: popoverBinding(\.modelsThisPeriod))
+                Toggle("Cloud agents", isOn: popoverBinding(\.cloudAgents))
             } header: {
                 Text("Overview")
             } footer: {
-                Text("Same metric set as the Mac popover. Menu bar density lives on the Mac app.")
+                Text("Same metric set as the Mac popover. This Mac and local chats stay on the Mac app.")
             }
         }
         .navigationTitle("Layout")
@@ -456,15 +457,32 @@ struct PhoneIncludedSettings: View {
                 if !snapshot.modelBreakdown.isEmpty {
                     Section("Models this period") {
                         ForEach(snapshot.modelBreakdown) { row in
-                            LabeledContent(row.model) {
-                                Text(MenuBarFormatter.usd(row.totalCents)).monospacedDigit()
+                            VStack(alignment: .leading, spacing: 2) {
+                                LabeledContent(row.model) {
+                                    Text(MenuBarFormatter.usd(row.totalCents)).monospacedDigit()
+                                }
+                                if let tokens = MenuBarFormatter.tokenCaption(row) {
+                                    Text(tokens)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
                         if let total = snapshot.totalModelCostCents {
                             LabeledContent("Total") {
-                                Text(MenuBarFormatter.usd(total))
-                                    .fontWeight(.semibold)
-                                    .monospacedDigit()
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text(MenuBarFormatter.usd(total))
+                                        .fontWeight(.semibold)
+                                        .monospacedDigit()
+                                    if let tokens = MenuBarFormatter.tokenCaption(
+                                        input: snapshot.totalInputTokens,
+                                        output: snapshot.totalOutputTokens
+                                    ) {
+                                        Text(tokens)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
                             }
                         }
                     }
