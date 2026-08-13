@@ -108,7 +108,6 @@ struct MenuBarPopoverView: View {
 
     private var header: some View {
         let snapshot = displayed?.snapshot
-        let presentation = displayed.map { store.menuBarPresentation(for: $0.id) } ?? store.menuBarPresentation
         return HStack(alignment: .center, spacing: 8) {
             AppLogo(size: 34)
             VStack(alignment: .leading, spacing: 2) {
@@ -131,11 +130,6 @@ struct MenuBarPopoverView: View {
             .fixedSize()
 
             Spacer(minLength: 6)
-
-            if presentation.showWarningDot {
-                headerAlarms(presentation.warningHits)
-                    .layoutPriority(1)
-            }
 
             Button {
                 Task {
@@ -169,93 +163,70 @@ struct MenuBarPopoverView: View {
         }
     }
 
-    private func headerAlarms(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
-        HStack(alignment: .center, spacing: 6) {
-            HStack(spacing: 0) {
-                ForEach(Array(hits.enumerated()), id: \.element.id) { index, hit in
-                    if index > 0 {
-                        Text("·")
-                            .font(.system(size: 9, weight: .bold, design: .rounded))
-                            .foregroundStyle(theme.danger.opacity(0.4))
-                            .padding(.horizontal, 3)
-                    }
-                    alarmReadout(hit)
-                }
-            }
-            .padding(.leading, 7)
-            .padding(.trailing, 5)
-            .padding(.vertical, 3)
-            .background(
-                Capsule(style: .continuous)
-                    .fill(theme.danger.opacity(0.12))
-            )
-            .overlay(
-                Capsule(style: .continuous)
-                    .strokeBorder(theme.danger.opacity(0.38), lineWidth: 1)
-            )
-
-            Button("Clear") {
-                store.snoozeAllMenuBarWarnings()
-            }
-            .font(.system(size: 10, weight: .bold, design: .rounded))
-            .foregroundStyle(.secondary)
-            .buttonStyle(.plain)
-            .fixedSize()
-            .help("Hide until usage drops back under the alert. Does not change the threshold.")
-        }
-        .lineLimit(1)
-        .minimumScaleFactor(0.82)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Usage alarms")
-        .accessibilityValue(hits.map(\.compactLine).joined(separator: ", "))
+    private var warningHits: [UsageSnapshot.MenuBarWarningHit] {
+        displayed.map { store.menuBarPresentation(for: $0.id).warningHits }
+            ?? store.menuBarPresentation.warningHits
     }
 
-    private func alarmReadout(_ hit: UsageSnapshot.MenuBarWarningHit) -> some View {
-        HStack(spacing: 5) {
-            Button {
-                AppActivation.openSettingsViaLinkFallback()
-            } label: {
-                HStack(spacing: 5) {
+    @ViewBuilder
+    private func alertList(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            ForEach(hits) { hit in
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
                     Circle()
                         .fill(theme.danger)
-                        .frame(width: 6, height: 6)
-                        .shadow(color: theme.danger.opacity(0.75), radius: 3)
-                    Text(hit.channel.shortTitle.uppercased())
-                        .font(.system(size: 10, weight: .bold, design: .rounded))
-                        .tracking(0.6)
-                    Text(hit.current)
-                        .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    Text("@")
-                        .font(.system(size: 9, weight: .semibold, design: .rounded))
-                        .foregroundStyle(.secondary)
-                    Text(hit.threshold)
-                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                }
-                .foregroundStyle(theme.danger)
-            }
-            .buttonStyle(.plain)
-            .help("\(hit.sentence). Click to change the alert in Settings → General.")
+                        .frame(width: 7, height: 7)
+                        .padding(.top, 3)
+                    Button {
+                        AppActivation.openSettingsViaLinkFallback()
+                    } label: {
+                        Text("\(hit.channel.title) \(hit.current)  ·  alert \(hit.threshold)")
+                            .font(.caption)
+                            .foregroundStyle(theme.danger)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.plain)
+                    .help("\(hit.sentence). Click to change the alert in Settings → General.")
 
-            Button {
-                store.snoozeMenuBarWarning(hit.channel)
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 8, weight: .bold))
-                    .foregroundStyle(theme.danger.opacity(0.7))
-                    .frame(width: 14, height: 14)
-                    .contentShape(Rectangle())
+                    Button {
+                        store.snoozeMenuBarWarning(hit.channel)
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Hide \(hit.channel.title) until it drops back under \(hit.threshold).")
+                }
             }
-            .buttonStyle(.plain)
-            .help("Clear \(hit.channel.shortTitle) until it drops back under \(hit.threshold).")
+
+            HStack {
+                Spacer()
+                Button("Clear") {
+                    store.snoozeAllMenuBarWarnings()
+                }
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .buttonStyle(.plain)
+                .help("Hide until usage drops back under the alert. Does not change the threshold.")
+            }
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Usage alarms")
+        .accessibilityValue(hits.map(\.sentence).joined(separator: ". "))
     }
 
     @ViewBuilder
     private func usageBody(_ snapshot: UsageSnapshot) -> some View {
         let t = store.preferences.popover
+        let hits = warningHits
 
         VStack(alignment: .leading, spacing: 12) {
+            if !hits.isEmpty {
+                alertList(hits)
+            }
+
             if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
                 Text("Included usage")
                     .font(.caption.weight(.semibold))
