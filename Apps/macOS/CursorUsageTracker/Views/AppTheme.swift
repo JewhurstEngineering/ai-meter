@@ -327,26 +327,73 @@ extension EnvironmentValues {
 struct AppThemed<Content: View>: View {
     let preferences: DisplayPreferences
     @ViewBuilder var content: () -> Content
-    @Environment(\.colorScheme) private var systemScheme
+    @ObservedObject private var system = SystemAppearanceMonitor.shared
 
     var body: some View {
-        let scheme: ColorScheme = {
-            switch preferences.appearanceMode {
-            case .system: return systemScheme
-            case .light: return .light
-            case .dark: return .dark
-            }
-        }()
+        let scheme = preferences.appearanceMode.colorScheme(systemIsDark: system.isDark)
         let palette = ThemePalette.resolved(preferences, scheme: scheme)
         content()
             .environment(\.appTheme, palette)
+            .environment(\.colorScheme, scheme)
+            // Always an explicit light/dark — `preferredColorScheme(nil)` sticks on `.dark`.
+            .preferredColorScheme(scheme)
             .tint(palette.tint)
-            // Window appearance only — `preferredColorScheme(nil)` does not undo `.dark`.
             .background(WindowAppearanceBridge(appearance: preferences.appearanceMode.nsAppearance))
     }
 }
 
-/// Locks the hosting NSWindow (Settings chrome, popover) without changing NSApp — menu bar stays native.
+/// Follows macOS light/dark without setting `NSApp.appearance` (that would tint the menu bar).
+@MainActor
+final class SystemAppearanceMonitor: ObservableObject {
+    static let shared = SystemAppearanceMonitor()
+
+    @Published private(set) var isDark: Bool
+    private var observation: NSKeyValueObservation?
+
+    private init() {
+        isDark = Self.read()
+        observation = NSApp.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
+            let dark = Self.read()
+            DispatchQueue.main.async { self?.isDark = dark }
+        }
+    }
+
+    static func read() -> Bool {
+        NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    }
+}
+
+enum WindowAppearanceApplier {
+    /// Settings chrome + content. Skips the status item. Does not set `NSApp.appearance`.
+    static func apply(_ appearance: NSAppearance?) {
+        for window in NSApp.windows where shouldTheme(window) {
+            apply(appearance, to: window)
+        }
+    }
+
+    static func apply(_ appearance: NSAppearance?, to window: NSWindow) {
+        window.appearance = appearance
+        if let content = window.contentView {
+            apply(appearance, to: content)
+        }
+        window.contentView?.superview?.appearance = appearance
+    }
+
+    private static func apply(_ appearance: NSAppearance?, to view: NSView) {
+        view.appearance = appearance
+        for sub in view.subviews {
+            apply(appearance, to: sub)
+        }
+    }
+
+    private static func shouldTheme(_ window: NSWindow) -> Bool {
+        if window.level == .statusBar { return false }
+        if window.styleMask.contains(.nonactivatingPanel) { return false }
+        return window.styleMask.contains(.titled)
+    }
+}
+
+/// Pushes appearance onto the hosting window when Settings / the popover first attach.
 private struct WindowAppearanceBridge: NSViewRepresentable {
     var appearance: NSAppearance?
 
@@ -372,16 +419,19 @@ private final class AppearanceProbeView: NSView {
     }
 
     func apply() {
-        window?.appearance = appearanceToApply
+        WindowAppearanceApplier.apply(appearanceToApply)
+        if let window {
+            WindowAppearanceApplier.apply(appearanceToApply, to: window)
+        }
     }
 }
 
 extension DisplayPreferences.AppearanceMode {
-    var preferredColorScheme: ColorScheme? {
+    func colorScheme(systemIsDark: Bool) -> ColorScheme {
         switch self {
-        case .system: return nil
         case .light: return .light
         case .dark: return .dark
+        case .system: return systemIsDark ? .dark : .light
         }
     }
 

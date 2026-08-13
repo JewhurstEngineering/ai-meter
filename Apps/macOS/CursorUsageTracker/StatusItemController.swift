@@ -56,6 +56,7 @@ final class StatusItemController: NSObject {
             .sink { [weak self] prefs in
                 self?.refreshTitle()
                 self?.applyPopoverAppearance(prefs)
+                WindowAppearanceApplier.apply(prefs.appearanceMode.nsAppearance)
             }
             .store(in: &cancellables)
         store.$isAuthenticated
@@ -71,14 +72,12 @@ final class StatusItemController: NSObject {
     private func applyPopoverAppearance(_ prefs: DisplayPreferences) {
         let appearance = prefs.appearanceMode.nsAppearance
         popover?.appearance = appearance
-        let paint: () -> Void = { [weak self] in
-            self?.popover?.contentViewController?.view.layer?.backgroundColor =
-                NSColor.windowBackgroundColor.cgColor
-        }
-        if let appearance {
-            appearance.performAsCurrentDrawingAppearance(paint)
-        } else {
-            paint()
+        if let view = popover?.contentViewController?.view {
+            view.appearance = appearance
+            let paint: () -> Void = {
+                view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+            }
+            (appearance ?? NSApp.effectiveAppearance).performAsCurrentDrawingAppearance(paint)
         }
     }
 

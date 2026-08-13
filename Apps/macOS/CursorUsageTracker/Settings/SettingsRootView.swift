@@ -26,6 +26,10 @@ struct SettingsRootView: View {
         .appThemed(store.preferences)
         .onAppear {
             AppActivation.scheduleSettingsFocus()
+            WindowAppearanceApplier.apply(store.preferences.appearanceMode.nsAppearance)
+        }
+        .onChange(of: store.preferences.appearanceMode) { _, mode in
+            WindowAppearanceApplier.apply(mode.nsAppearance)
         }
     }
 }

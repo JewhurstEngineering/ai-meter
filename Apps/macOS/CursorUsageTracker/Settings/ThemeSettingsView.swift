@@ -3,7 +3,6 @@ import CursorUsageCore
 
 struct ThemeSettingsView: View {
     @EnvironmentObject private var store: UsageStore
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
@@ -70,11 +69,7 @@ struct ThemeSettingsView: View {
     }
 
     private var previewScheme: ColorScheme {
-        switch store.preferences.appearanceMode {
-        case .light: return .light
-        case .dark: return .dark
-        case .system: return colorScheme
-        }
+        store.preferences.appearanceMode.colorScheme(systemIsDark: SystemAppearanceMonitor.shared.isDark)
     }
 
     private var appearanceBinding: Binding<DisplayPreferences.AppearanceMode> {
