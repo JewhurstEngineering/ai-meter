@@ -8,11 +8,21 @@ import CursorUsageCore
 final class StatusItemController: NSObject {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
+    private var popoverHosting: NSHostingController<AnyView>?
     private var store: UsageStore?
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
 
-    private static let popoverSize = NSSize(width: 360, height: 580)
+    private static let popoverWidth: CGFloat = 360
+
+    private func syncPopoverSize() {
+        guard let hosting = popoverHosting else { return }
+        let fitted = hosting.sizeThatFits(in: CGSize(width: Self.popoverWidth, height: 10_000))
+        let height = min(max(fitted.height.rounded(.up), 160), 640)
+        let size = NSSize(width: Self.popoverWidth, height: height)
+        hosting.preferredContentSize = size
+        popover?.contentSize = size
+    }
 
     func start(store: UsageStore) {
         self.store = store
@@ -28,19 +38,21 @@ final class StatusItemController: NSObject {
         }
 
         let hosting = NSHostingController(
-            rootView: MenuBarPopoverView()
-                .environmentObject(store)
+            rootView: AnyView(
+                MenuBarPopoverView()
+                    .environmentObject(store)
+            )
         )
-        hosting.sizingOptions = []
-        hosting.preferredContentSize = Self.popoverSize
+        hosting.sizingOptions = .preferredContentSize
         hosting.view.wantsLayer = true
 
         let pop = NSPopover()
         pop.behavior = .transient
         pop.animates = true
-        pop.contentSize = Self.popoverSize
         pop.contentViewController = hosting
         popover = pop
+        popoverHosting = hosting
+        syncPopoverSize()
 
         store.objectWillChange
             .receive(on: DispatchQueue.main)
@@ -51,7 +63,12 @@ final class StatusItemController: NSObject {
 
         store.$snapshot
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.refreshTitle() }
+            .sink { [weak self] _ in
+                self?.refreshTitle()
+                if self?.popover?.isShown == true {
+                    self?.syncPopoverSize()
+                }
+            }
             .store(in: &cancellables)
         store.$preferences
             .receive(on: DispatchQueue.main)
@@ -59,6 +76,9 @@ final class StatusItemController: NSObject {
                 self?.refreshTitle()
                 self?.applyPopoverAppearance(prefs)
                 WindowAppearanceApplier.apply(prefs.appearanceMode.nsAppearance)
+                if self?.popover?.isShown == true {
+                    self?.syncPopoverSize()
+                }
             }
             .store(in: &cancellables)
         store.$isAuthenticated
@@ -116,10 +136,10 @@ final class StatusItemController: NSObject {
             if let store {
                 applyPopoverAppearance(store.preferences)
             }
-            popover.contentSize = Self.popoverSize
-            popover.contentViewController?.preferredContentSize = Self.popoverSize
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             Self.hardenPopoverBackground(popover)
+            syncPopoverSize()
+            DispatchQueue.main.async { [weak self] in self?.syncPopoverSize() }
             addEventMonitor()
         }
     }

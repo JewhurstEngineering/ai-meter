@@ -10,31 +10,28 @@ struct MenuBarPopoverView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
                 .padding(.horizontal, 14)
-                .padding(.top, 14)
-                .padding(.bottom, 10)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
 
             Divider()
 
-            ScrollView {
-                Group {
-                    if !store.isAuthenticated {
-                        signInPrompt
-                    } else if let snapshot = store.snapshot {
-                        usageBody(snapshot)
-                    } else if store.isRefreshing {
-                        ProgressView("Loading usage…")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 28)
-                    } else {
-                        Text(store.lastError ?? "No usage data yet.")
-                            .foregroundStyle(.secondary)
-                            .padding(14)
-                    }
+            Group {
+                if !store.isAuthenticated {
+                    signInPrompt
+                } else if let snapshot = store.snapshot {
+                    usageBody(snapshot)
+                } else if store.isRefreshing {
+                    ProgressView("Loading usage…")
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 28)
+                } else {
+                    Text(store.lastError ?? "No usage data yet.")
+                        .foregroundStyle(.secondary)
+                        .padding(14)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
 
             Divider()
 
@@ -42,7 +39,8 @@ struct MenuBarPopoverView: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 10)
         }
-        .frame(width: 360, height: 580)
+        .frame(width: 360)
+        .fixedSize(horizontal: true, vertical: true)
         // Flatten to an opaque bitmap so popover vibrancy cannot bleed editor content through.
         .background(Color(nsColor: .windowBackgroundColor))
         .compositingGroup()
@@ -50,9 +48,9 @@ struct MenuBarPopoverView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .center, spacing: 8) {
             AppLogo(size: 34)
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(store.snapshot?.planDisplayName ?? "Cursor")
                     .font(.headline)
                 if let fetched = store.snapshot?.fetchedAt {
@@ -64,17 +62,23 @@ struct MenuBarPopoverView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                if store.menuBarPresentation.showWarningDot {
-                    headerAlarms(store.menuBarPresentation.warningHits)
-                }
             }
-            Spacer(minLength: 8)
+            .fixedSize()
+
+            Spacer(minLength: 6)
+
+            if store.menuBarPresentation.showWarningDot {
+                headerAlarms(store.menuBarPresentation.warningHits)
+                    .layoutPriority(1)
+            }
+
             Button {
                 Task { await store.refresh() }
             } label: {
                 Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.bordered)
+            .controlSize(.small)
             .disabled(store.isRefreshing || !store.isAuthenticated)
             .help("Refresh")
         }
@@ -95,20 +99,20 @@ struct MenuBarPopoverView: View {
     }
 
     private func headerAlarms(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
-        HStack(alignment: .center, spacing: 8) {
+        HStack(alignment: .center, spacing: 6) {
             HStack(spacing: 0) {
                 ForEach(Array(hits.enumerated()), id: \.element.id) { index, hit in
                     if index > 0 {
                         Text("·")
-                            .font(.system(size: 10, weight: .bold, design: .rounded))
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
                             .foregroundStyle(theme.danger.opacity(0.4))
-                            .padding(.horizontal, 4)
+                            .padding(.horizontal, 3)
                     }
                     alarmReadout(hit)
                 }
             }
-            .padding(.leading, 8)
-            .padding(.trailing, 6)
+            .padding(.leading, 7)
+            .padding(.trailing, 5)
             .padding(.vertical, 3)
             .background(
                 Capsule(style: .continuous)
@@ -125,8 +129,11 @@ struct MenuBarPopoverView: View {
             .font(.system(size: 10, weight: .bold, design: .rounded))
             .foregroundStyle(.secondary)
             .buttonStyle(.plain)
+            .fixedSize()
             .help("Hide until usage drops back under the alert. Does not change the threshold.")
         }
+        .lineLimit(1)
+        .minimumScaleFactor(0.82)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Usage alarms")
         .accessibilityValue(hits.map(\.compactLine).joined(separator: ", "))
