@@ -11,7 +11,6 @@ struct IncludedUsageSettingsView: View {
                 if let snapshot = store.snapshot {
                     VStack(alignment: .leading, spacing: 10) {
                         subscriptionHero(snapshot)
-                        DailyUsageCard(snapshot: snapshot, compact: true)
                         pools(snapshot)
                         models(snapshot)
                     }
@@ -221,32 +220,28 @@ struct PaidUsageSettingsView: View {
         ScrollView {
             Group {
                 if let snapshot = store.snapshot {
-                    VStack(alignment: .leading, spacing: 12) {
-                        SettingsPanel(
-                            title: "Usage-based pricing",
-                            systemImage: "creditcard.fill",
-                            subtitle: "On-demand spend beyond included pools."
-                        ) {
-                            HStack {
-                                Label(
-                                    snapshot.onDemandEnabled ? "Enabled" : "Disabled",
-                                    systemImage: snapshot.onDemandEnabled ? "checkmark.circle.fill" : "xmark.octagon.fill"
-                                )
-                                .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
-                                .font(.headline)
-                                Spacer()
-                            }
-                            if let used = snapshot.onDemandUsedCents {
-                                LabeledContent("Billable usage", value: MenuBarFormatter.usd(used))
-                            }
-                            LabeledContent(
-                                "Current usage limit",
-                                value: snapshot.onDemandLimitCents.map(MenuBarFormatter.usd)
-                                    ?? (snapshot.onDemandEnabled ? "—" : "$0")
+                    SettingsPanel(
+                        title: "Usage-based pricing",
+                        systemImage: "creditcard.fill",
+                        subtitle: "On-demand spend beyond included pools."
+                    ) {
+                        HStack {
+                            Label(
+                                snapshot.onDemandEnabled ? "Enabled" : "Disabled",
+                                systemImage: snapshot.onDemandEnabled ? "checkmark.circle.fill" : "xmark.octagon.fill"
                             )
+                            .foregroundStyle(snapshot.onDemandEnabled ? theme.ok : theme.danger)
+                            .font(.headline)
+                            Spacer()
                         }
-
-                        DailyUsageCard(snapshot: snapshot, compact: true)
+                        if let used = snapshot.onDemandUsedCents {
+                            LabeledContent("Billable usage", value: MenuBarFormatter.usd(used))
+                        }
+                        LabeledContent(
+                            "Current usage limit",
+                            value: snapshot.onDemandLimitCents.map(MenuBarFormatter.usd)
+                                ?? (snapshot.onDemandEnabled ? "—" : "$0")
+                        )
                     }
                 } else {
                     ContentUnavailableView(
@@ -266,7 +261,7 @@ struct PaidUsageSettingsView: View {
 struct AboutSettingsView: View {
     @Environment(\.appTheme) private var theme
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.6"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.7"
     }
 
     @State private var installMessage: String?
@@ -291,7 +286,6 @@ struct AboutSettingsView: View {
                         VStack(alignment: .leading, spacing: 6) {
                             aboutBullet("sparkles", "Cursor Models included pool")
                             aboutBullet("cpu", "Other Models included pool")
-                            aboutBullet("chart.line.uptrend.xyaxis", "Daily spend (local, from each refresh)")
                             aboutBullet("creditcard", "On-demand, limits, and spend")
                             aboutBullet("bell.badge", "Menu bar warnings + notifications")
                         }
@@ -301,7 +295,7 @@ struct AboutSettingsView: View {
                     SettingsPanel(
                         title: "Desktop widget",
                         systemImage: "rectangle.on.rectangle",
-                        subtitle: "Small, medium, large — plus a daily widget. Edit Widget to pick the highlighted metric.",
+                        subtitle: "Small, medium, and large. Edit Widget to pick the highlighted metric.",
                         compact: true
                     ) {
                         VStack(alignment: .leading, spacing: 8) {

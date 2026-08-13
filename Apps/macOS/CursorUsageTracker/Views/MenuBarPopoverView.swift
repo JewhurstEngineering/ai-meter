@@ -346,10 +346,6 @@ struct MenuBarPopoverView: View {
                 )
             }
 
-            if t.burnRateEstimate {
-                DailyUsageCard(snapshot: snapshot, compact: true)
-            }
-
             if t.modelsThisPeriod {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }

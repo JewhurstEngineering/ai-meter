@@ -8,7 +8,6 @@ enum WidgetMetric: String, AppEnum {
     case cursorModels
     case total
     case spend
-    case today
     case daysLeft
 
     static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Highlight")
@@ -17,7 +16,6 @@ enum WidgetMetric: String, AppEnum {
         .cursorModels: "Cursor Models %",
         .total: "Total included %",
         .spend: "Plan spend",
-        .today: "Today’s spend",
         .daysLeft: "Days remaining",
     ]
 }
@@ -53,21 +51,6 @@ struct Provider: AppIntentTimelineProvider {
     }
 }
 
-struct DailyProvider: TimelineProvider {
-    func placeholder(in context: Context) -> Entry {
-        Entry(date: .now, snapshot: nil, metric: .today)
-    }
-
-    func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
-        completion(Entry(date: .now, snapshot: WidgetSnapshotStore.read(), metric: .today))
-    }
-
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
-        let entry = Entry(date: .now, snapshot: WidgetSnapshotStore.read(), metric: .today)
-        completion(Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(60))))
-    }
-}
-
 struct Entry: TimelineEntry {
     let date: Date
     let snapshot: WidgetSnapshot?
@@ -78,7 +61,6 @@ private enum WidgetPalette {
     static let cursor = Color(red: 0.22, green: 0.48, blue: 0.86)
     static let other = Color(red: 0.55, green: 0.35, blue: 0.82)
     static let total = Color(red: 0.20, green: 0.55, blue: 0.58)
-    static let spend = Color(red: 0.18, green: 0.62, blue: 0.45)
 }
 
 struct CursorUsageWidgetEntryView: View {
@@ -110,9 +92,7 @@ struct CursorUsageWidgetEntryView: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             Spacer(minLength: 0)
-            if entry.metric == .today || entry.metric == .spend {
-                WidgetSparkline(values: sparkValues, accent: WidgetPalette.spend, height: 18)
-            } else if let days = entry.snapshot?.daysRemaining {
+            if entry.metric != .daysLeft, let days = entry.snapshot?.daysRemaining {
                 Text("\(days)d left")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -128,16 +108,12 @@ struct CursorUsageWidgetEntryView: View {
                 poolRow("Cursor Models", percent: snap.cursorModelsPercentUsed, color: WidgetPalette.cursor, highlight: entry.metric == .cursorModels)
                 poolRow("Other Models", percent: snap.otherModelsPercentUsed, color: WidgetPalette.other, highlight: entry.metric == .otherModels)
                 poolRow("Total", percent: snap.totalPercentUsed, color: WidgetPalette.total, highlight: entry.metric == .total)
-                HStack {
-                    footerStat("Today", usd(snap.todaySpendCents))
-                    Spacer()
-                    footerStat("Avg/day", usd(snap.cycleAverageCents))
-                    Spacer()
-                    if let days = snap.daysRemaining {
-                        footerStat("Left", "\(days)d")
-                    }
+                if let days = snap.daysRemaining {
+                    Text("\(days)d left")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
                 }
-                .padding(.top, 2)
             } else {
                 emptyLabel
             }
@@ -153,23 +129,12 @@ struct CursorUsageWidgetEntryView: View {
                 poolRow("Cursor Models", percent: snap.cursorModelsPercentUsed, color: WidgetPalette.cursor, highlight: entry.metric == .cursorModels)
                 poolRow("Other Models", percent: snap.otherModelsPercentUsed, color: WidgetPalette.other, highlight: entry.metric == .otherModels)
                 poolRow("Total", percent: snap.totalPercentUsed, color: WidgetPalette.total, highlight: entry.metric == .total)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Last 7 days")
-                        .font(.caption2.weight(.semibold))
+                if let days = snap.daysRemaining {
+                    Text("\(days)d left in cycle")
+                        .font(.caption)
                         .foregroundStyle(.secondary)
-                    WidgetSparkline(values: sparkValues, accent: WidgetPalette.spend, height: 44)
-                    HStack {
-                        footerStat("Today", usd(snap.todaySpendCents))
-                        Spacer()
-                        footerStat("Yesterday", usd(snap.yesterdaySpendCents))
-                        Spacer()
-                        footerStat("Avg/day", usd(snap.cycleAverageCents))
-                        Spacer()
-                        footerStat("Pace", usd(snap.remainingPaceCents))
-                    }
+                        .padding(.top, 4)
                 }
-                .padding(.top, 4)
             } else {
                 emptyLabel
             }
@@ -216,26 +181,10 @@ struct CursorUsageWidgetEntryView: View {
         }
     }
 
-    private func footerStat(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(title)
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.caption.monospacedDigit().weight(.semibold))
-        }
-    }
-
     private var emptyLabel: some View {
         Text("Open Cursor Usage Tracker to sync.")
             .font(.caption)
             .foregroundStyle(.secondary)
-    }
-
-    private var sparkValues: [Int] {
-        let values = entry.snapshot?.last7DaySpendCents ?? []
-        if values.count == 7 { return values }
-        return Array(repeating: 0, count: 7)
     }
 
     private var heroValue: String {
@@ -249,8 +198,6 @@ struct CursorUsageWidgetEntryView: View {
             return percent(snap.totalPercentUsed)
         case .spend:
             return snap.planUsedCents.map(MenuBarFormatter.usd) ?? "—"
-        case .today:
-            return usd(snap.todaySpendCents)
         case .daysLeft:
             return snap.daysRemaining.map { "\($0)d" } ?? "—"
         }
@@ -266,7 +213,6 @@ struct CursorUsageWidgetEntryView: View {
                 return "of \(MenuBarFormatter.usd(limit)) plan"
             }
             return "Plan spend"
-        case .today: return "Today"
         case .daysLeft: return "left in cycle"
         }
     }
@@ -275,154 +221,12 @@ struct CursorUsageWidgetEntryView: View {
         guard let value else { return "—" }
         return "\(Int(value.rounded()))%"
     }
-
-    private func usd(_ cents: Int?) -> String {
-        cents.map(MenuBarFormatter.usd) ?? "—"
-    }
-}
-
-struct DailyUsageWidgetView: View {
-    @Environment(\.widgetFamily) private var family
-    var entry: Entry
-
-    var body: some View {
-        if family == .systemMedium {
-            mediumBody
-        } else {
-            smallBody
-        }
-    }
-
-    private var smallBody: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 6) {
-                AppLogo(size: 16)
-                Text("Today")
-                    .font(.caption.weight(.semibold))
-                Spacer()
-                if entry.snapshot?.showWarning == true {
-                    Circle().fill(.red).frame(width: 7, height: 7)
-                }
-            }
-            Spacer(minLength: 0)
-            Text(usd(entry.snapshot?.todaySpendCents))
-                .font(.system(size: 32, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .minimumScaleFactor(0.55)
-                .lineLimit(1)
-            Text(vsAverage)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
-            Spacer(minLength: 0)
-            WidgetSparkline(values: sparkValues, accent: WidgetPalette.spend, height: 18)
-        }
-        .containerBackground(.fill.tertiary, for: .widget)
-    }
-
-    private var mediumBody: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                AppLogo(size: 18)
-                Text(entry.snapshot?.planDisplayName ?? "Cursor")
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Text("Daily")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-            if entry.snapshot != nil {
-                HStack(alignment: .bottom, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(usd(entry.snapshot?.todaySpendCents))
-                            .font(.title.monospacedDigit().weight(.bold))
-                        Text("today")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    WidgetSparkline(values: sparkValues, accent: WidgetPalette.spend, height: 40)
-                        .frame(maxWidth: .infinity)
-                }
-                HStack {
-                    stat("Yesterday", usd(entry.snapshot?.yesterdaySpendCents))
-                    Spacer()
-                    stat("Avg/day", usd(entry.snapshot?.cycleAverageCents))
-                    Spacer()
-                    stat("Pace left", usd(entry.snapshot?.remainingPaceCents))
-                }
-            } else {
-                Text("Open Cursor Usage Tracker to sync.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer(minLength: 0)
-        }
-        .containerBackground(.fill.tertiary, for: .widget)
-    }
-
-    private var vsAverage: String {
-        guard let today = entry.snapshot?.todaySpendCents, let avg = entry.snapshot?.cycleAverageCents, avg > 0 else {
-            return "vs cycle average"
-        }
-        let delta = today - avg
-        if delta == 0 { return "in line with avg" }
-        let prefix = delta > 0 ? "+" : "−"
-        return "\(prefix)\(MenuBarFormatter.usd(abs(delta))) vs avg"
-    }
-
-    private var sparkValues: [Int] {
-        let values = entry.snapshot?.last7DaySpendCents ?? []
-        if values.count == 7 { return values }
-        return Array(repeating: 0, count: 7)
-    }
-
-    private func stat(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
-            Text(title)
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.caption.monospacedDigit().weight(.semibold))
-        }
-    }
-
-    private func usd(_ cents: Int?) -> String {
-        cents.map(MenuBarFormatter.usd) ?? "—"
-    }
-}
-
-struct WidgetSparkline: View {
-    let values: [Int]
-    var accent: Color
-    var height: CGFloat
-
-    var body: some View {
-        let peak = max(values.max() ?? 0, 1)
-        GeometryReader { geo in
-            let count = max(values.count, 1)
-            let spacing: CGFloat = 3
-            let barWidth = max(3, (geo.size.width - spacing * CGFloat(count - 1)) / CGFloat(count))
-            HStack(alignment: .bottom, spacing: spacing) {
-                ForEach(Array(values.enumerated()), id: \.offset) { index, value in
-                    let ratio = CGFloat(value) / CGFloat(peak)
-                    let barHeight = value == 0 ? 2 : max(6, ratio * geo.size.height)
-                    Capsule()
-                        .fill(index == values.count - 1 ? accent : accent.opacity(value == 0 ? 0.16 : 0.42))
-                        .frame(width: barWidth, height: barHeight)
-                }
-            }
-            .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
-        }
-        .frame(height: height)
-        .accessibilityHidden(true)
-    }
 }
 
 @main
 struct CursorUsageWidgetsBundle: WidgetBundle {
     var body: some Widget {
         CursorUsageWidget()
-        CursorDailyWidget()
     }
 }
 
@@ -434,20 +238,7 @@ struct CursorUsageWidget: Widget {
             CursorUsageWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Cursor Usage")
-        .description("Highlight Other Models, Cursor Models, total, spend, today, or days left. Small, medium, and large.")
+        .description("Highlight Other Models, Cursor Models, total, spend, or days left. Small, medium, and large.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
-    }
-}
-
-struct CursorDailyWidget: Widget {
-    let kind = "CursorDailyUsageWidget"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: DailyProvider()) { entry in
-            DailyUsageWidgetView(entry: entry)
-        }
-        .configurationDisplayName("Daily usage")
-        .description("Today’s spend vs your cycle average, with a 7-day sparkline.")
-        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
