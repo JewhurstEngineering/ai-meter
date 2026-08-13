@@ -33,10 +33,11 @@ struct CursorUsageTrackerApp: App {
         Settings {
             SettingsRootView()
                 .environmentObject(appDelegate.store)
-                .frame(minWidth: 900, idealWidth: 960, minHeight: 600, idealHeight: 680)
                 .onAppear {
                     AppActivation.scheduleSettingsFocus()
                 }
         }
+        .defaultSize(width: 960, height: 680)
+        .windowResizability(.contentMinSize)
     }
 }

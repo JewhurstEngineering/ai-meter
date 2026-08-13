@@ -24,9 +24,10 @@ struct MenuBarLabelView: View {
                 }
             }
             if presentation.showWarningDot {
-                Circle()
-                    .fill(.red)
-                    .frame(width: 6, height: 6)
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                    .font(.system(size: 9, weight: .semibold))
+                    .accessibilityLabel("Warning")
             }
         }
         .fixedSize()

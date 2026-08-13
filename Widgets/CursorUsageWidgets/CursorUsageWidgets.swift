@@ -43,7 +43,10 @@ struct CursorUsageWidgetEntryView: View {
                     .font(.caption.weight(.semibold))
                 Spacer()
                 if entry.snapshot?.showWarning == true {
-                    Circle().fill(.red).frame(width: 7, height: 7)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                        .font(.caption)
+                        .accessibilityLabel("Usage warning")
                 }
             }
             if let om = entry.snapshot?.otherModelsPercentUsed {
@@ -88,7 +91,10 @@ struct CursorUsageWidgetEntryView: View {
                         .foregroundStyle(.secondary)
                 }
                 if entry.snapshot?.showWarning == true {
-                    Circle().fill(.red).frame(width: 7, height: 7)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                        .font(.caption)
+                        .accessibilityLabel("Usage warning")
                 }
             }
             if let snap = entry.snapshot {

@@ -56,7 +56,11 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertFalse(presentation.showWarningDot)
 
         prefs.menuBarWarnings.otherModelsPercent = 50
-        XCTAssertTrue(MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true).showWarningDot)
+        let warned = MenuBarFormatter.format(snapshot: snap, preferences: prefs, authenticated: true)
+        XCTAssertTrue(warned.showWarningDot)
+        XCTAssertTrue(warned.accessibilityTitle.contains("Other Models"))
+        XCTAssertTrue(warned.accessibilityTitle.contains("alert set to 50%"))
+        XCTAssertTrue(warned.warningHits.contains(where: { $0.channel == .otherModels }))
 
         prefs.menuBarWarnings.otherModelsPercent = 95
         prefs.menuBarWarnings.onDemandAndLimitsPercent = 40

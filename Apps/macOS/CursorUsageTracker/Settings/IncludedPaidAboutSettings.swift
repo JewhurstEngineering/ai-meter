@@ -188,7 +188,11 @@ private struct IncludedPoolCard: View {
                     .font(compact ? .subheadline.monospacedDigit().weight(.bold) : .title3.monospacedDigit().weight(.bold))
                     .foregroundStyle(theme.color(forPool: title, percent: percent))
             }
-            UsageProgressBar(percent: percent, tint: theme.color(forPool: title, percent: percent))
+            UsageProgressBar(
+                percent: percent,
+                tint: theme.color(forPool: title, percent: percent),
+                pattern: .forPool(title)
+            )
                 .frame(height: compact ? 6 : 8)
             Text(caption)
                 .font(.caption2)
@@ -257,7 +261,7 @@ struct PaidUsageSettingsView: View {
 struct AboutSettingsView: View {
     @Environment(\.appTheme) private var theme
     private var version: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.23"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.28"
     }
 
     @State private var installMessage: String?

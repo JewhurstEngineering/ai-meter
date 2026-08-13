@@ -13,15 +13,27 @@ public struct MenuBarSegment: Sendable, Equatable {
 public struct MenuBarPresentation: Sendable, Equatable {
     public var segments: [MenuBarSegment]
     public var showWarningDot: Bool
+    public var warningHits: [UsageSnapshot.MenuBarWarningHit]
 
     public var accessibilityTitle: String {
         let body = segments.map(\.text).joined(separator: " · ")
-        return body.isEmpty ? "Cursor Usage" : body
+        let base = body.isEmpty ? "Cursor Usage" : body
+        guard showWarningDot else { return base }
+        let why = warningHits.map(\.sentence).joined(separator: ". ")
+        let reason = why.isEmpty
+            ? "Warning: a usage alert you set is active."
+            : "Warning: \(why)."
+        return "\(base)\n\(reason)\nChange alert levels in Settings → General."
     }
 
-    public init(segments: [MenuBarSegment], showWarningDot: Bool) {
+    public init(
+        segments: [MenuBarSegment],
+        showWarningDot: Bool,
+        warningHits: [UsageSnapshot.MenuBarWarningHit] = []
+    ) {
         self.segments = segments
         self.showWarningDot = showWarningDot
+        self.warningHits = warningHits
     }
 }
 
@@ -94,8 +106,8 @@ public enum MenuBarFormatter {
             segments = [.init(text: snapshot.planDisplayName)]
         }
 
-        let warning = snapshot.exceedsMenuBarWarnings(preferences.menuBarWarnings)
-        return .init(segments: segments, showWarningDot: warning)
+        let hits = snapshot.menuBarWarningHits(preferences.menuBarWarnings)
+        return .init(segments: segments, showWarningDot: !hits.isEmpty, warningHits: hits)
     }
 
     private enum Kind {

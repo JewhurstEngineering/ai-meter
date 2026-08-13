@@ -32,6 +32,26 @@ struct ThemePalette: Equatable {
 
     var swatches: [Color] { [cursorModels, otherModels, total, spend] }
 
+    func adapted(
+        for vision: DisplayPreferences.ColorVision,
+        highContrast _: Bool,
+        scheme: ColorScheme
+    ) -> ThemePalette {
+        let dark = scheme == .dark
+        switch vision {
+        case .typical:
+            return self
+        case .deuteranopia:
+            return .cvdDeuteranopia
+        case .protanopia:
+            return .cvdProtanopia
+        case .tritanopia:
+            return .cvdTritanopia
+        case .monochrome:
+            return dark ? .monoDark : .monoLight
+        }
+    }
+
     static func resolved(_ preferences: DisplayPreferences, scheme: ColorScheme) -> ThemePalette {
         resolved(preferences.colorTheme, scheme: scheme, custom: preferences.customThemeColors)
     }
@@ -251,6 +271,32 @@ struct ThemePalette: Equatable {
         ok: "1a7f37", warn: "9a6700", danger: "cf222e", tint: "0969da"
     )
 
+    /// Okabe–Ito: blue / orange / sky / purple — distinct under deuteranopia.
+    private static let cvdDeuteranopia = hexPack(
+        cursor: "0072B2", other: "E69F00", total: "56B4E9", spend: "CC79A7",
+        ok: "009E73", warn: "F0E442", danger: "D55E00", tint: "0072B2"
+    )
+    /// Protanopia: skip vermillion/orange pairs; yellow + blue + gray.
+    private static let cvdProtanopia = hexPack(
+        cursor: "0072B2", other: "F0E442", total: "56B4E9", spend: "999999",
+        ok: "009E73", warn: "F0E442", danger: "000000", tint: "0072B2"
+    )
+    /// Tritanopia: vermillion / purple / green, no blue–yellow pair.
+    private static let cvdTritanopia = hexPack(
+        cursor: "D55E00", other: "CC79A7", total: "009E73", spend: "000000",
+        ok: "009E73", warn: "E69F00", danger: "000000", tint: "D55E00"
+    )
+    private static let monoDark = pack(
+        cursor: (0.92, 0.92, 0.92), other: (0.58, 0.58, 0.58),
+        total: (0.78, 0.78, 0.78), spend: (0.48, 0.48, 0.48),
+        ok: (0.82, 0.82, 0.82), warn: (0.62, 0.62, 0.62), danger: (1, 1, 1)
+    )
+    private static let monoLight = pack(
+        cursor: (0.10, 0.10, 0.10), other: (0.42, 0.42, 0.42),
+        total: (0.22, 0.22, 0.22), spend: (0.50, 0.50, 0.50),
+        ok: (0.18, 0.18, 0.18), warn: (0.38, 0.38, 0.38), danger: (0.05, 0.05, 0.05)
+    )
+
     // MARK: - Helpers
 
     private static func pack(
@@ -322,6 +368,33 @@ extension EnvironmentValues {
         get { self[ThemePaletteKey.self] }
         set { self[ThemePaletteKey.self] = newValue }
     }
+
+    var appUsePatterns: Bool {
+        get { self[UsePatternsKey.self] }
+        set { self[UsePatternsKey.self] = newValue }
+    }
+
+    var appHighContrast: Bool {
+        get { self[HighContrastKey.self] }
+        set { self[HighContrastKey.self] = newValue }
+    }
+
+    var appScale: CGFloat {
+        get { self[AppScaleKey.self] }
+        set { self[AppScaleKey.self] = newValue }
+    }
+}
+
+private struct UsePatternsKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+private struct HighContrastKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+private struct AppScaleKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 1
 }
 
 struct AppThemed<Content: View>: View {
@@ -332,10 +405,19 @@ struct AppThemed<Content: View>: View {
     var body: some View {
         let scheme = preferences.appearanceMode.colorScheme(systemIsDark: system.isDark)
         let palette = ThemePalette.resolved(preferences, scheme: scheme)
+            .adapted(
+                for: preferences.colorVision,
+                highContrast: preferences.highContrast,
+                scheme: scheme
+            )
         content()
             .environment(\.appTheme, palette)
             .environment(\.colorScheme, scheme)
-            // Always an explicit light/dark — `preferredColorScheme(nil)` sticks on `.dark`.
+            .environment(\.appUsePatterns, preferences.distinguishWithoutColor || preferences.colorVision != .typical)
+            .environment(\.appHighContrast, preferences.highContrast)
+            .environment(\.appScale, preferences.interfaceSize.scale)
+            // Pin Dynamic Type so a larger size cannot stick (same class of bug as Dark).
+            .transformEnvironment(\.dynamicTypeSize) { $0 = .large }
             .preferredColorScheme(scheme)
             .tint(palette.tint)
             .background(WindowAppearanceBridge(appearance: preferences.appearanceMode.nsAppearance))
@@ -386,10 +468,27 @@ enum WindowAppearanceApplier {
         }
     }
 
-    private static func shouldTheme(_ window: NSWindow) -> Bool {
+    static func shouldTheme(_ window: NSWindow) -> Bool {
         if window.level == .statusBar { return false }
         if window.styleMask.contains(.nonactivatingPanel) { return false }
         return window.styleMask.contains(.titled)
+    }
+
+    /// Restore a usable Settings size and allow the user to resize it.
+    static func configureChrome(scale: CGFloat) {
+        let s = max(scale, 1)
+        let minContent = NSSize(width: 900 * s, height: 560 * s)
+        let idealContent = NSSize(width: 960 * s, height: 680 * s)
+        for window in NSApp.windows where shouldTheme(window) {
+            window.styleMask.insert(.resizable)
+            let minFrame = window.frameRect(forContentRect: NSRect(origin: .zero, size: minContent)).size
+            window.minSize = minFrame
+            window.maxSize = NSSize(width: 4000, height: 3000)
+            let current = window.contentLayoutRect.size
+            if current.width < minContent.width - 8 || current.height < minContent.height - 8 {
+                window.setContentSize(idealContent)
+            }
+        }
     }
 }
 
@@ -420,9 +519,10 @@ private final class AppearanceProbeView: NSView {
 
     func apply() {
         WindowAppearanceApplier.apply(appearanceToApply)
-        if let window {
-            WindowAppearanceApplier.apply(appearanceToApply, to: window)
-        }
+        // NSPopover chrome is owned by StatusItemController. Applying nil (System)
+        // onto the popover window can reset it to aqua and leave a light panel on a dark Mac.
+        guard let window, WindowAppearanceApplier.shouldTheme(window) else { return }
+        WindowAppearanceApplier.apply(appearanceToApply, to: window)
     }
 }
 
@@ -444,8 +544,73 @@ extension DisplayPreferences.AppearanceMode {
     }
 }
 
+extension DisplayPreferences.InterfaceSize {
+    /// Layout magnification. 1.0 always restores Default (not a sticky minimum).
+    var scale: CGFloat {
+        switch self {
+        case .defaultSize: return 1.0
+        case .large: return 1.22
+        case .extraLarge: return 1.44
+        }
+    }
+
+    var popoverWidth: CGFloat { (360 * scale).rounded() }
+
+    var settingsMinWidth: CGFloat { 900 }
+
+    var settingsMinHeight: CGFloat { 600 }
+}
+
 extension View {
     func appThemed(_ preferences: DisplayPreferences) -> some View {
         AppThemed(preferences: preferences) { self }
+    }
+
+    /// Lay out at 1×, then magnify. Scale is absolute, so Default (1.0) always shrinks back.
+    func appLayoutScale(_ scale: CGFloat) -> some View {
+        modifier(FillLayoutScale(scale: scale))
+    }
+
+    func appIntrinsicScale(_ scale: CGFloat) -> some View {
+        modifier(IntrinsicLayoutScale(scale: scale))
+    }
+}
+
+/// Settings: fill the window, lay out smaller, draw larger.
+private struct FillLayoutScale: ViewModifier {
+    let scale: CGFloat
+
+    func body(content: Content) -> some View {
+        GeometryReader { geo in
+            let s = max(scale, 0.5)
+            content
+                .frame(
+                    width: geo.size.width / s,
+                    height: geo.size.height / s,
+                    alignment: .topLeading
+                )
+                .scaleEffect(s, anchor: .topLeading)
+        }
+    }
+}
+
+/// Popover: keep 1× layout, magnify drawing, then claim scaled space (can shrink).
+private struct IntrinsicLayoutScale: ViewModifier {
+    let scale: CGFloat
+    @State private var height: CGFloat = 240
+
+    func body(content: Content) -> some View {
+        let s = max(scale, 0.5)
+        content
+            .fixedSize(horizontal: false, vertical: true)
+            .overlay(
+                GeometryReader { proxy in
+                    Color.clear
+                        .onAppear { height = proxy.size.height }
+                        .onChange(of: proxy.size.height) { _, h in height = h }
+                }
+            )
+            .scaleEffect(s, anchor: .topLeading)
+            .frame(width: 360 * s, height: height * s, alignment: .topLeading)
     }
 }

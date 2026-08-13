@@ -8,6 +8,7 @@ import CursorUsageCore
 final class StatusItemController: NSObject {
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
+    private var popoverHost: (any PopoverSizing)?
     private var store: UsageStore?
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
@@ -25,20 +26,21 @@ final class StatusItemController: NSObject {
             button.sendAction(on: [.leftMouseUp])
         }
 
-        let hosting = NSHostingController(
+        let hosting = FittingHostingController(
             rootView: MenuBarPopoverView()
                 .environmentObject(store)
-                .frame(width: 360)
         )
-        // Opaque fill so vibrancy does not blend editor chrome into the UI.
+        // NSPopover sizes from preferredContentSize, not Auto Layout intrinsic size.
+        hosting.sizingOptions = .preferredContentSize
         hosting.view.wantsLayer = true
-        hosting.view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
 
         let pop = NSPopover()
         pop.behavior = .transient
         pop.animates = true
         pop.contentViewController = hosting
+        hosting.popover = pop
         popover = pop
+        popoverHost = hosting
 
         store.objectWillChange
             .receive(on: DispatchQueue.main)
@@ -49,7 +51,12 @@ final class StatusItemController: NSObject {
 
         store.$snapshot
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in self?.refreshTitle() }
+            .sink { [weak self] _ in
+                self?.refreshTitle()
+                if self?.popover?.isShown == true {
+                    self?.popoverHost?.updateSize()
+                }
+            }
             .store(in: &cancellables)
         store.$preferences
             .receive(on: DispatchQueue.main)
@@ -64,20 +71,30 @@ final class StatusItemController: NSObject {
             .sink { [weak self] _ in self?.refreshTitle() }
             .store(in: &cancellables)
 
+        SystemAppearanceMonitor.shared.$isDark
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, let prefs = self.store?.preferences else { return }
+                self.applyPopoverAppearance(prefs)
+            }
+            .store(in: &cancellables)
+
         refreshTitle()
         applyPopoverAppearance(store.preferences)
         Task { await store.bootstrap() }
     }
 
     private func applyPopoverAppearance(_ prefs: DisplayPreferences) {
-        let appearance = prefs.appearanceMode.nsAppearance
+        let appearance = prefs.appearanceMode.nsAppearance ?? NSApp.effectiveAppearance
         popover?.appearance = appearance
         if let view = popover?.contentViewController?.view {
             view.appearance = appearance
-            let paint: () -> Void = {
+            appearance.performAsCurrentDrawingAppearance {
                 view.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
             }
-            (appearance ?? NSApp.effectiveAppearance).performAsCurrentDrawingAppearance(paint)
+        }
+        if popover?.isShown == true {
+            popoverHost?.updateSize()
         }
     }
 
@@ -104,8 +121,12 @@ final class StatusItemController: NSObject {
             closePopover()
         } else {
             AppActivation.bringToFront()
+            if let store {
+                applyPopoverAppearance(store.preferences)
+            }
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             Self.hardenPopoverBackground(popover)
+            popoverHost?.updateSize()
             addEventMonitor()
         }
     }
@@ -113,10 +134,14 @@ final class StatusItemController: NSObject {
     /// NSPopover wraps content in a vibrant effect view; force an opaque material so dark apps don't show through.
     private static func hardenPopoverBackground(_ popover: NSPopover) {
         guard let root = popover.contentViewController?.view else { return }
+        let appearance = popover.appearance ?? NSApp.effectiveAppearance
         root.wantsLayer = true
-        root.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        appearance.performAsCurrentDrawingAppearance {
+            root.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        }
 
         func walk(_ view: NSView) {
+            view.appearance = appearance
             if let effect = view as? NSVisualEffectView {
                 effect.material = .contentBackground
                 effect.blendingMode = .withinWindow
@@ -181,12 +206,13 @@ final class StatusItemController: NSObject {
 
         if presentation.showWarningDot {
             result.append(NSAttributedString(string: " ", attributes: textAttrs))
-            let dot = NSMutableAttributedString(string: "●", attributes: [
-                .font: NSFont.systemFont(ofSize: 7, weight: .bold),
-                .foregroundColor: NSColor.systemRed,
-                .baselineOffset: 1,
-            ])
-            result.append(dot)
+            appendSymbol(
+                named: "exclamationmark.triangle.fill",
+                to: result,
+                pointSize: 11,
+                color: .systemOrange,
+                trailingSpace: false
+            )
         }
 
         return result
@@ -204,21 +230,68 @@ final class StatusItemController: NSObject {
         return image
     }
 
-    private static func appendSymbol(named name: String, to result: NSMutableAttributedString, pointSize: CGFloat) {
+    private static func appendSymbol(
+        named name: String,
+        to result: NSMutableAttributedString,
+        pointSize: CGFloat,
+        color: NSColor? = nil,
+        trailingSpace: Bool = true
+    ) {
         guard let base = NSImage(systemSymbolName: name, accessibilityDescription: nil) else { return }
-        let config = NSImage.SymbolConfiguration(pointSize: pointSize, weight: .medium)
+        let sized = NSImage.SymbolConfiguration(pointSize: pointSize, weight: color == nil ? .medium : .semibold)
+        let config: NSImage.SymbolConfiguration
+        if let color {
+            config = sized.applying(NSImage.SymbolConfiguration(hierarchicalColor: color))
+        } else {
+            config = sized
+        }
         let image = (base.withSymbolConfiguration(config) ?? base).copy() as? NSImage ?? base
-        image.isTemplate = true
+        image.isTemplate = color == nil
         image.size = NSSize(width: pointSize + 1, height: pointSize + 1)
 
         let attachment = NSTextAttachment()
         attachment.image = image
-        // Nudge symbol to align with menu-bar text.
         let y = (NSFont.menuBarFont(ofSize: 0).capHeight - image.size.height) / 2
         attachment.bounds = CGRect(x: 0, y: y, width: image.size.width, height: image.size.height)
         result.append(NSAttributedString(attachment: attachment))
-        result.append(NSAttributedString(string: " ", attributes: [
-            .font: NSFont.menuBarFont(ofSize: 0),
-        ]))
+        if trailingSpace {
+            result.append(NSAttributedString(string: " ", attributes: [
+                .font: NSFont.menuBarFont(ofSize: 0),
+            ]))
+        }
+    }
+}
+
+@MainActor
+private protocol PopoverSizing: AnyObject {
+    func updateSize()
+}
+
+/// Sizes the popover from SwiftUI’s unconstrained ideal height.
+/// `view.fittingSize` is wrong here: once the popover is short, fittingSize reports that short frame.
+private final class FittingHostingController<Content: View>: NSHostingController<Content>, PopoverSizing {
+    weak var popover: NSPopover?
+    private var lastHeight: CGFloat = 0
+
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        updateSize()
+        DispatchQueue.main.async { [weak self] in self?.updateSize() }
+    }
+
+    override func viewDidLayout() {
+        super.viewDidLayout()
+        updateSize()
+    }
+
+    func updateSize() {
+        let fitted = sizeThatFits(in: CGSize(width: 360, height: 10_000))
+        guard fitted.height > 80 else { return }
+        let height = min(fitted.height.rounded(.up), 720)
+        guard abs(height - lastHeight) > 2 else { return }
+        lastHeight = height
+        let size = NSSize(width: 360, height: height)
+        preferredContentSize = size
+        popover?.contentSize = size
     }
 }

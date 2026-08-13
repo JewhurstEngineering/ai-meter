@@ -40,9 +40,9 @@ struct MenuBarPopoverView: View {
                 .padding(.vertical, 10)
         }
         .frame(width: 360)
+        .fixedSize(horizontal: true, vertical: true)
         // Flatten to an opaque bitmap so popover vibrancy cannot bleed editor content through.
         .background(Color(nsColor: .windowBackgroundColor))
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .compositingGroup()
         .appThemed(store.preferences)
     }
@@ -89,11 +89,53 @@ struct MenuBarPopoverView: View {
         }
     }
 
+    private func warningBanner(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                    .font(.subheadline)
+                Text("Menu bar warning")
+                    .font(.subheadline.weight(.semibold))
+            }
+            if hits.isEmpty {
+                Text("A usage alert you set is active.")
+                    .font(.caption)
+            } else {
+                ForEach(hits) { hit in
+                    Text(hit.sentence)
+                        .font(.caption)
+                }
+            }
+            Text("That’s the warning icon next to the menu bar meter — not an error. Change levels in Settings → General.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.orange.opacity(0.14))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.orange.opacity(0.40), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Menu bar warning")
+        .accessibilityValue(hits.map(\.sentence).joined(separator: ". "))
+    }
+
     @ViewBuilder
     private func usageBody(_ snapshot: UsageSnapshot) -> some View {
         let t = store.preferences.popover
 
         VStack(alignment: .leading, spacing: 12) {
+            if store.menuBarPresentation.showWarningDot {
+                warningBanner(store.menuBarPresentation.warningHits)
+            }
+
             if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
                 Text("Included usage")
                     .font(.caption.weight(.semibold))
@@ -235,7 +277,7 @@ private struct PopoverPoolRow: View {
                     .font(.subheadline.monospacedDigit().weight(.bold))
                     .foregroundStyle(tint)
             }
-            UsageProgressBar(percent: percent, tint: tint)
+            UsageProgressBar(percent: percent, tint: tint, pattern: .forPool(title))
             if let caption {
                 Text(caption)
                     .font(.caption2)

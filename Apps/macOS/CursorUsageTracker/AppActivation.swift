@@ -22,6 +22,7 @@ enum AppActivation {
             window.collectionBehavior.insert(.moveToActiveSpace)
             window.makeKeyAndOrderFront(nil)
             window.orderFrontRegardless()
+            window.styleMask.insert(.resizable)
         }
     }
 

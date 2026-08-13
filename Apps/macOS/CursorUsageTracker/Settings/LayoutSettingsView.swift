@@ -234,7 +234,10 @@ private struct MenuBarPreviewStrip: View {
                         .foregroundStyle(fg.opacity(0.7))
                 }
                 if presentation.showWarningDot {
-                    Circle().fill(theme.danger).frame(width: 6, height: 6)
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                        .help("Warning: a usage alert you set is active")
+                        .accessibilityLabel("Warning")
                 }
                 Spacer(minLength: 0)
             }
@@ -250,6 +253,14 @@ private struct MenuBarPreviewStrip: View {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
             )
+            .help(presentation.accessibilityTitle)
+
+            if presentation.showWarningDot {
+                Text("Warning triangle = a usage alert from General (not an error). Hover the menu bar for which channel.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 }
@@ -375,7 +386,7 @@ private struct PopoverPreviewCard: View {
                     .foregroundStyle(tint)
             }
             .font(.caption2.weight(.semibold))
-            UsageProgressBar(percent: percent, tint: tint)
+            UsageProgressBar(percent: percent, tint: tint, pattern: .forPool(title))
                 .frame(height: 6)
         }
     }

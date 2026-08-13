@@ -10,6 +10,7 @@
 		04361D3C3E751EF4831F2280 /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E8CCBE505DA6FB97811519 /* ThemeSettingsView.swift */; };
 		085A847B91556F58F0799339 /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 42920EBF770ADCA233569FB2 /* CursorUsageCore */; };
 		123E7B69D607CF80EA22C68E /* CursorUsageWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 877B0F967CCC1D8C34B40F9D /* CursorUsageWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1B01F21650D42319A09252DF /* AccessibilitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBCA4386F4AF35D267C6C9E7 /* AccessibilitySettingsView.swift */; };
 		2B007A75C0CECFFB837F728E /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D6343547B0FDEF9BC426FC /* WidgetReload.swift */; };
 		38BEB562C58CFAE068095C59 /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A905F4E400E7A3C109C2AF57 /* SettingsRootView.swift */; };
 		44D27C3EB943F82E0B4DC7AD /* IncludedPaidAboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */; };
@@ -80,6 +81,7 @@
 		B10B4DC6481D9FBB53CB9194 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
 		BAB6318BD090C6E7FF509DC3 /* CursorUsageTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CursorUsageTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2DA406888DC9DD69FBB6D6E /* LayoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsView.swift; sourceTree = "<group>"; };
+		CBCA4386F4AF35D267C6C9E7 /* AccessibilitySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySettingsView.swift; sourceTree = "<group>"; };
 		CD38FF7739F2FCF0BBAAC89F /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
 		D84C0068DCEE8809551F3FF6 /* SettingsOpenLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsOpenLink.swift; sourceTree = "<group>"; };
 		E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncludedPaidAboutSettings.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 		128DC51DA8705D39A0DF709D /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				CBCA4386F4AF35D267C6C9E7 /* AccessibilitySettingsView.swift */,
 				8161504B9ED6174A8DF8349F /* AuthenticationSettingsView.swift */,
 				AF872466A93EEF6AE698D30A /* GeneralSettingsView.swift */,
 				E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */,
@@ -345,6 +348,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B01F21650D42319A09252DF /* AccessibilitySettingsView.swift in Sources */,
 				62EBF769AC08D801C50E4DD6 /* AppActivation.swift in Sources */,
 				7051E2B79F32EE8488762A06 /* AppLogo.swift in Sources */,
 				5B4AD42BFBAD2229B02D10AF /* AppTheme.swift in Sources */,
@@ -455,7 +459,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 22;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -475,7 +479,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.23;
+				MARKETING_VERSION = 0.1.28;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -545,7 +549,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 17;
+				CURRENT_PROJECT_VERSION = 22;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -559,7 +563,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.23;
+				MARKETING_VERSION = 0.1.28;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

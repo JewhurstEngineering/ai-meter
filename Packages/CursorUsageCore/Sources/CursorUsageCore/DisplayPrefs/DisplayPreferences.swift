@@ -27,6 +27,14 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
     public var colorTheme: ColorTheme
     /// Four metric colors used when `colorTheme == .custom`.
     public var customThemeColors: CustomThemeColors
+    /// Settings + popover type size (not macOS screen zoom).
+    public var interfaceSize: InterfaceSize
+    /// Replaces theme accents with a palette that stays distinct for this vision type.
+    public var colorVision: ColorVision
+    /// Hatch / dots on progress bars so metrics are not color-only.
+    public var distinguishWithoutColor: Bool
+    /// Stronger borders and fills in Settings and the popover.
+    public var highContrast: Bool
 
     public enum AppearanceMode: String, Codable, Sendable, CaseIterable {
         case system
@@ -166,6 +174,52 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             case .ayu: return "Warm gold on near-black iron"
             case .github: return "github.com dark / light"
             case .custom: return "Pick the four metric colors"
+            }
+        }
+    }
+
+    public enum InterfaceSize: String, Codable, Sendable, CaseIterable, Identifiable {
+        case defaultSize = "default"
+        case large
+        case extraLarge
+
+        public var id: String { rawValue }
+
+        public var title: String {
+            switch self {
+            case .defaultSize: return "Default"
+            case .large: return "Large"
+            case .extraLarge: return "Extra Large"
+            }
+        }
+    }
+
+    public enum ColorVision: String, Codable, Sendable, CaseIterable, Identifiable {
+        case typical
+        case deuteranopia
+        case protanopia
+        case tritanopia
+        case monochrome
+
+        public var id: String { rawValue }
+
+        public var title: String {
+            switch self {
+            case .typical: return "Typical"
+            case .deuteranopia: return "Red–green (deuteranopia)"
+            case .protanopia: return "Red–green (protanopia)"
+            case .tritanopia: return "Blue–yellow (tritanopia)"
+            case .monochrome: return "Monochrome"
+            }
+        }
+
+        public var subtitle: String {
+            switch self {
+            case .typical: return "Your Theme colors as-is"
+            case .deuteranopia: return "Okabe–Ito blues, orange, and yellow"
+            case .protanopia: return "Blue, yellow, and gray — avoids dim reds"
+            case .tritanopia: return "Vermillion, purple, and green"
+            case .monochrome: return "Lightness only — use with patterns"
             }
         }
     }
@@ -423,7 +477,11 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         popover: .popoverDefault,
         appearanceMode: .system,
         colorTheme: .cursor,
-        customThemeColors: .default
+        customThemeColors: .default,
+        interfaceSize: .defaultSize,
+        colorVision: .typical,
+        distinguishWithoutColor: false,
+        highContrast: false
     )
 
     public init(
@@ -443,7 +501,11 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         popover: SurfaceToggles,
         appearanceMode: AppearanceMode = .system,
         colorTheme: ColorTheme = .cursor,
-        customThemeColors: CustomThemeColors = .default
+        customThemeColors: CustomThemeColors = .default,
+        interfaceSize: InterfaceSize = .defaultSize,
+        colorVision: ColorVision = .typical,
+        distinguishWithoutColor: Bool = false,
+        highContrast: Bool = false
     ) {
         self.refreshIntervalMinutes = refreshIntervalMinutes
         self.launchAtLogin = launchAtLogin
@@ -462,6 +524,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         self.appearanceMode = appearanceMode
         self.colorTheme = colorTheme
         self.customThemeColors = customThemeColors
+        self.interfaceSize = interfaceSize
+        self.colorVision = colorVision
+        self.distinguishWithoutColor = distinguishWithoutColor
+        self.highContrast = highContrast
     }
 
     public init(from decoder: Decoder) throws {
@@ -490,6 +556,10 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         appearanceMode = try c.decodeIfPresent(AppearanceMode.self, forKey: .appearanceMode) ?? .system
         colorTheme = try c.decodeIfPresent(ColorTheme.self, forKey: .colorTheme) ?? .cursor
         customThemeColors = try c.decodeIfPresent(CustomThemeColors.self, forKey: .customThemeColors) ?? .default
+        interfaceSize = try c.decodeIfPresent(InterfaceSize.self, forKey: .interfaceSize) ?? .defaultSize
+        colorVision = try c.decodeIfPresent(ColorVision.self, forKey: .colorVision) ?? .typical
+        distinguishWithoutColor = try c.decodeIfPresent(Bool.self, forKey: .distinguishWithoutColor) ?? false
+        highContrast = try c.decodeIfPresent(Bool.self, forKey: .highContrast) ?? false
     }
 
     public static func normalizeThresholds(_ values: [Double]) -> [Double] {

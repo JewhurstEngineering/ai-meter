@@ -130,20 +130,74 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
     }
 
     public func exceedsMenuBarWarnings(_ warnings: DisplayPreferences.MenuBarWarningThresholds) -> Bool {
-        if let p = cursorModelsPercentUsed, p >= warnings.cursorModelsPercent { return true }
-        if let p = otherModelsPercentUsed, p >= warnings.otherModelsPercent { return true }
-        if let p = totalPercentUsed, p >= warnings.totalIncludedPercent { return true }
-        if let status = warningChannelStatus(.onDemandAndLimits, warnings: warnings), status.triggered {
-            return true
-        }
-        return false
+        !menuBarWarningHits(warnings).isEmpty
     }
 
-    public enum WarningChannel: String, Sendable {
+    public enum WarningChannel: String, Sendable, CaseIterable {
         case cursorModels
         case otherModels
         case onDemandAndLimits
         case totalIncluded
+
+        public var title: String {
+            switch self {
+            case .cursorModels: return "Cursor Models"
+            case .otherModels: return "Other Models"
+            case .totalIncluded: return "Total included"
+            case .onDemandAndLimits: return "On-demand & limits"
+            }
+        }
+    }
+
+    public struct MenuBarWarningHit: Sendable, Equatable, Identifiable {
+        public var id: String { channel.rawValue }
+        public var channel: WarningChannel
+        public var current: String
+        public var threshold: String
+
+        public var sentence: String {
+            "\(channel.title) is at \(current) (alert set to \(threshold))"
+        }
+
+        public init(channel: WarningChannel, current: String, threshold: String) {
+            self.channel = channel
+            self.current = current
+            self.threshold = threshold
+        }
+    }
+
+    public func menuBarWarningHits(
+        _ warnings: DisplayPreferences.MenuBarWarningThresholds
+    ) -> [MenuBarWarningHit] {
+        WarningChannel.allCases.compactMap { channel in
+            guard let status = warningChannelStatus(channel, warnings: warnings), status.triggered else {
+                return nil
+            }
+            return MenuBarWarningHit(
+                channel: channel,
+                current: status.detail,
+                threshold: warningThresholdLabel(channel, warnings: warnings)
+            )
+        }
+    }
+
+    private func warningThresholdLabel(
+        _ channel: WarningChannel,
+        warnings: DisplayPreferences.MenuBarWarningThresholds
+    ) -> String {
+        switch channel {
+        case .cursorModels: return "\(Int(warnings.cursorModelsPercent.rounded()))%"
+        case .otherModels: return "\(Int(warnings.otherModelsPercent.rounded()))%"
+        case .totalIncluded: return "\(Int(warnings.totalIncludedPercent.rounded()))%"
+        case .onDemandAndLimits:
+            if isOnDemandUnlimited,
+               let used = onDemandUsedCents,
+               used >= warnings.onDemandUnlimitedAlertCents
+            {
+                return MenuBarFormatter.usd(warnings.onDemandUnlimitedAlertCents)
+            }
+            return "\(Int(warnings.onDemandAndLimitsPercent.rounded()))%"
+        }
     }
 
     public func warningChannelStatus(
