@@ -51,7 +51,10 @@ struct AuthenticationSettingsView: View {
                         columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)],
                         spacing: 8
                     ) {
-                        authButton("Sign in with Cursor", systemImage: "globe") {
+                        authButton(
+                            store.connections.isEmpty ? "Sign in with Cursor" : "Add another account with Cursor",
+                            systemImage: "globe"
+                        ) {
                             reauthAccountID = nil
                             showLogin = true
                         }
@@ -159,7 +162,11 @@ struct AuthenticationSettingsView: View {
         .sheet(isPresented: $showLogin) {
             VStack(spacing: 0) {
                 HStack {
-                    Text(reauthAccountID == nil ? "Sign in to Cursor" : "Re-authenticate")
+                    Text(
+                        reauthAccountID != nil
+                            ? "Re-authenticate"
+                            : (store.connections.isEmpty ? "Sign in to Cursor" : "Add another account")
+                    )
                         .font(.headline)
                     Spacer()
                     Button("Cancel") { showLogin = false }

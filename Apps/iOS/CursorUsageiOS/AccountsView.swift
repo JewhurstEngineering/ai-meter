@@ -31,7 +31,10 @@ struct AccountsView: View {
                         reauthAccountID = nil
                         showLogin = true
                     } label: {
-                        Label("Sign in with Cursor", systemImage: "globe")
+                        Label(
+                            store.connections.isEmpty ? "Sign in with Cursor" : "Add another account with Cursor",
+                            systemImage: "globe"
+                        )
                     }
                     Button {
                         reauthAccountID = store.activeAccountID
@@ -116,7 +119,11 @@ struct AccountsView: View {
                         }
                     }
                     .ignoresSafeArea()
-                    .navigationTitle(reauthAccountID == nil ? "Sign in to Cursor" : "Re-authenticate")
+                    .navigationTitle(
+                        reauthAccountID != nil
+                            ? "Re-authenticate"
+                            : (store.connections.isEmpty ? "Sign in to Cursor" : "Add another account")
+                    )
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
