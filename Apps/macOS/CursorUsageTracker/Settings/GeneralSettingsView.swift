@@ -253,7 +253,7 @@ struct GeneralSettingsView: View {
                     .font(.subheadline.monospacedDigit().weight(.bold))
                     .foregroundStyle(tint)
             }
-            Slider(value: percent, in: 1...100, step: 1)
+            Slider(value: percent, in: 1...100)
                 .controlSize(.small)
                 .tint(tint)
             Text("1% – 100%")
