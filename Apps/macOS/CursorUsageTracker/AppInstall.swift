@@ -24,6 +24,10 @@ enum AppInstall {
             return dest
         }
 
+        if FileManager.default.fileExists(atPath: dest.path) {
+            try FileManager.default.removeItem(at: dest)
+        }
+
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
         task.arguments = [src.path, dest.path]

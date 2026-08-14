@@ -13,6 +13,9 @@ struct MenuBarPopoverView: View {
     @State private var topChromeHeight: CGFloat = 70
     @State private var bottomChromeHeight: CGFloat = 44
     @State private var showReauth = false
+    @State private var installBusy = false
+    @State private var installCopied = false
+    @State private var installError: String?
     @AppStorage(AppInstall.bannerDismissedKey) private var installBannerDismissed = false
 
     private var popoverMaxHeight: CGFloat {
@@ -184,22 +187,52 @@ struct MenuBarPopoverView: View {
             Label("Desktop widgets need this app in Applications.", systemImage: "rectangle.on.rectangle")
                 .appFont(.caption, weight: .semibold)
                 .fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: 8) {
-                Button {
-                    do {
-                        _ = try AppInstall.copyRunningAppToApplications()
-                    } catch {
-                        // Keep the banner; About has the same installer with an error line.
+
+            if installCopied {
+                Text("Copied to Applications. This Xcode/DerivedData copy is still running — widgets only appear after you open the installed app.")
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 8) {
+                    Button {
+                        AppInstall.launchInstalledAndTerminate()
+                    } label: {
+                        Label("Quit & open installed app", systemImage: "arrow.up.forward.app")
                     }
-                } label: {
-                    Label("Install to Applications", systemImage: "square.and.arrow.down")
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    Button("Reveal in Finder") {
+                        NSWorkspace.shared.activateFileViewerSelecting([AppInstall.installedAppURL])
+                    }
+                    .controlSize(.small)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-                Button("Not now") {
-                    installBannerDismissed = true
+            } else {
+                HStack(spacing: 8) {
+                    Button {
+                        installToApplications()
+                    } label: {
+                        if installBusy {
+                            Label("Copying…", systemImage: "arrow.triangle.2.circlepath")
+                        } else {
+                            Label("Install to Applications", systemImage: "square.and.arrow.down")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(installBusy)
+                    Button("Not now") {
+                        installBannerDismissed = true
+                    }
+                    .controlSize(.small)
+                    .disabled(installBusy)
                 }
-                .controlSize(.small)
+            }
+
+            if let installError {
+                Text(installError)
+                    .appFont(.caption2)
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(10)
@@ -208,6 +241,22 @@ struct MenuBarPopoverView: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color.primary.opacity(0.04))
         )
+    }
+
+    private func installToApplications() {
+        installBusy = true
+        installError = nil
+        Task { @MainActor in
+            do {
+                _ = try await Task.detached(priority: .userInitiated) {
+                    try AppInstall.copyRunningAppToApplications()
+                }.value
+                installCopied = true
+            } catch {
+                installError = "Couldn’t install: \(error.localizedDescription)"
+            }
+            installBusy = false
+        }
     }
 
     private var reauthSheet: some View {
