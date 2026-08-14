@@ -23,7 +23,10 @@ public final class UsageStore: ObservableObject {
 
     #if os(macOS)
     @Published public private(set) var thisMac = CursorProcessSnapshot()
+    /// IDE Composer / Agent threads on this Mac.
     @Published public private(set) var localComposers: [LocalComposerSummary] = []
+    /// Cursor CLI (`cursor-agent`) sessions from `~/.cursor/chats`.
+    @Published public private(set) var localCLISessions: [LocalComposerSummary] = []
     #endif
 
     public init() {
@@ -282,6 +285,7 @@ public final class UsageStore: ObservableObject {
         #if os(macOS)
         thisMac = CursorProcessMonitor.snapshot()
         localComposers = CursorLocalComposerReader.recent()
+        localCLISessions = CursorCLISessionReader.recent()
         #endif
     }
 

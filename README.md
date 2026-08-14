@@ -26,7 +26,7 @@ Cursor Usage Tracker signs in with your personal Cursor session, pulls the same 
 | **Models this period** | Per-model spend and tokens for the billing cycle |
 | **Days left** | Remaining days in the current billing window |
 
-On Mac it can also show **this Mac** (Cursor apps / editor windows / CLI), **recent local Composer chats**, and **cloud agents** (when you save a Cursor Cloud Agents API key).
+On Mac it can also show **Agents** — This Mac (editor), CLI (`cursor-agent`), and cloud runs (when you save a Cursor Cloud Agents API key).
 
 It does **not** scrape the dashboard, store tokens in iCloud, or send credentials to Watch. Team / Enterprise Admin API is not implemented yet.
 

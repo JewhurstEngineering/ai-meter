@@ -11,6 +11,8 @@ public struct LocalComposerSummary: Sendable, Equatable, Identifiable {
     public var projectFolder: String?
     public var updatedAt: Date?
     public var status: String?
+    /// `"cli"` for Cursor Agent CLI sessions; nil/empty is the IDE.
+    public var source: String?
 
     public init(
         id: String,
@@ -19,7 +21,8 @@ public struct LocalComposerSummary: Sendable, Equatable, Identifiable {
         model: String? = nil,
         projectFolder: String? = nil,
         updatedAt: Date? = nil,
-        status: String? = nil
+        status: String? = nil,
+        source: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -28,9 +31,38 @@ public struct LocalComposerSummary: Sendable, Equatable, Identifiable {
         self.projectFolder = projectFolder
         self.updatedAt = updatedAt
         self.status = status
+        self.source = source
+    }
+
+    public var isCLI: Bool { source == "cli" }
+
+    /// Mode badge when the medium (This Mac / CLI) is already labeled.
+    public var activityModeLabel: String {
+        if isCLI {
+            switch (mode ?? "").lowercased() {
+            case "plan": return "Plan"
+            case "ask": return "Ask"
+            default: return "Agent"
+            }
+        }
+        return modeLabel
     }
 
     public var modeLabel: String {
+        if isCLI {
+            switch (mode ?? "").lowercased() {
+            case "plan": return "CLI · Plan"
+            case "ask": return "CLI · Ask"
+            default: return "CLI"
+            }
+        }
+        if isCLI {
+            switch (mode ?? "").lowercased() {
+            case "plan": return "CLI · Plan"
+            case "ask": return "CLI · Ask"
+            default: return "CLI"
+            }
+        }
         switch (mode ?? "").lowercased() {
         case "agent": return "Agent"
         case "chat": return "Chat"

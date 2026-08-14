@@ -190,11 +190,11 @@ struct PhoneLayoutSettings: View {
                 Toggle("On-demand", isOn: popoverBinding(\.onDemand))
                 Toggle("Days remaining", isOn: popoverBinding(\.daysRemaining))
                 Toggle("Models this period", isOn: popoverBinding(\.modelsThisPeriod))
-                Toggle("Cloud agents", isOn: popoverBinding(\.cloudAgents))
+                Toggle("Cloud", isOn: popoverBinding(\.cloudAgents))
             } header: {
                 Text("Overview")
             } footer: {
-                Text("Same metric set as the Mac popover. This Mac and local chats stay on the Mac app.")
+                Text("Agents on iPhone is Cloud only. This Mac and CLI stay on the Mac app.")
             }
         }
         .navigationTitle("Layout")

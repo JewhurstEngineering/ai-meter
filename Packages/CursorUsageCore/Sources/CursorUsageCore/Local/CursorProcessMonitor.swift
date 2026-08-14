@@ -3,35 +3,57 @@ import Foundation
 #if os(macOS)
 import AppKit
 import CoreGraphics
+import Darwin
 
 public struct CursorProcessSnapshot: Sendable, Equatable {
     public var appCount: Int
     public var windowCount: Int
-    public var cliRunning: Bool
+    public var cliProcessCount: Int
+    public var cliInstalled: Bool
+    public var cliVersion: String?
 
-    public init(appCount: Int = 0, windowCount: Int = 0, cliRunning: Bool = false) {
+    public init(
+        appCount: Int = 0,
+        windowCount: Int = 0,
+        cliProcessCount: Int = 0,
+        cliInstalled: Bool = false,
+        cliVersion: String? = nil
+    ) {
         self.appCount = appCount
         self.windowCount = windowCount
-        self.cliRunning = cliRunning
+        self.cliProcessCount = max(0, cliProcessCount)
+        self.cliInstalled = cliInstalled
+        self.cliVersion = cliVersion
     }
 
-    public var isRunning: Bool { appCount > 0 || cliRunning }
+    /// Back-compat for older call sites.
+    public var cliRunning: Bool { cliProcessCount > 0 }
+
+    public var isEditorRunning: Bool { appCount > 0 }
+    public var isRunning: Bool { isEditorRunning || cliRunning }
+    public var showsCLIRow: Bool { cliInstalled || cliProcessCount > 0 }
 
     public var summaryLine: String {
-        var parts: [String] = []
+        if appCount > 1 {
+            return "Cursor · \(appCount) apps · \(windowPhrase)"
+        }
         if appCount > 0 {
-            if appCount > 1 {
-                parts.append("Cursor · \(appCount) apps · \(windowPhrase)")
-            } else {
-                parts.append("Cursor · \(windowPhrase)")
+            return "Cursor · \(windowPhrase)"
+        }
+        return "Cursor not running"
+    }
+
+    public var cliSummaryLine: String {
+        if cliProcessCount > 0 {
+            if let cliVersion, !cliVersion.isEmpty {
+                return "CLI · \(cliVersion)"
             }
-        } else {
-            parts.append("Cursor not running")
+            return "CLI running"
         }
-        if cliRunning {
-            parts.append("CLI running")
+        if cliInstalled {
+            return "CLI not running"
         }
-        return parts.joined(separator: " · ")
+        return "CLI not installed"
     }
 
     public var windowPhrase: String {
@@ -40,17 +62,71 @@ public struct CursorProcessSnapshot: Sendable, Equatable {
 }
 
 public enum CursorProcessMonitor {
+    public static var defaultCLIBinaryURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".local/bin/cursor-agent")
+    }
+
     public static func snapshot() -> CursorProcessSnapshot {
         let running = NSWorkspace.shared.runningApplications
         let helpersAndApp = running.filter(isCursorProcess)
         let apps = helpersAndApp.filter { $0.activationPolicy == .regular }
         let workspaces = running.filter(isCursorFileWatcher).count
         let windows = max(onscreenEditorWindows(), workspaces)
+        let install = installedCLI()
+        let fromWorkspace = running.filter(isCursorCLI).count
+        let fromProc = cursorAgentProcessCount()
         return CursorProcessSnapshot(
             appCount: max(apps.count, apps.isEmpty && windows > 0 ? 1 : 0),
             windowCount: windows,
-            cliRunning: running.contains(where: isCursorCLI)
+            cliProcessCount: max(fromProc, fromWorkspace),
+            cliInstalled: install.installed,
+            cliVersion: install.version
         )
+    }
+
+    /// `~/.local/bin/cursor-agent` plus Homebrew / usr/local copies.
+    public static func installedCLI(
+        extraBinaryURLs: [URL] = [],
+        fileManager: FileManager = .default
+    ) -> (installed: Bool, version: String?) {
+        let home = fileManager.homeDirectoryForCurrentUser
+        var candidates = extraBinaryURLs
+        candidates.append(contentsOf: [
+            home.appendingPathComponent(".local/bin/cursor-agent"),
+            URL(fileURLWithPath: "/opt/homebrew/bin/cursor-agent"),
+            URL(fileURLWithPath: "/usr/local/bin/cursor-agent"),
+        ])
+
+        for url in candidates {
+            guard fileManager.fileExists(atPath: url.path) else { continue }
+            return (true, versionFromCLIBinary(url, fileManager: fileManager))
+        }
+        return (false, nil)
+    }
+
+    public static func versionFromCLIBinary(_ url: URL, fileManager: FileManager = .default) -> String? {
+        let resolved: URL
+        if let dest = try? fileManager.destinationOfSymbolicLink(atPath: url.path) {
+            resolved = URL(fileURLWithPath: dest, relativeTo: url.deletingLastPathComponent()).standardizedFileURL
+        } else {
+            resolved = url.resolvingSymlinksInPath()
+        }
+        // …/versions/2026.08.04-aaa8809/cursor-agent
+        let parent = resolved.deletingLastPathComponent()
+        guard parent.deletingLastPathComponent().lastPathComponent == "versions" else {
+            return nil
+        }
+        let version = parent.lastPathComponent
+        return version.isEmpty ? nil : version
+    }
+
+    public static func isCursorAgentExecutable(path: String) -> Bool {
+        let name = URL(fileURLWithPath: path).lastPathComponent.lowercased()
+        if name == "cursor-agent" || name.hasPrefix("cursor-agent") { return true }
+        // Some installs wrap the binary as `agent`.
+        if name == "agent", path.lowercased().contains("cursor-agent") { return true }
+        return false
     }
 
     private static func isCursorProcess(_ app: NSRunningApplication) -> Bool {
@@ -93,15 +169,40 @@ public enum CursorProcessMonitor {
     }
 
     private static func isCursorCLI(_ app: NSRunningApplication) -> Bool {
+        if let exec = app.executableURL?.path, isCursorAgentExecutable(path: exec) {
+            return true
+        }
         let name = (app.localizedName ?? "").lowercased()
         if name.contains("cursor-agent") || name == "cursor agent" { return true }
         if let bundle = app.bundleIdentifier?.lowercased(), bundle.contains("cursor-agent") {
             return true
         }
-        if let exec = app.executableURL?.lastPathComponent.lowercased() {
-            return exec == "cursor-agent" || exec.hasPrefix("cursor-agent")
-        }
         return false
+    }
+
+    /// CLI tools often never appear in `NSWorkspace.runningApplications`.
+    private static func cursorAgentProcessCount() -> Int {
+        let needed = proc_listpids(UInt32(PROC_ALL_PIDS), 0, nil, 0)
+        guard needed > 0 else { return 0 }
+        let stride = MemoryLayout<pid_t>.stride
+        var pids = [pid_t](repeating: 0, count: Int(needed) / stride + 32)
+        let filled = pids.withUnsafeMutableBufferPointer { buf -> Int32 in
+            guard let base = buf.baseAddress else { return 0 }
+            return proc_listpids(UInt32(PROC_ALL_PIDS), 0, base, Int32(buf.count * stride))
+        }
+        guard filled > 0 else { return 0 }
+        let count = Int(filled) / stride
+        var pathBuffer = [CChar](repeating: 0, count: 4 * Int(MAXPATHLEN))
+        var matches = 0
+        for pid in pids.prefix(count) where pid > 0 {
+            let result = proc_pidpath(pid, &pathBuffer, UInt32(pathBuffer.count))
+            guard result > 0 else { continue }
+            let path = String(cString: pathBuffer)
+            if isCursorAgentExecutable(path: path) {
+                matches += 1
+            }
+        }
+        return matches
     }
 }
 #endif

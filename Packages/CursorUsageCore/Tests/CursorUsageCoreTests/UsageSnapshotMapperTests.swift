@@ -1,4 +1,5 @@
 import XCTest
+import SQLite3
 @testable import CursorUsageCore
 
 final class UsageSnapshotMapperTests: XCTestCase {
@@ -291,6 +292,124 @@ final class UsageSnapshotMapperTests: XCTestCase {
         { "composerId": "d1", "name": "scratch", "isDraft": true, "createdAt": 999999 }
         """.data(using: .utf8)!
         XCTAssertNil(CursorLocalComposerReader.decodeComposerData(draft))
+    }
+
+    func testCLIModeLabel() {
+        let cli = LocalComposerSummary(id: "1", name: "Refactor", mode: "plan", source: "cli")
+        XCTAssertEqual(cli.modeLabel, "CLI · Plan")
+        XCTAssertEqual(cli.activityModeLabel, "Plan")
+        XCTAssertTrue(cli.isCLI)
+        let ask = LocalComposerSummary(id: "2", name: "Why", mode: "ask", source: "cli")
+        XCTAssertEqual(ask.modeLabel, "CLI · Ask")
+        XCTAssertEqual(ask.activityModeLabel, "Ask")
+        let agent = LocalComposerSummary(id: "3", name: "Do it", source: "cli")
+        XCTAssertEqual(agent.modeLabel, "CLI")
+        XCTAssertEqual(agent.activityModeLabel, "Agent")
+    }
+
+    func testCLIMetaJSONAndHex() throws {
+        let json = """
+        {"name":"New Agent","mode":"plan","createdAt":1761698454965}
+        """
+        let parsed = try XCTUnwrap(CursorCLISessionReader.decodeMetaJSON(Data(json.utf8)))
+        XCTAssertEqual(parsed.name, "New Agent")
+        XCTAssertEqual(parsed.mode, "plan")
+
+        let hex = Data(json.utf8).map { String(format: "%02x", $0) }.joined()
+        let fromHex = try XCTUnwrap(CursorCLISessionReader.decodeMetaValue(hex))
+        XCTAssertEqual(fromHex.name, "New Agent")
+        XCTAssertEqual(fromHex.mode, "plan")
+    }
+
+    func testCLIRecentSessionsFromStore() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cli-chats-\(UUID().uuidString)", isDirectory: true)
+        let projects = root.appendingPathComponent("projects", isDirectory: true)
+        let chats = root.appendingPathComponent("chats", isDirectory: true)
+        let hash = CursorCLISessionReader.md5Hex("/Users/me/Projects/demo-app")
+        let chatID = "EF886E42-25B4-4A52-92BF-881D6FC4232E"
+        let storeDir = chats.appendingPathComponent(hash).appendingPathComponent(chatID)
+        try FileManager.default.createDirectory(at: storeDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: projects, withIntermediateDirectories: true)
+        let storeURL = storeDir.appendingPathComponent("store.db")
+        try writeCLIStore(
+            at: storeURL,
+            json: #"{"name":"Fix login","mode":"ask","createdAt":1761698454965}"#
+        )
+
+        let rows = CursorCLISessionReader.recent(limit: 4, chatsRoot: chats, projectsRoot: projects)
+        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(rows.first?.name, "Fix login")
+        XCTAssertEqual(rows.first?.modeLabel, "CLI · Ask")
+        XCTAssertEqual(rows.first?.id.lowercased(), chatID.lowercased())
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    func testCursorAgentExecutablePaths() {
+        XCTAssertTrue(CursorProcessMonitor.isCursorAgentExecutable(path: "/Users/me/.local/share/cursor-agent/versions/1/cursor-agent"))
+        XCTAssertTrue(CursorProcessMonitor.isCursorAgentExecutable(path: "/opt/homebrew/bin/cursor-agent"))
+        XCTAssertTrue(CursorProcessMonitor.isCursorAgentExecutable(path: "/tmp/cursor-agent/agent"))
+        XCTAssertFalse(CursorProcessMonitor.isCursorAgentExecutable(path: "/Applications/Cursor.app/Contents/MacOS/Cursor"))
+        XCTAssertFalse(CursorProcessMonitor.isCursorAgentExecutable(path: "/usr/bin/agent"))
+    }
+
+    func testCLIInstallVersionFromSymlinkLayout() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("cli-install-\(UUID().uuidString)", isDirectory: true)
+        let versionDir = root.appendingPathComponent("versions/2026.08.04-aaa8809", isDirectory: true)
+        try FileManager.default.createDirectory(at: versionDir, withIntermediateDirectories: true)
+        let binary = versionDir.appendingPathComponent("cursor-agent")
+        FileManager.default.createFile(atPath: binary.path, contents: Data())
+        let link = root.appendingPathComponent("cursor-agent")
+        try FileManager.default.createSymbolicLink(atPath: link.path, withDestinationPath: binary.path)
+        let version = CursorProcessMonitor.versionFromCLIBinary(link)
+        XCTAssertEqual(version, "2026.08.04-aaa8809")
+        let install = CursorProcessMonitor.installedCLI(extraBinaryURLs: [link])
+        XCTAssertTrue(install.installed)
+        XCTAssertEqual(install.version, "2026.08.04-aaa8809")
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    func testThisMacSummariesSplitEditorAndCLI() {
+        let both = CursorProcessSnapshot(
+            appCount: 1,
+            windowCount: 3,
+            cliProcessCount: 2,
+            cliInstalled: true,
+            cliVersion: "2026.08.04-aaa8809"
+        )
+        XCTAssertEqual(both.summaryLine, "Cursor · 3 windows")
+        XCTAssertEqual(both.cliSummaryLine, "CLI · 2026.08.04-aaa8809")
+        XCTAssertTrue(both.showsCLIRow)
+        XCTAssertTrue(both.cliRunning)
+
+        let idle = CursorProcessSnapshot(cliInstalled: true)
+        XCTAssertEqual(idle.summaryLine, "Cursor not running")
+        XCTAssertEqual(idle.cliSummaryLine, "CLI not running")
+
+        let missing = CursorProcessSnapshot()
+        XCTAssertFalse(missing.showsCLIRow)
+        XCTAssertEqual(missing.cliSummaryLine, "CLI not installed")
+    }
+
+    private func writeCLIStore(at url: URL, json: String) throws {
+        var db: OpaquePointer?
+        guard sqlite3_open(url.path, &db) == SQLITE_OK else {
+            throw NSError(domain: "cli-test", code: 1)
+        }
+        defer { sqlite3_close(db) }
+        guard sqlite3_exec(db, "CREATE TABLE meta (key TEXT PRIMARY KEY, value TEXT);", nil, nil, nil) == SQLITE_OK else {
+            throw NSError(domain: "cli-test", code: 2)
+        }
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(db, "INSERT INTO meta (key, value) VALUES ('0', ?);", -1, &statement, nil) == SQLITE_OK else {
+            throw NSError(domain: "cli-test", code: 3)
+        }
+        defer { sqlite3_finalize(statement) }
+        sqlite3_bind_text(statement, 1, json, -1, unsafeBitCast(-1, to: sqlite3_destructor_type.self))
+        guard sqlite3_step(statement) == SQLITE_DONE else {
+            throw NSError(domain: "cli-test", code: 4)
+        }
     }
     #endif
 

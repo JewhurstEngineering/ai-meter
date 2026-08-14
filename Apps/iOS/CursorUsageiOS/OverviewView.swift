@@ -154,7 +154,7 @@ struct OverviewView: View {
                 }
             }
 
-            if layout.cloudAgents, account?.hasCloudAPIKey == true {
+            if layout.cloudAgents {
                 cloudAgentsSection(account)
             }
 
@@ -205,7 +205,7 @@ struct OverviewView: View {
 
     @ViewBuilder
     private func cloudAgentsSection(_ account: AccountRuntime?) -> some View {
-        Section("Cloud agents") {
+        Section {
             if account?.hasCloudAPIKey != true {
                 Text("Add a Cloud Agents API key in Accounts.")
                     .foregroundStyle(.secondary)
@@ -226,6 +226,10 @@ struct OverviewView: View {
                 Text("No active cloud agents.")
                     .foregroundStyle(.secondary)
             }
+        } header: {
+            Text("Agents")
+        } footer: {
+            Text("Cloud runs for this account. This Mac and CLI only appear on the Mac app.")
         }
     }
 

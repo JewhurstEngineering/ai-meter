@@ -142,133 +142,154 @@ struct IncludedUsageSettingsView: View {
 
     @ViewBuilder
     private var activityColumn: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            thisMacPanel
-            cloudAgentsPanel
-            recentLocalPanel
-                .frame(maxHeight: .infinity, alignment: .top)
-        }
-        .frame(maxHeight: .infinity, alignment: .top)
+        agentsPanel
+            .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    private var thisMacPanel: some View {
+    private var agentsPanel: some View {
         let mac = store.thisMac
-        return SettingsPanel(
-            title: "This Mac",
-            systemImage: "laptopcomputer",
-            subtitle: mac.isRunning ? nil : "Cursor isn’t running.",
-            compact: true
-        ) {
-            HStack(spacing: 8) {
-                Text(mac.summaryLine)
-                    .font(.caption)
-                Spacer(minLength: 0)
-                if mac.windowCount > 0 {
-                    Text("\(mac.windowCount)")
-                        .font(.caption.weight(.bold).monospacedDigit())
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 2)
-                        .background(Capsule().fill(theme.cursorModels.opacity(0.18)))
-                        .foregroundStyle(theme.cursorModels)
-                }
-            }
-        }
-    }
-
-    private var cloudAgentsPanel: some View {
         let account = store.activeAccount
         return SettingsPanel(
-            title: "Cloud agents",
-            systemImage: "cloud",
-            subtitle: account?.hasCloudAPIKey == true
-                ? nil
-                : "Paste a user API key in Authentication.",
-            compact: true
-        ) {
-            if account?.hasCloudAPIKey != true {
-                Text("Optional. Lists background bc-* agents from api.cursor.com.")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else if let error = account?.cloudAgentsError {
-                Text(error)
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            } else if let agents = account?.cloudAgents, !agents.isEmpty {
-                VStack(alignment: .leading, spacing: 6) {
-                    ForEach(agents.prefix(8)) { agent in
-                        Button {
-                            if let url = agent.url {
-                                NSWorkspace.shared.open(url)
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(agent.isRunning ? theme.ok : Color.secondary.opacity(0.4))
-                                    .frame(width: 7, height: 7)
-                                Text(agent.name)
-                                    .font(.caption)
-                                    .lineLimit(1)
-                                    .foregroundStyle(.primary)
-                                Spacer(minLength: 4)
-                                Text(agent.displayStatus.lowercased())
-                                    .font(.caption2.weight(.semibold))
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            } else {
-                Text("No active cloud agents.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    private var recentLocalPanel: some View {
-        SettingsPanel(
-            title: "Recent on this Mac",
-            systemImage: "bubble.left.and.bubble.right",
-            subtitle: nil,
+            title: "Agents",
+            systemImage: "cpu",
+            subtitle: "This Mac, CLI, and cloud — same family, different runtimes.",
             compact: true,
             fillsHeight: true
         ) {
-            if store.localComposers.isEmpty {
-                Text("No recent local chats.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                VStack(spacing: 0) {
-                    ForEach(Array(store.localComposers.enumerated()), id: \.element.id) { index, row in
-                        if index > 0 { Divider().opacity(0.5) }
-                        HStack(spacing: 8) {
-                            Text(row.name)
-                                .font(.caption.weight(.medium))
+            VStack(alignment: .leading, spacing: 12) {
+                agentGroup(title: "This Mac") {
+                    thisMacRow(
+                        text: mac.summaryLine,
+                        badge: mac.windowCount > 0 ? "\(mac.windowCount)" : nil,
+                        tint: theme.cursorModels
+                    )
+                    chatRows(store.localComposers, empty: "No recent editor chats.")
+                }
+
+                if mac.showsCLIRow || !store.localCLISessions.isEmpty {
+                    Divider().opacity(0.5)
+                    agentGroup(title: "CLI") {
+                        if mac.showsCLIRow {
+                            thisMacRow(
+                                text: mac.cliSummaryLine,
+                                badge: mac.cliProcessCount > 0 ? "\(mac.cliProcessCount)" : nil,
+                                tint: theme.otherModels
+                            )
+                        }
+                        chatRows(store.localCLISessions, empty: "No recent CLI sessions.")
+                    }
+                }
+
+                Divider().opacity(0.5)
+                agentGroup(title: "Cloud") {
+                    cloudAgentsBody(account)
+                }
+
+                Spacer(minLength: 0)
+            }
+            .frame(maxHeight: .infinity, alignment: .top)
+        }
+    }
+
+    @ViewBuilder
+    private func agentGroup<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+            content()
+        }
+    }
+
+    @ViewBuilder
+    private func chatRows(_ rows: [LocalComposerSummary], empty: String) -> some View {
+        if rows.isEmpty {
+            Text(empty)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        } else {
+            ForEach(rows) { row in
+                HStack(spacing: 8) {
+                    Text(row.name)
+                        .font(.caption.weight(.medium))
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    if let folder = row.projectFolder {
+                        Text(folder)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                    Spacer(minLength: 6)
+                    Text(row.activityModeLabel)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Text(row.updatedAt.map { MenuBarFormatter.relative($0) } ?? "—")
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .frame(minWidth: 44, alignment: .trailing)
+                }
+            }
+        }
+    }
+
+    private func thisMacRow(text: String, badge: String?, tint: Color) -> some View {
+        HStack(spacing: 8) {
+            Text(text)
+                .font(.caption)
+            Spacer(minLength: 0)
+            if let badge {
+                Text(badge)
+                    .font(.caption.weight(.bold).monospacedDigit())
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(tint.opacity(0.18)))
+                    .foregroundStyle(tint)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func cloudAgentsBody(_ account: AccountRuntime?) -> some View {
+        if account?.hasCloudAPIKey != true {
+            Text("Paste a user API key in Authentication to list bc-* cloud runs.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        } else if let error = account?.cloudAgentsError {
+            Text(error)
+                .font(.caption)
+                .foregroundStyle(.orange)
+        } else if let agents = account?.cloudAgents, !agents.isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(agents.prefix(8)) { agent in
+                    Button {
+                        if let url = agent.url {
+                            NSWorkspace.shared.open(url)
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(agent.isRunning ? theme.ok : Color.secondary.opacity(0.4))
+                                .frame(width: 7, height: 7)
+                            Text(agent.name)
+                                .font(.caption)
                                 .lineLimit(1)
-                                .truncationMode(.tail)
-                            if let folder = row.projectFolder {
-                                Text(folder)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(1)
-                                    .truncationMode(.middle)
-                            }
-                            Spacer(minLength: 6)
-                            Text(row.modeLabel)
+                                .foregroundStyle(.primary)
+                            Spacer(minLength: 4)
+                            Text(agent.displayStatus.lowercased())
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(.secondary)
-                            Text(row.updatedAt.map { MenuBarFormatter.relative($0) } ?? "—")
-                                .font(.caption2.monospacedDigit())
-                                .foregroundStyle(.secondary)
-                                .frame(minWidth: 44, alignment: .trailing)
                         }
-                        .padding(.vertical, 5)
                     }
-                    Spacer(minLength: 0)
+                    .buttonStyle(.plain)
                 }
-                .frame(maxHeight: .infinity, alignment: .top)
             }
+        } else {
+            Text("No active cloud agents.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 

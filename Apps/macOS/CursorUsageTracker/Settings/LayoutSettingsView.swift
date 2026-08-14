@@ -150,12 +150,12 @@ struct LayoutSettingsView: View {
                     isOn: binding(\.thisMacActivity)
                 )
                 MetricToggleRow(
-                    title: "Recent local chats",
+                    title: "Recent chats",
                     systemImage: "bubble.left.and.bubble.right",
                     isOn: binding(\.localRecentChats)
                 )
                 MetricToggleRow(
-                    title: "Cloud agents",
+                    title: "Cloud",
                     systemImage: "cloud",
                     isOn: binding(\.cloudAgents)
                 )
@@ -415,20 +415,23 @@ private struct PopoverPreviewCard: View {
                     .font(.caption2)
                 }
 
-                if t.thisMacActivity {
+                if t.thisMacActivity || t.localRecentChats || t.cloudAgents {
                     Divider()
-                    Label("Cursor · 3 windows", systemImage: "laptopcomputer")
-                        .font(.caption2)
-                }
-                if t.localRecentChats {
-                    Label("Recent on this Mac", systemImage: "bubble.left.and.bubble.right")
+                    Text("Agents")
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
-                }
-                if t.cloudAgents {
-                    Label("Cloud agents", systemImage: "cloud")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(.secondary)
+                    if t.thisMacActivity {
+                        Label("This Mac · 3 windows", systemImage: "laptopcomputer")
+                            .font(.caption2)
+                    }
+                    if t.thisMacActivity || t.localRecentChats {
+                        Label("CLI · running", systemImage: "terminal")
+                            .font(.caption2)
+                    }
+                    if t.cloudAgents {
+                        Label("Cloud · 2 running", systemImage: "cloud")
+                            .font(.caption2)
+                    }
                 }
 
                 if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent

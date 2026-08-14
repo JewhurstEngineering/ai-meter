@@ -416,11 +416,11 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var burnRateEstimate: Bool
         /// Popover-only: per-model spend for the billing period.
         public var modelsThisPeriod: Bool
-        /// Popover-only (Mac): running Cursor app / window count.
+        /// Popover-only (Mac): editor windows in the Agents → This Mac group.
         public var thisMacActivity: Bool
-        /// Popover-only (Mac): recent local Composer/Agent chats.
+        /// Popover-only (Mac): recent chats under Agents → This Mac and Agents → CLI.
         public var localRecentChats: Bool
-        /// Popover / iOS: cloud agents when an API key is saved.
+        /// Popover / iOS: Agents → Cloud (needs a Cloud Agents API key).
         public var cloudAgents: Bool
 
         public static let menuBarDefault = SurfaceToggles(

@@ -167,8 +167,11 @@ struct MenuBarPopoverView: View {
             Text("Open Settings → Authentication to connect with Cursor, local session, or a pasted token.")
                 .appFont(.caption)
                 .foregroundStyle(.secondary)
-            if store.preferences.popover.thisMacActivity {
-                PopoverThisMacCard(snapshot: store.thisMac)
+            if store.preferences.popover.thisMacActivity
+                || store.preferences.popover.localRecentChats
+                || store.preferences.popover.cloudAgents
+            {
+                PopoverAgentsCard(account: displayed)
             }
             SettingsOpenLink {
                 Label("Open Settings", systemImage: "gearshape")
@@ -239,10 +242,6 @@ struct MenuBarPopoverView: View {
         VStack(alignment: .leading, spacing: 12) {
             if !hits.isEmpty {
                 alertList(hits)
-            }
-
-            if t.thisMacActivity {
-                PopoverThisMacCard(snapshot: store.thisMac)
             }
 
             if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
@@ -360,12 +359,8 @@ struct MenuBarPopoverView: View {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
-            if t.localRecentChats {
-                PopoverLocalChatsCard(composers: store.localComposers)
-            }
-
-            if t.cloudAgents, displayed?.hasCloudAPIKey == true {
-                PopoverCloudAgentsCard(account: displayed)
+            if t.thisMacActivity || t.localRecentChats || t.cloudAgents {
+                PopoverAgentsCard(account: displayed)
             }
 
             if let error = displayed?.lastError ?? store.lastError {
@@ -535,20 +530,108 @@ private struct PopoverModelsThisPeriodCard: View {
     }
 }
 
-private struct PopoverThisMacCard: View {
-    let snapshot: CursorProcessSnapshot
+private struct PopoverAgentsCard: View {
+    @EnvironmentObject private var store: UsageStore
+    var account: AccountRuntime?
+
+    private var toggles: DisplayPreferences.SurfaceToggles { store.preferences.popover }
+    private var mac: CursorProcessSnapshot { store.thisMac }
+
+    private var showThisMac: Bool {
+        toggles.thisMacActivity || (toggles.localRecentChats && !store.localComposers.isEmpty)
+    }
+
+    private var showCLI: Bool {
+        let status = toggles.thisMacActivity && mac.showsCLIRow
+        let chats = toggles.localRecentChats && (mac.showsCLIRow || !store.localCLISessions.isEmpty)
+        return status || chats
+    }
+
+    private var showCloud: Bool { toggles.cloudAgents }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Agents")
+                .appFont(.caption, weight: .semibold)
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            if showThisMac {
+                agentGroup(title: "This Mac", systemImage: "laptopcomputer") {
+                    if toggles.thisMacActivity {
+                        statusRow(
+                            systemImage: mac.isEditorRunning ? "laptopcomputer" : "laptopcomputer.slash",
+                            text: mac.summaryLine,
+                            active: mac.isEditorRunning,
+                            badge: mac.windowCount > 0 ? "\(mac.windowCount)" : nil
+                        )
+                    }
+                    if toggles.localRecentChats {
+                        chatList(store.localComposers, empty: "No recent editor chats.")
+                    }
+                }
+            }
+
+            if showCLI {
+                agentGroup(title: "CLI", systemImage: "terminal") {
+                    if toggles.thisMacActivity, mac.showsCLIRow {
+                        statusRow(
+                            systemImage: mac.cliRunning ? "terminal.fill" : "terminal",
+                            text: mac.cliSummaryLine,
+                            active: mac.cliRunning,
+                            badge: mac.cliProcessCount > 0 ? "\(mac.cliProcessCount)" : nil
+                        )
+                    }
+                    if toggles.localRecentChats {
+                        chatList(store.localCLISessions, empty: "No recent CLI sessions.")
+                    }
+                }
+            }
+
+            if showCloud {
+                agentGroup(title: "Cloud", systemImage: "cloud") {
+                    cloudBody
+                }
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
+        )
+    }
+
+    @ViewBuilder
+    private func agentGroup<Content: View>(
+        title: String,
+        systemImage: String,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: systemImage)
+                .appFont(.caption, weight: .semibold)
+                .foregroundStyle(.secondary)
+            content()
+        }
+    }
+
+    private func statusRow(systemImage: String, text: String, active: Bool, badge: String?) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: snapshot.isRunning ? "laptopcomputer" : "laptopcomputer.slash")
-                .foregroundStyle(snapshot.isRunning ? Color.accentColor : Color.secondary)
+            Image(systemName: systemImage)
+                .foregroundStyle(active ? Color.accentColor : Color.secondary)
                 .frame(width: 16)
-            Text(snapshot.summaryLine)
+            Text(text)
                 .appFont(.caption)
-                .foregroundStyle(snapshot.isRunning ? Color.primary : Color.secondary)
+                .foregroundStyle(active ? Color.primary : Color.secondary)
+                .lineLimit(1)
             Spacer(minLength: 0)
-            if snapshot.windowCount > 0 {
-                Text("\(snapshot.windowCount)")
+            if let badge {
+                Text(badge)
                     .appFont(.caption2, weight: .bold, mono: true)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 1)
@@ -556,137 +639,89 @@ private struct PopoverThisMacCard: View {
                     .foregroundStyle(Color.accentColor)
             }
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
-        )
     }
-}
 
-private struct PopoverLocalChatsCard: View {
-    let composers: [LocalComposerSummary]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Recent on this Mac", systemImage: "bubble.left.and.bubble.right")
-                .appFont(.caption, weight: .semibold)
+    @ViewBuilder
+    private func chatList(_ rows: [LocalComposerSummary], empty: String) -> some View {
+        if rows.isEmpty {
+            Text(empty)
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
-
-            if composers.isEmpty {
-                Text("No local Cursor chats found.")
-                    .appFont(.caption)
-                    .foregroundStyle(.secondary)
-            } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(composers) { row in
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text(row.name)
-                                    .appFont(.caption, weight: .medium)
-                                    .lineLimit(1)
-                                Spacer(minLength: 4)
-                                Text(row.modeLabel)
-                                    .appFont(.caption2, weight: .semibold)
-                                    .foregroundStyle(.secondary)
-                            }
-                            HStack(spacing: 6) {
-                                if let model = row.model {
-                                    Text(model)
-                                        .lineLimit(1)
-                                        .truncationMode(.middle)
-                                }
-                                if let folder = row.projectFolder {
-                                    Text(folder)
-                                        .lineLimit(1)
-                                }
-                                Spacer(minLength: 4)
-                                if let updated = row.updatedAt {
-                                    Text(MenuBarFormatter.relative(updated))
-                                }
-                            }
-                            .appFont(.caption2)
-                            .foregroundStyle(.secondary)
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(rows) { row in
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 6) {
+                            Text(row.name)
+                                .appFont(.caption, weight: .medium)
+                                .lineLimit(1)
+                            Spacer(minLength: 4)
+                            Text(row.activityModeLabel)
+                                .appFont(.caption2, weight: .semibold)
+                                .foregroundStyle(.secondary)
                         }
+                        HStack(spacing: 6) {
+                            if let model = row.model {
+                                Text(model)
+                                    .lineLimit(1)
+                                    .truncationMode(.middle)
+                            }
+                            if let folder = row.projectFolder {
+                                Text(folder)
+                                    .lineLimit(1)
+                            }
+                            Spacer(minLength: 4)
+                            if let updated = row.updatedAt {
+                                Text(MenuBarFormatter.relative(updated))
+                            }
+                        }
+                        .appFont(.caption2)
+                        .foregroundStyle(.secondary)
                     }
                 }
             }
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
-        )
     }
-}
 
-private struct PopoverCloudAgentsCard: View {
-    let account: AccountRuntime?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Cloud agents", systemImage: "cloud")
-                .appFont(.caption, weight: .semibold)
+    @ViewBuilder
+    private var cloudBody: some View {
+        if account?.hasCloudAPIKey != true {
+            Text("Add a Cloud Agents API key in Settings → Authentication.")
+                .appFont(.caption)
                 .foregroundStyle(.secondary)
-
-            if account?.hasCloudAPIKey != true {
-                Text("Add a Cloud Agents API key in Settings → Authentication.")
-                    .appFont(.caption)
-                    .foregroundStyle(.secondary)
-            } else if let error = account?.cloudAgentsError {
-                Text(error)
-                    .appFont(.caption)
-                    .foregroundStyle(.orange)
-            } else if let agents = account?.cloudAgents, !agents.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(agents.prefix(8)) { agent in
-                        Button {
-                            if let url = agent.url {
-                                NSWorkspace.shared.open(url)
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Circle()
-                                    .fill(agent.isRunning ? Color.green : Color.secondary.opacity(0.45))
-                                    .frame(width: 7, height: 7)
-                                Text(agent.name)
-                                    .appFont(.caption, weight: .medium)
-                                    .lineLimit(1)
-                                    .foregroundStyle(.primary)
-                                Spacer(minLength: 4)
-                                Text(agent.displayStatus.lowercased())
-                                    .appFont(.caption2, weight: .semibold)
-                                    .foregroundStyle(.secondary)
-                            }
+        } else if let error = account?.cloudAgentsError {
+            Text(error)
+                .appFont(.caption)
+                .foregroundStyle(.orange)
+        } else if let agents = account?.cloudAgents, !agents.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(agents.prefix(8)) { agent in
+                    Button {
+                        if let url = agent.url {
+                            NSWorkspace.shared.open(url)
                         }
-                        .buttonStyle(.plain)
+                    } label: {
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(agent.isRunning ? Color.green : Color.secondary.opacity(0.45))
+                                .frame(width: 7, height: 7)
+                            Text(agent.name)
+                                .appFont(.caption, weight: .medium)
+                                .lineLimit(1)
+                                .foregroundStyle(.primary)
+                            Spacer(minLength: 4)
+                            Text(agent.displayStatus.lowercased())
+                                .appFont(.caption2, weight: .semibold)
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                    .buttonStyle(.plain)
                 }
-            } else {
-                Text("No active cloud agents.")
-                    .appFont(.caption)
-                    .foregroundStyle(.secondary)
             }
+        } else {
+            Text("No active cloud agents.")
+                .appFont(.caption)
+                .foregroundStyle(.secondary)
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.06), lineWidth: 1)
-        )
     }
 }
