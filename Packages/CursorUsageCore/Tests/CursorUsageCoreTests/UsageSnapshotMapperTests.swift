@@ -31,6 +31,155 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(snap.totalOutputTokens, 2_885_782)
         XCTAssertEqual(MenuBarFormatter.tokenCaption(snap.modelBreakdown[0]), "2.4M in · 1.9M out")
         XCTAssertEqual(MenuBarFormatter.compactCount(940_605), "940.6K")
+        XCTAssertEqual(snap.subscriptionStatus, "active")
+        XCTAssertFalse(snap.lastPaymentFailed)
+        XCTAssertFalse(snap.isYearlyPlan)
+        XCTAssertEqual(snap.customerBalanceCents, 0)
+        XCTAssertFalse(snap.isTeamMember)
+        XCTAssertFalse(snap.isOnStudentPlan)
+        XCTAssertFalse(snap.verifiedStudent)
+        XCTAssertFalse(snap.trialEligible)
+        XCTAssertNil(snap.pendingCancellationDate)
+        XCTAssertNil(Mirror(reflecting: stripe).children.first { $0.label == "paymentId" })
+    }
+
+    func testBillingCycleWindowMathMatchesAnniversaryCycle() throws {
+        let start = try XCTUnwrap(isoDate("2026-08-12T18:28:08.000Z"))
+        let end = try XCTUnwrap(isoDate("2026-09-12T18:28:08.000Z"))
+        let windows = BillingCycleHistory.previousWindows(start: start, end: end, count: 2)
+        XCTAssertEqual(windows.count, 2)
+        XCTAssertEqual(windows[0].end, start)
+        XCTAssertEqual(windows[0].start, try XCTUnwrap(isoDate("2026-07-12T18:28:08.000Z")))
+        XCTAssertEqual(windows[1].end, windows[0].start)
+        XCTAssertEqual(windows[1].start, try XCTUnwrap(isoDate("2026-06-11T18:28:08.000Z")))
+        for window in windows {
+            XCTAssertNotEqual(BillingCycleHistory.aggregatedDateMillis(window.start), "0")
+            XCTAssertNotEqual(BillingCycleHistory.aggregatedDateMillis(window.end), "0")
+        }
+        XCTAssertEqual(
+            BillingCycleHistory.aggregatedDateMillis(start),
+            String(Int64((start.timeIntervalSince1970 * 1000).rounded()))
+        )
+    }
+
+    func testCycleWalkStopsAfterTwoEmptyResponses() async {
+        let start = Date(timeIntervalSince1970: 1_786_550_888)
+        let end = start.addingTimeInterval(31 * 24 * 60 * 60)
+        var fetched: [(Date, Date)] = []
+        let result = await BillingCycleHistory.walkPrevious(
+            currentStart: start,
+            currentEnd: end,
+            cached: CachedCycleHistory()
+        ) { windowStart, windowEnd in
+            fetched.append((windowStart, windowEnd))
+            return .empty
+        }
+        XCTAssertEqual(fetched.count, 2)
+        XCTAssertTrue(result.reachedEnd)
+        XCTAssertTrue(result.cycles.isEmpty)
+        XCTAssertEqual(result.fetchedWindows, 2)
+        XCTAssertFalse(fetched.contains(where: { $0.0.timeIntervalSince1970 == 0 }))
+    }
+
+    func testCycleWalkKeepsSpendAndStopsOnEmptyStreak() async throws {
+        let start = try XCTUnwrap(isoDate("2026-08-12T18:28:08.000Z"))
+        let end = try XCTUnwrap(isoDate("2026-09-12T18:28:08.000Z"))
+        let prev1 = BillingCycleHistory.previousWindows(start: start, end: end, count: 1)[0]
+        let result = await BillingCycleHistory.walkPrevious(
+            currentStart: start,
+            currentEnd: end,
+            cached: CachedCycleHistory()
+        ) { windowStart, _ in
+            if abs(windowStart.timeIntervalSince(prev1.start)) < 2 {
+                return .spend(.init(start: windowStart, end: start, totalCents: 16933, modelCount: 3))
+            }
+            return .empty
+        }
+        XCTAssertEqual(result.cycles.count, 1)
+        XCTAssertEqual(result.cycles.first?.totalCents, 16933)
+        XCTAssertEqual(result.fetchedWindows, 3)
+        XCTAssertTrue(result.reachedEnd)
+    }
+
+    func testCycleWalkUsesCacheAndDoesNotRefetch() async throws {
+        let start = try XCTUnwrap(isoDate("2026-08-12T18:28:08.000Z"))
+        let end = try XCTUnwrap(isoDate("2026-09-12T18:28:08.000Z"))
+        let prev = BillingCycleHistory.previousWindows(start: start, end: end, count: 1)[0]
+        let cachedCycle = UsageSnapshot.BillingCycleSpend(
+            start: prev.start,
+            end: prev.end,
+            totalCents: 49858,
+            modelCount: 4
+        )
+        var fetched = 0
+        let result = await BillingCycleHistory.walkPrevious(
+            currentStart: start,
+            currentEnd: end,
+            cached: CachedCycleHistory(cycles: [cachedCycle], reachedEnd: true)
+        ) { _, _ in
+            fetched += 1
+            return .empty
+        }
+        XCTAssertEqual(fetched, 0)
+        XCTAssertEqual(result.cycles.count, 1)
+        XCTAssertEqual(result.cycles.first?.totalCents, 49858)
+    }
+
+    func testMergedHistoryMarksCurrentAndDropsDuplicate() {
+        let currentStart = Date(timeIntervalSince1970: 100)
+        let currentEnd = Date(timeIntervalSince1970: 200)
+        let previous = UsageSnapshot.BillingCycleSpend(
+            start: Date(timeIntervalSince1970: 0),
+            end: currentStart,
+            totalCents: 50,
+            modelCount: 1,
+            isCurrent: true
+        )
+        let current = UsageSnapshot.BillingCycleSpend(
+            start: currentStart,
+            end: currentEnd,
+            totalCents: 99,
+            modelCount: 2,
+            isCurrent: true
+        )
+        let merged = BillingCycleHistory.mergedHistory(current: current, previous: [previous])
+        XCTAssertEqual(merged.count, 2)
+        XCTAssertFalse(merged[0].isCurrent)
+        XCTAssertTrue(merged[1].isCurrent)
+        XCTAssertEqual(merged[1].totalCents, 99)
+    }
+
+    func testCycleComparisonCaption() {
+        let prev = UsageSnapshot.BillingCycleSpend(
+            start: Date(timeIntervalSince1970: 0),
+            end: Date(timeIntervalSince1970: 100),
+            totalCents: 169_33,
+            modelCount: 3
+        )
+        let current = UsageSnapshot.BillingCycleSpend(
+            start: Date(timeIntervalSince1970: 100),
+            end: Date(timeIntervalSince1970: 200),
+            totalCents: 522_01,
+            modelCount: 12,
+            isCurrent: true
+        )
+        let snap = UsageSnapshot(
+            membershipType: "ultra",
+            planDisplayName: "Ultra",
+            billingCycleStart: current.start,
+            billingCycleEnd: current.end,
+            cycleHistory: [prev, current],
+            totalModelCostCents: 522_01
+        )
+        XCTAssertEqual(snap.cycleComparisonCaption, "Last cycle $169 · this cycle $522")
+        XCTAssertFalse(snap.hasBillingAlert)
+        var failed = snap
+        failed.lastPaymentFailed = true
+        XCTAssertTrue(failed.hasBillingAlert)
+    }
+
+    private func isoDate(_ string: String) -> Date? {
+        UsageSnapshotMapper.parseDate(string)
     }
 
     func testMenuBarFormatterDetailed() {

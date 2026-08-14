@@ -54,6 +54,20 @@ struct AuthStripeResponse: Decodable, Sendable {
     var membershipType: String?
     var subscriptionStatus: String?
     var individualMembershipType: String?
+    var lastPaymentFailed: Bool?
+    var pendingCancellationDate: String?
+    var isYearlyPlan: Bool?
+    var customerBalance: Int?
+    var verifiedStudent: Bool?
+    var studentDiscountApplied: Bool?
+    var trialEligible: Bool?
+    var trialLengthDays: Int?
+    var isOnStudentPlan: Bool?
+    var trialWasCancelled: Bool?
+    var isTeamMember: Bool?
+    var teamMembershipType: String?
+    var isOnBillableAuto: Bool?
+    var paymentRecoveryAction: String?
 }
 
 struct AggregatedUsageResponse: Decodable, Sendable {
@@ -63,6 +77,17 @@ struct AggregatedUsageResponse: Decodable, Sendable {
     var totalOutputTokens: FlexibleInt?
     var totalCacheWriteTokens: FlexibleInt?
     var totalCacheReadTokens: FlexibleInt?
+
+    var isEmptySpend: Bool {
+        let models = aggregations ?? []
+        let total = totalCostCents ?? 0
+        return models.isEmpty && total <= 0
+    }
+
+    var resolvedTotalCents: Double {
+        if let totalCostCents { return totalCostCents }
+        return (aggregations ?? []).reduce(0) { $0 + ($1.totalCents ?? 0) }
+    }
 
     struct Aggregation: Decodable, Sendable {
         var modelIntent: String?

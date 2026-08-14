@@ -11,14 +11,16 @@ public actor PersonalUsageClient {
 
     private let session: URLSession
     private let baseURL = URL(string: "https://cursor.com")!
+    private let historyStore: BillingCycleHistoryStore
 
-    public init(session: URLSession = .shared) {
+    public init(session: URLSession = .shared, historyStore: BillingCycleHistoryStore = BillingCycleHistoryStore()) {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 20
         config.httpAdditionalHeaders = [
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
         ]
         self.session = session == .shared ? URLSession(configuration: config) : session
+        self.historyStore = historyStore
     }
 
     public func fetchSnapshot(sessionToken: String) async throws -> UsageSnapshot {
@@ -32,25 +34,103 @@ public actor PersonalUsageClient {
         let stripe = try? await stripeTask
 
         var aggregated: AggregatedUsageResponse?
+        var previousCycles: [UsageSnapshot.BillingCycleSpend] = []
         if let userId = me.id,
-           let start = summary.billingCycleStart,
-           let end = summary.billingCycleEnd,
-           let startMs = Self.epochMs(start),
-           let endMs = Self.epochMs(end)
+           let startISO = summary.billingCycleStart,
+           let endISO = summary.billingCycleEnd,
+           let start = UsageSnapshotMapper.parseDate(startISO),
+           let end = UsageSnapshotMapper.parseDate(endISO)
         {
-            aggregated = try? await post(
-                "/api/dashboard/get-aggregated-usage-events",
+            aggregated = try? await postAggregated(cookie: cookie, start: start, end: end, userId: userId)
+            previousCycles = await walkHistory(
                 cookie: cookie,
-                body: [
-                    "teamId": 0,
-                    "startDate": String(startMs),
-                    "endDate": String(endMs),
-                    "userId": userId,
-                ]
+                userId: userId,
+                currentStart: start,
+                currentEnd: end,
+                cached: historyStore.load(userID: userId)
             )
         }
 
-        return UsageSnapshotMapper.map(summary: summary, stripe: stripe, aggregated: aggregated)
+        let currentSpend: UsageSnapshot.BillingCycleSpend?
+        if let start = UsageSnapshotMapper.parseDate(summary.billingCycleStart),
+           let end = UsageSnapshotMapper.parseDate(summary.billingCycleEnd),
+           let aggregated,
+           let spend = BillingCycleHistory.spend(from: aggregated, start: start, end: end, isCurrent: true)
+        {
+            currentSpend = spend
+        } else if let start = UsageSnapshotMapper.parseDate(summary.billingCycleStart),
+                  let end = UsageSnapshotMapper.parseDate(summary.billingCycleEnd)
+        {
+            currentSpend = .init(
+                start: start,
+                end: end,
+                totalCents: aggregated?.resolvedTotalCents ?? 0,
+                modelCount: aggregated?.aggregations?.count ?? 0,
+                isCurrent: true
+            )
+        } else {
+            currentSpend = nil
+        }
+
+        let history = BillingCycleHistory.mergedHistory(current: currentSpend, previous: previousCycles)
+        return UsageSnapshotMapper.map(
+            summary: summary,
+            stripe: stripe,
+            aggregated: aggregated,
+            cycleHistory: history
+        )
+    }
+
+    private func walkHistory(
+        cookie: String,
+        userId: Int,
+        currentStart: Date,
+        currentEnd: Date,
+        cached: CachedCycleHistory
+    ) async -> [UsageSnapshot.BillingCycleSpend] {
+        let result = await BillingCycleHistory.walkPrevious(
+            currentStart: currentStart,
+            currentEnd: currentEnd,
+            cached: cached
+        ) { start, end in
+            do {
+                let response = try await postAggregated(
+                    cookie: cookie,
+                    start: start,
+                    end: end,
+                    userId: userId
+                )
+                if let spend = BillingCycleHistory.spend(from: response, start: start, end: end) {
+                    return .spend(spend)
+                }
+                return .empty
+            } catch {
+                return .failed
+            }
+        }
+        historyStore.save(
+            userID: userId,
+            CachedCycleHistory(cycles: result.cycles, reachedEnd: result.reachedEnd)
+        )
+        return result.cycles
+    }
+
+    private func postAggregated(
+        cookie: String,
+        start: Date,
+        end: Date,
+        userId: Int
+    ) async throws -> AggregatedUsageResponse {
+        try await post(
+            "/api/dashboard/get-aggregated-usage-events",
+            cookie: cookie,
+            body: [
+                "teamId": 0,
+                "startDate": BillingCycleHistory.aggregatedDateMillis(start),
+                "endDate": BillingCycleHistory.aggregatedDateMillis(end),
+                "userId": userId,
+            ]
+        )
     }
 
     public func validate(sessionToken: String) async throws -> AuthMeResponse {
@@ -91,10 +171,5 @@ public actor PersonalUsageClient {
         } catch {
             throw PersonalAPIError.decodingFailed
         }
-    }
-
-    private static func epochMs(_ iso: String) -> Int64? {
-        guard let date = UsageSnapshotMapper.parseDate(iso) else { return nil }
-        return Int64(date.timeIntervalSince1970 * 1000)
     }
 }

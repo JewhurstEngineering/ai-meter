@@ -6,9 +6,21 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
     public var membershipType: String
     public var planDisplayName: String
     public var subscriptionStatus: String?
+    public var lastPaymentFailed: Bool
+    public var pendingCancellationDate: Date?
+    public var isYearlyPlan: Bool
+    public var customerBalanceCents: Int?
+    public var isOnStudentPlan: Bool
+    public var studentDiscountApplied: Bool
+    public var verifiedStudent: Bool
+    public var trialEligible: Bool
+    public var trialWasCancelled: Bool
+    public var isTeamMember: Bool
 
     public var billingCycleStart: Date?
     public var billingCycleEnd: Date?
+    /// Completed + current cycle model spend, oldest first. Current cycle is last when present.
+    public var cycleHistory: [BillingCycleSpend]
 
     /// Cursor Models (dashboard "auto" / first-party pool).
     public var cursorModelsPercentUsed: Double?
@@ -36,6 +48,27 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
     public var totalCacheReadTokens: Int?
 
     public var displayMessages: DisplayMessages
+
+    public struct BillingCycleSpend: Codable, Sendable, Equatable, Identifiable {
+        public var id: Date { start }
+        public var start: Date
+        public var end: Date
+        public var totalCents: Double
+        public var modelCount: Int
+        public var isCurrent: Bool
+
+        public init(start: Date, end: Date, totalCents: Double, modelCount: Int, isCurrent: Bool = false) {
+            self.start = start
+            self.end = end
+            self.totalCents = totalCents
+            self.modelCount = modelCount
+            self.isCurrent = isCurrent
+        }
+
+        public var shortLabel: String {
+            start.formatted(.dateTime.month(.abbreviated).year(.twoDigits))
+        }
+    }
 
     public struct DisplayMessages: Codable, Sendable, Equatable {
         public var cursorModels: String?
@@ -81,8 +114,19 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         membershipType: String,
         planDisplayName: String,
         subscriptionStatus: String? = nil,
+        lastPaymentFailed: Bool = false,
+        pendingCancellationDate: Date? = nil,
+        isYearlyPlan: Bool = false,
+        customerBalanceCents: Int? = nil,
+        isOnStudentPlan: Bool = false,
+        studentDiscountApplied: Bool = false,
+        verifiedStudent: Bool = false,
+        trialEligible: Bool = false,
+        trialWasCancelled: Bool = false,
+        isTeamMember: Bool = false,
         billingCycleStart: Date? = nil,
         billingCycleEnd: Date? = nil,
+        cycleHistory: [BillingCycleSpend] = [],
         cursorModelsPercentUsed: Double? = nil,
         otherModelsPercentUsed: Double? = nil,
         totalPercentUsed: Double? = nil,
@@ -106,8 +150,19 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         self.membershipType = membershipType
         self.planDisplayName = planDisplayName
         self.subscriptionStatus = subscriptionStatus
+        self.lastPaymentFailed = lastPaymentFailed
+        self.pendingCancellationDate = pendingCancellationDate
+        self.isYearlyPlan = isYearlyPlan
+        self.customerBalanceCents = customerBalanceCents
+        self.isOnStudentPlan = isOnStudentPlan
+        self.studentDiscountApplied = studentDiscountApplied
+        self.verifiedStudent = verifiedStudent
+        self.trialEligible = trialEligible
+        self.trialWasCancelled = trialWasCancelled
+        self.isTeamMember = isTeamMember
         self.billingCycleStart = billingCycleStart
         self.billingCycleEnd = billingCycleEnd
+        self.cycleHistory = cycleHistory
         self.cursorModelsPercentUsed = cursorModelsPercentUsed
         self.otherModelsPercentUsed = otherModelsPercentUsed
         self.totalPercentUsed = totalPercentUsed
@@ -126,6 +181,30 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         self.totalCacheWriteTokens = totalCacheWriteTokens
         self.totalCacheReadTokens = totalCacheReadTokens
         self.displayMessages = displayMessages
+    }
+
+    private static func cycleUSD(_ cents: Double) -> String {
+        String(format: "$%.0f", (cents / 100).rounded())
+    }
+
+    public var previousCycle: BillingCycleSpend? {
+        cycleHistory.filter { !$0.isCurrent }.sorted { $0.start < $1.start }.last
+    }
+
+    public var currentCycleSpend: BillingCycleSpend? {
+        cycleHistory.first(where: \.isCurrent) ?? cycleHistory.sorted { $0.start < $1.start }.last
+    }
+
+    public var cycleComparisonCaption: String? {
+        guard let previous = previousCycle else { return nil }
+        let currentCents = currentCycleSpend?.totalCents ?? totalModelCostCents
+        guard let currentCents else { return nil }
+        return "Last cycle \(Self.cycleUSD(previous.totalCents)) · this cycle \(Self.cycleUSD(currentCents))"
+    }
+
+    /// True when Stripe reported a problem worth showing (failed payment or pending cancel).
+    public var hasBillingAlert: Bool {
+        lastPaymentFailed || pendingCancellationDate != nil
     }
 
     public var daysRemainingInCycle: Int? {

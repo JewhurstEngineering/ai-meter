@@ -22,6 +22,7 @@ public enum UsageSnapshotMapper {
         summary: UsageSummaryResponse,
         stripe: AuthStripeResponse?,
         aggregated: AggregatedUsageResponse?,
+        cycleHistory: [UsageSnapshot.BillingCycleSpend] = [],
         fetchedAt: Date = .now
     ) -> UsageSnapshot {
         let membership = summary.membershipType
@@ -56,8 +57,19 @@ public enum UsageSnapshotMapper {
             membershipType: membership,
             planDisplayName: tier.displayName,
             subscriptionStatus: stripe?.subscriptionStatus,
+            lastPaymentFailed: stripe?.lastPaymentFailed ?? false,
+            pendingCancellationDate: parseDate(stripe?.pendingCancellationDate),
+            isYearlyPlan: stripe?.isYearlyPlan ?? false,
+            customerBalanceCents: stripe?.customerBalance,
+            isOnStudentPlan: stripe?.isOnStudentPlan ?? false,
+            studentDiscountApplied: stripe?.studentDiscountApplied ?? false,
+            verifiedStudent: stripe?.verifiedStudent ?? false,
+            trialEligible: stripe?.trialEligible ?? false,
+            trialWasCancelled: stripe?.trialWasCancelled ?? false,
+            isTeamMember: stripe?.isTeamMember ?? false,
             billingCycleStart: parseDate(summary.billingCycleStart),
             billingCycleEnd: parseDate(summary.billingCycleEnd),
+            cycleHistory: cycleHistory,
             cursorModelsPercentUsed: cursorPct,
             otherModelsPercentUsed: otherPct,
             totalPercentUsed: plan?.totalPercentUsed,
