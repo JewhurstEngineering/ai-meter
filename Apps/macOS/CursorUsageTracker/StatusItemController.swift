@@ -23,6 +23,7 @@ final class StatusItemController: NSObject {
     private var cancellables = Set<AnyCancellable>()
     private var eventMonitor: Any?
     private var lastLayoutSignature = ""
+    private var idealHeights: [SlotKey: CGFloat] = [:]
 
     private var popoverWidth: CGFloat {
         store?.preferences.interfaceSize.popoverWidth ?? 360
@@ -31,19 +32,49 @@ final class StatusItemController: NSObject {
     private func syncPopoverSize(_ popover: NSPopover?, hosting: NSHostingController<AnyView>?) {
         guard let hosting else { return }
         let width = popoverWidth
-        hosting.sizingOptions = [.intrinsicContentSize]
-        hosting.view.layoutSubtreeIfNeeded()
-        let fitted = hosting.sizeThatFits(
-            in: CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)
-        )
         let screenCap = (NSScreen.main?.visibleFrame.height ?? 900) * 0.72
-        let height = min(max(fitted.height.rounded(.up), 160), screenCap)
-        if fitted.height > screenCap {
-            // Bound the hosting view so the SwiftUI ScrollView actually scrolls
-            // instead of overflowing the screen (which clips the header).
-            hosting.sizingOptions = []
+        let key = slots.first { $0.value.hosting === hosting }?.key
+        let fitted: CGFloat
+        if let key, let measured = idealHeights[key], measured > 1 {
+            fitted = measured
+        } else {
+            hosting.sizingOptions = [.intrinsicContentSize]
+            hosting.view.layoutSubtreeIfNeeded()
+            fitted = hosting.sizeThatFits(
+                in: CGSize(width: width, height: screenCap)
+            ).height
         }
-        let size = NSSize(width: width, height: height)
+        applyPopoverContentSize(popover, hosting: hosting, height: fitted, screenCap: screenCap, width: width)
+    }
+
+    private func applyMeasuredPopoverHeight(_ height: CGFloat, accountID: UUID?) {
+        let key: SlotKey = accountID.map { .account($0) } ?? .single
+        idealHeights[key] = height
+        guard let slot = slots[key] else { return }
+        let screenCap = (NSScreen.main?.visibleFrame.height ?? 900) * 0.72
+        applyPopoverContentSize(
+            slot.popover,
+            hosting: slot.hosting,
+            height: height,
+            screenCap: screenCap,
+            width: popoverWidth
+        )
+    }
+
+    private func applyPopoverContentSize(
+        _ popover: NSPopover?,
+        hosting: NSHostingController<AnyView>,
+        height: CGFloat,
+        screenCap: CGFloat,
+        width: CGFloat
+    ) {
+        let capped = min(max(height.rounded(.up), 1), screenCap)
+        let size = NSSize(width: width, height: capped)
+        if abs((popover?.contentSize.height ?? 0) - capped) < 0.5,
+           abs((popover?.contentSize.width ?? 0) - width) < 0.5 {
+            return
+        }
+        hosting.sizingOptions = height > screenCap + 0.5 ? [] : [.intrinsicContentSize]
         hosting.preferredContentSize = size
         popover?.contentSize = size
     }
@@ -159,8 +190,13 @@ final class StatusItemController: NSObject {
 
         let hosting = NSHostingController(
             rootView: AnyView(
-                MenuBarPopoverView(focusedAccountID: accountID)
-                    .environmentObject(store)
+                MenuBarPopoverView(
+                    focusedAccountID: accountID,
+                    onIdealHeight: { [weak self] height in
+                        self?.applyMeasuredPopoverHeight(height, accountID: accountID)
+                    }
+                )
+                .environmentObject(store)
             )
         )
         hosting.sizingOptions = [.intrinsicContentSize]

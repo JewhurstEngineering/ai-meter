@@ -7,10 +7,18 @@ struct MenuBarPopoverView: View {
     @Environment(\.appTheme) private var theme
     /// When set (separate menu bar items), lock this popover to one account — no tabs.
     var focusedAccountID: UUID? = nil
+    var onIdealHeight: ((CGFloat) -> Void)? = nil
     @State private var selectedTab: UUID?
+    @State private var bodyHeight: CGFloat = 0
+    @State private var topChromeHeight: CGFloat = 70
+    @State private var bottomChromeHeight: CGFloat = 44
 
     private var popoverMaxHeight: CGFloat {
         (NSScreen.main?.visibleFrame.height ?? 800) * 0.72
+    }
+
+    private var maxBodyHeight: CGFloat {
+        max(80, popoverMaxHeight - topChromeHeight - bottomChromeHeight)
     }
 
     private var displayed: AccountRuntime? {
@@ -31,54 +39,74 @@ struct MenuBarPopoverView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            if showAccountTabs {
-                accountTabs
-                    .padding(.horizontal, 14)
-                    .padding(.top, 10)
-                    .padding(.bottom, 4)
-            }
-
-            header
-                .padding(.horizontal, 14)
-                .padding(.top, showAccountTabs ? 4 : 12)
-                .padding(.bottom, 8)
-                .fixedSize(horizontal: false, vertical: true)
-
-            Divider()
-
-            ScrollView(.vertical, showsIndicators: true) {
-                Group {
-                    if displayed?.isAuthenticated != true {
-                        signInPrompt
-                    } else if let snapshot = displayed?.snapshot {
-                        usageBody(snapshot)
-                    } else if displayed?.isRefreshing == true || store.isRefreshing {
-                        ProgressView("Loading usage…")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.vertical, 28)
-                    } else {
-                        Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
-                            .foregroundStyle(.secondary)
-                            .padding(14)
-                    }
+            VStack(alignment: .leading, spacing: 0) {
+                if showAccountTabs {
+                    accountTabs
+                        .padding(.horizontal, 14)
+                        .padding(.top, 10)
+                        .padding(.bottom, 4)
                 }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
+
+                header
+                    .padding(.horizontal, 14)
+                    .padding(.top, showAccountTabs ? 4 : 12)
+                    .padding(.bottom, 8)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Divider()
             }
-            .frame(maxHeight: .infinity)
+            .background {
+                GeometryReader { geo in
+                    Color.clear.preference(key: PopoverTopChromeHeightKey.self, value: geo.size.height)
+                }
+            }
 
-            Divider()
+            ScrollView(.vertical, showsIndicators: bodyHeight > maxBodyHeight + 1) {
+                popoverBody
+                    .background {
+                        GeometryReader { geo in
+                            Color.clear.preference(key: PopoverBodyHeightKey.self, value: geo.size.height)
+                        }
+                    }
+            }
+            .frame(height: min(max(bodyHeight, 1), maxBodyHeight), alignment: .top)
+            .scrollBounceBehavior(.basedOnSize)
 
-            footer
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 0) {
+                Divider()
+                footer
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .background {
+                GeometryReader { geo in
+                    Color.clear.preference(key: PopoverBottomChromeHeightKey.self, value: geo.size.height)
+                }
+            }
         }
         .frame(width: store.preferences.interfaceSize.popoverWidth)
-        .frame(maxHeight: popoverMaxHeight)
+        .fixedSize(horizontal: false, vertical: true)
         .background(Color(nsColor: .windowBackgroundColor))
         .appThemed(store.preferences)
+        .onPreferenceChange(PopoverBodyHeightKey.self) { newValue in
+            if abs(newValue - bodyHeight) > 0.5 { bodyHeight = newValue }
+        }
+        .onPreferenceChange(PopoverTopChromeHeightKey.self) { newValue in
+            if abs(newValue - topChromeHeight) > 0.5 { topChromeHeight = newValue }
+        }
+        .onPreferenceChange(PopoverBottomChromeHeightKey.self) { newValue in
+            if abs(newValue - bottomChromeHeight) > 0.5 { bottomChromeHeight = newValue }
+        }
+        .background {
+            GeometryReader { geo in
+                Color.clear.preference(key: PopoverTotalHeightKey.self, value: geo.size.height)
+            }
+        }
+        .onPreferenceChange(PopoverTotalHeightKey.self) { newValue in
+            guard newValue > 1 else { return }
+            onIdealHeight?(newValue)
+        }
         .onAppear {
             selectedTab = focusedAccountID ?? store.activeAccountID
             store.refreshLocalActivity()
@@ -88,6 +116,29 @@ struct MenuBarPopoverView: View {
                 selectedTab = newValue
             }
         }
+    }
+
+    @ViewBuilder
+    private var popoverBody: some View {
+        Group {
+            if displayed?.isAuthenticated != true {
+                signInPrompt
+            } else if let snapshot = displayed?.snapshot {
+                usageBody(snapshot)
+            } else if displayed?.isRefreshing == true || store.isRefreshing {
+                ProgressView("Loading usage…")
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 28)
+            } else {
+                Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
+                    .foregroundStyle(.secondary)
+                    .padding(14)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var accountTabs: some View {
@@ -724,4 +775,24 @@ private struct PopoverAgentsCard: View {
                 .foregroundStyle(.secondary)
         }
     }
+}
+
+private struct PopoverBodyHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+private struct PopoverTopChromeHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+private struct PopoverBottomChromeHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
+}
+
+private struct PopoverTotalHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }
