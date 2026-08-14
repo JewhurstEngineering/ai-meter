@@ -43,11 +43,11 @@ public enum MenuBarFormatter {
         preferences: DisplayPreferences,
         authenticated: Bool
     ) -> MenuBarPresentation {
-        guard authenticated else {
-            return .init(segments: [.init(systemImage: "person.crop.circle.badge.questionmark", text: "Sign in")], showWarningDot: false)
-        }
         guard let snapshot else {
-            return .init(segments: [.init(text: "…")], showWarningDot: false)
+            if authenticated {
+                return .init(segments: [.init(text: "…")], showWarningDot: false)
+            }
+            return .init(segments: [.init(systemImage: "person.crop.circle.badge.questionmark", text: "Sign in")], showWarningDot: false)
         }
 
         var segments = metricSegments(snapshot: snapshot, preferences: preferences)
@@ -66,7 +66,7 @@ public enum MenuBarFormatter {
         entries: [(label: String, snapshot: UsageSnapshot?, authenticated: Bool)],
         preferences: DisplayPreferences
     ) -> MenuBarPresentation {
-        if entries.isEmpty || entries.allSatisfy({ !$0.authenticated }) {
+        if entries.isEmpty || entries.allSatisfy({ !$0.authenticated && $0.snapshot == nil }) {
             return .init(
                 segments: [.init(systemImage: "person.crop.circle.badge.questionmark", text: "Sign in")],
                 showWarningDot: false
@@ -77,7 +77,7 @@ public enum MenuBarFormatter {
         var hits: [UsageSnapshot.MenuBarWarningHit] = []
 
         for entry in entries {
-            if !entry.authenticated {
+            if !entry.authenticated, entry.snapshot == nil {
                 segments.append(.init(text: "\(entry.label) Sign in"))
                 continue
             }
@@ -103,6 +103,9 @@ public enum MenuBarFormatter {
         if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
             return "\(usd(used))/\(usd(limit))"
         }
+        if toggles.burnRateEstimate, let pace = snapshot.pace() {
+            return pace.menuBarText
+        }
         return snapshot.planDisplayName
     }
 
@@ -121,6 +124,8 @@ public enum MenuBarFormatter {
                 segments.append(segment(style: style, kind: .total, text: pct(p)))
             } else if toggles.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
                 segments.append(segment(style: style, kind: .spend, text: "\(usd(used))/\(usd(limit))"))
+            } else if toggles.burnRateEstimate, let pace = snapshot.pace() {
+                segments.append(segment(style: style, kind: .pace, text: pace.menuBarText))
             }
         case .detailed:
             if toggles.cursorModelsPercent, let p = snapshot.cursorModelsPercentUsed {
@@ -157,12 +162,15 @@ public enum MenuBarFormatter {
             if toggles.daysRemaining, let days = snapshot.daysRemainingInCycle {
                 segments.append(segment(style: style, kind: .days, text: "\(days)d"))
             }
+            if toggles.burnRateEstimate, let pace = snapshot.pace() {
+                segments.append(segment(style: style, kind: .pace, text: labeled(style, kind: .pace, value: pace.menuBarText)))
+            }
         }
         return segments
     }
 
     private enum Kind {
-        case cursorModels, otherModels, total, spend, bonus, onDemand, days
+        case cursorModels, otherModels, total, spend, bonus, onDemand, days, pace
     }
 
     private static func pct(_ value: Double) -> String {
@@ -180,6 +188,7 @@ public enum MenuBarFormatter {
             case .otherModels: return "Other \(value)"
             case .total: return "Total \(value)"
             case .onDemand: return "On-demand \(value)"
+            case .pace: return "Pace \(value)"
             case .spend, .bonus, .days: return value
             }
         }
@@ -195,6 +204,7 @@ public enum MenuBarFormatter {
         case (.icons, .bonus): icon = "gift"
         case (.icons, .onDemand): icon = "creditcard"
         case (.icons, .days): icon = "calendar"
+        case (.icons, .pace): icon = "speedometer"
         case (.shortWords, _): icon = nil
         }
         return .init(systemImage: icon, text: text)

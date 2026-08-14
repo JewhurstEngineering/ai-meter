@@ -12,6 +12,8 @@ struct MenuBarPopoverView: View {
     @State private var bodyHeight: CGFloat = 0
     @State private var topChromeHeight: CGFloat = 70
     @State private var bottomChromeHeight: CGFloat = 44
+    @State private var showReauth = false
+    @AppStorage(AppInstall.bannerDismissedKey) private var installBannerDismissed = false
 
     private var popoverMaxHeight: CGFloat {
         (NSScreen.main?.visibleFrame.height ?? 800) * 0.72
@@ -55,6 +57,7 @@ struct MenuBarPopoverView: View {
 
                 Divider()
             }
+            .layoutPriority(1)
             .background {
                 GeometryReader { geo in
                     Color.clear.preference(key: PopoverTopChromeHeightKey.self, value: geo.size.height)
@@ -79,6 +82,7 @@ struct MenuBarPopoverView: View {
                     .padding(.vertical, 10)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            .layoutPriority(1)
             .background {
                 GeometryReader { geo in
                     Color.clear.preference(key: PopoverBottomChromeHeightKey.self, value: geo.size.height)
@@ -91,21 +95,15 @@ struct MenuBarPopoverView: View {
         .appThemed(store.preferences)
         .onPreferenceChange(PopoverBodyHeightKey.self) { newValue in
             if abs(newValue - bodyHeight) > 0.5 { bodyHeight = newValue }
+            reportIdealHeight(body: newValue, top: topChromeHeight, bottom: bottomChromeHeight)
         }
         .onPreferenceChange(PopoverTopChromeHeightKey.self) { newValue in
             if abs(newValue - topChromeHeight) > 0.5 { topChromeHeight = newValue }
+            reportIdealHeight(body: bodyHeight, top: newValue, bottom: bottomChromeHeight)
         }
         .onPreferenceChange(PopoverBottomChromeHeightKey.self) { newValue in
             if abs(newValue - bottomChromeHeight) > 0.5 { bottomChromeHeight = newValue }
-        }
-        .background {
-            GeometryReader { geo in
-                Color.clear.preference(key: PopoverTotalHeightKey.self, value: geo.size.height)
-            }
-        }
-        .onPreferenceChange(PopoverTotalHeightKey.self) { newValue in
-            guard newValue > 1 else { return }
-            onIdealHeight?(newValue)
+            reportIdealHeight(body: bodyHeight, top: topChromeHeight, bottom: newValue)
         }
         .onAppear {
             selectedTab = focusedAccountID ?? store.activeAccountID
@@ -116,29 +114,124 @@ struct MenuBarPopoverView: View {
                 selectedTab = newValue
             }
         }
+        .sheet(isPresented: $showReauth) {
+            reauthSheet
+        }
+    }
+
+    private func reportIdealHeight(body: CGFloat, top: CGFloat, bottom: CGFloat) {
+        let scroll = min(max(body, 1), max(80, popoverMaxHeight - top - bottom))
+        let total = top + scroll + bottom
+        guard total > 1 else { return }
+        onIdealHeight?(total)
     }
 
     @ViewBuilder
     private var popoverBody: some View {
-        Group {
-            if displayed?.isAuthenticated != true {
-                signInPrompt
-            } else if let snapshot = displayed?.snapshot {
+        VStack(alignment: .leading, spacing: 12) {
+            if !AppInstall.isRunningFromApplications, !installBannerDismissed {
+                installBanner
+            }
+            if displayed != nil, displayed?.isAuthenticated != true, !store.connections.isEmpty {
+                sessionExpiredBanner
+            }
+            if let snapshot = displayed?.snapshot {
                 usageBody(snapshot)
             } else if displayed?.isRefreshing == true || store.isRefreshing {
                 ProgressView("Loading usage…")
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 28)
+            } else if store.connections.isEmpty {
+                signInPrompt
             } else {
                 Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
                     .foregroundStyle(.secondary)
-                    .padding(14)
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var sessionExpiredBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(
+                displayed?.lastError ?? "Session expired — sign in again.",
+                systemImage: "exclamationmark.triangle.fill"
+            )
+            .appFont(.caption, weight: .semibold)
+            .foregroundStyle(.orange)
+            .fixedSize(horizontal: false, vertical: true)
+            Button {
+                showReauth = true
+            } label: {
+                Label("Sign in again", systemImage: "arrow.triangle.2.circlepath")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.orange.opacity(0.12))
+        )
+    }
+
+    private var installBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Desktop widgets need this app in Applications.", systemImage: "rectangle.on.rectangle")
+                .appFont(.caption, weight: .semibold)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 8) {
+                Button {
+                    do {
+                        _ = try AppInstall.copyRunningAppToApplications()
+                    } catch {
+                        // Keep the banner; About has the same installer with an error line.
+                    }
+                } label: {
+                    Label("Install to Applications", systemImage: "square.and.arrow.down")
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+                Button("Not now") {
+                    installBannerDismissed = true
+                }
+                .controlSize(.small)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+    }
+
+    private var reauthSheet: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Text("Sign in again")
+                    .font(.headline)
+                Spacer()
+                Button("Cancel") { showReauth = false }
+                    .keyboardShortcut(.cancelAction)
+            }
+            .padding()
+            Divider()
+            LoginWebView { token in
+                showReauth = false
+                let replacing = displayed?.id ?? store.activeAccountID
+                Task {
+                    try? await store.saveSessionToken(token, replacing: replacing)
+                }
+            } onCancel: {
+                showReauth = false
+            }
+        }
+        .frame(width: 720, height: 640)
     }
 
     private var accountTabs: some View {
@@ -238,13 +331,12 @@ struct MenuBarPopoverView: View {
 
     @ViewBuilder
     private func alertList(_ hits: [UsageSnapshot.MenuBarWarningHit]) -> some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 8) {
             ForEach(hits) { hit in
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     Circle()
                         .fill(theme.danger)
                         .frame(width: 7, height: 7)
-                        .padding(.top, 3)
                     Button {
                         AppActivation.openSettingsViaLinkFallback()
                     } label: {
@@ -263,23 +355,32 @@ struct MenuBarPopoverView: View {
                         Image(systemName: "xmark")
                             .appFont(.caption2, weight: .bold)
                             .foregroundStyle(.secondary)
+                            .frame(width: 20, height: 20)
                     }
                     .buttonStyle(.plain)
                     .help("Hide \(hit.channel.title) until it drops back under \(hit.threshold).")
                 }
             }
 
-            HStack {
-                Spacer()
-                Button("Clear") {
-                    store.snoozeAllMenuBarWarnings()
+            if hits.count > 1 {
+                HStack {
+                    Spacer()
+                    Button("Clear all") {
+                        store.snoozeAllMenuBarWarnings()
+                    }
+                    .appFont(.caption2, weight: .semibold)
+                    .foregroundStyle(.secondary)
+                    .buttonStyle(.plain)
+                    .help("Hide until usage drops back under the alert. Does not change the threshold.")
                 }
-                .appFont(.caption2, weight: .semibold)
-                .foregroundStyle(.secondary)
-                .buttonStyle(.plain)
-                .help("Hide until usage drops back under the alert. Does not change the threshold.")
             }
         }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(theme.danger.opacity(0.12))
+        )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Usage alarms")
         .accessibilityValue(hits.map(\.sentence).joined(separator: ". "))
@@ -327,7 +428,7 @@ struct MenuBarPopoverView: View {
                 }
             }
 
-            if t.planSpend || t.bonus || t.onDemand || t.daysRemaining {
+            if t.planSpend || t.bonus || t.onDemand || t.daysRemaining || t.burnRateEstimate {
                 VStack(alignment: .leading, spacing: 8) {
                     if t.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
                         Label {
@@ -397,6 +498,11 @@ struct MenuBarPopoverView: View {
                         .appFont(.caption)
                         .foregroundStyle(.secondary)
                     }
+                    if t.burnRateEstimate, let pace = snapshot.pace() {
+                        Label(pace.caption, systemImage: "speedometer")
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -410,7 +516,19 @@ struct MenuBarPopoverView: View {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
-            if let caption = snapshot.cycleComparisonCaption {
+            if t.cycleChart, !snapshot.cycleHistory.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Spend by cycle")
+                        .appFont(.caption, weight: .semibold)
+                        .foregroundStyle(.secondary)
+                    CycleSpendChart(cycles: snapshot.cycleHistory, height: 88)
+                    if let caption = snapshot.cycleComparisonCaption {
+                        Text(caption)
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else if let caption = snapshot.cycleComparisonCaption {
                 Text(caption)
                     .appFont(.caption)
                     .foregroundStyle(.secondary)
@@ -439,29 +557,35 @@ struct MenuBarPopoverView: View {
     }
 
     private var footer: some View {
-        HStack {
-            SettingsOpenLink {
-                Label("Settings", systemImage: "gearshape")
+        VStack(spacing: 6) {
+            HStack {
+                SettingsOpenLink {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                .keyboardShortcut(",", modifiers: .command)
+                if let snapshot = displayed?.snapshot {
+                    Button {
+                        UsageExportPanel.present(snapshot: snapshot)
+                    } label: {
+                        Label("Export", systemImage: "square.and.arrow.up")
+                    }
+                }
+                Spacer(minLength: 8)
+                Button {
+                    NSApplication.shared.terminate(nil)
+                } label: {
+                    Label("Quit", systemImage: "xmark.circle")
+                }
+                .keyboardShortcut("q", modifiers: .command)
             }
-            .keyboardShortcut(",", modifiers: .command)
-            Spacer(minLength: 8)
-            Button {
-                NSApplication.shared.terminate(nil)
-            } label: {
-                Label("Quit", systemImage: "xmark.circle")
-            }
-            .keyboardShortcut("q", modifiers: .command)
-        }
-        .overlay {
-            Text("Made by \(AppAbout.copyrightHolder)")
+            .labelStyle(.titleAndIcon)
+            .controlSize(.small)
+
+            Text((AppAbout.organization))
                 .appFont(.caption2)
                 .foregroundStyle(.tertiary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-                .allowsHitTesting(false)
+                .frame(maxWidth: .infinity)
         }
-        .labelStyle(.titleAndIcon)
-        .controlSize(.small)
     }
 }
 
@@ -794,11 +918,6 @@ private struct PopoverTopChromeHeightKey: PreferenceKey {
 }
 
 private struct PopoverBottomChromeHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
-}
-
-private struct PopoverTotalHeightKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
 }

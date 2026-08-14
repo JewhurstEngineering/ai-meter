@@ -24,6 +24,8 @@ Cursor Usage Tracker signs in with your personal Cursor session, pulls the same 
 | **Subscription $** | Plan spend vs included limit (USD), plus bonus credits |
 | **On-demand** | Enabled/disabled, billable usage, cap or unlimited |
 | **Models this period** | Per-model spend and tokens for the billing cycle |
+| **Spend by cycle** | This cycle vs previous billing windows |
+| **Pace** | Linear projection of cycle-end spend |
 | **Days left** | Remaining days in the current billing window |
 
 On Mac it can also show **Agents** — This Mac (editor), CLI (`cursor-agent`), and cloud runs (when you save a Cursor Cloud Agents API key).

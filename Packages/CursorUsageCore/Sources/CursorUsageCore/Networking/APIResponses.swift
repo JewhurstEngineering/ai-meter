@@ -27,6 +27,7 @@ struct UsageSummaryResponse: Decodable, Sendable {
         var cursorModelsPercentUsed: Double?
         var firstPartyPercentUsed: Double?
         var apiModelsPercentUsed: Double?
+        var otherModelsPercentUsed: Double?
     }
 
     struct Breakdown: Decodable, Sendable {

@@ -189,6 +189,8 @@ struct PhoneLayoutSettings: View {
                 Toggle("Bonus", isOn: popoverBinding(\.bonus))
                 Toggle("On-demand", isOn: popoverBinding(\.onDemand))
                 Toggle("Days remaining", isOn: popoverBinding(\.daysRemaining))
+                Toggle("Burn-rate pace", isOn: popoverBinding(\.burnRateEstimate))
+                Toggle("Spend by cycle", isOn: popoverBinding(\.cycleChart))
                 Toggle("Models this period", isOn: popoverBinding(\.modelsThisPeriod))
                 Toggle("Cloud", isOn: popoverBinding(\.cloudAgents))
             } header: {
@@ -437,8 +439,13 @@ struct PhoneIncludedSettings: View {
                     if let days = snapshot.daysRemainingInCycle {
                         LabeledContent("Remaining", value: "\(days)d")
                     }
+                    if let pace = snapshot.pace() {
+                        Text(pace.caption)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                if snapshot.cycleHistory.count >= 2 {
+                if !snapshot.cycleHistory.isEmpty {
                     Section("Spend by cycle") {
                         CycleSpendChart(cycles: snapshot.cycleHistory, height: 140)
                         if let caption = snapshot.cycleComparisonCaption {
@@ -496,6 +503,15 @@ struct PhoneIncludedSettings: View {
                             }
                         }
                     }
+                }
+                Section {
+                    if let url = try? UsageExport.writeTemporaryCSV(snapshot) {
+                        ShareLink(item: url) {
+                            Label("Export CSV", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                } footer: {
+                    Text("Exports the numbers this app already shows. No tokens or keys.")
                 }
             }
         } else {
@@ -578,7 +594,7 @@ struct PhonePaidSettings: View {
                     Link(destination: AppAbout.dashboardURL) {
                         Label("Cursor dashboard", systemImage: "globe")
                     }
-                    Link(destination: AppAbout.dashboardURL) {
+                    Link(destination: AppAbout.billingURL) {
                         Label("Billing & invoices", systemImage: "doc.text")
                     }
                 }

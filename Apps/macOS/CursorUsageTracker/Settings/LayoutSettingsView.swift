@@ -138,7 +138,13 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
             MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: binding(\.daysRemaining))
+            MetricToggleRow(title: "Burn-rate pace", systemImage: "speedometer", isOn: binding(\.burnRateEstimate))
             if includeModelsThisPeriod {
+                MetricToggleRow(
+                    title: "Spend by cycle",
+                    systemImage: "chart.bar",
+                    isOn: binding(\.cycleChart)
+                )
                 MetricToggleRow(
                     title: "Models this period",
                     systemImage: "list.bullet.rectangle",
@@ -382,6 +388,18 @@ private struct PopoverPreviewCard: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+                if t.burnRateEstimate {
+                    Label(snapshot?.pace()?.caption ?? "On track · on pace for $20", systemImage: "speedometer")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                if t.cycleChart {
+                    Divider()
+                    Label("Spend by cycle", systemImage: "chart.bar")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
 
                 if t.modelsThisPeriod {
                     Divider()
@@ -435,7 +453,8 @@ private struct PopoverPreviewCard: View {
                 }
 
                 if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent
-                    && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining && !t.modelsThisPeriod
+                    && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining && !t.burnRateEstimate
+                    && !t.modelsThisPeriod && !t.cycleChart
                     && !t.thisMacActivity && !t.localRecentChats && !t.cloudAgents
                 {
                     Text("Enable a Popover metric above to preview it.")

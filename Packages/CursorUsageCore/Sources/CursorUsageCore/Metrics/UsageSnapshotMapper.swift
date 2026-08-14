@@ -38,6 +38,7 @@ public enum UsageSnapshotMapper {
             ?? plan?.firstPartyPercentUsed
         let otherPct = plan?.apiPercentUsed
             ?? plan?.apiModelsPercentUsed
+            ?? plan?.otherModelsPercentUsed
 
         let models: [UsageSnapshot.ModelCost] = (aggregated?.aggregations ?? []).compactMap { row in
             guard let name = row.modelIntent, let cents = row.totalCents else { return nil }

@@ -416,6 +416,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var burnRateEstimate: Bool
         /// Popover-only: per-model spend for the billing period.
         public var modelsThisPeriod: Bool
+        /// Popover / iOS Overview: spend-by-cycle bar chart.
+        public var cycleChart: Bool
         /// Popover-only (Mac): editor windows in the Agents → This Mac group.
         public var thisMacActivity: Bool
         /// Popover-only (Mac): recent chats under Agents → This Mac and Agents → CLI.
@@ -433,6 +435,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             daysRemaining: false,
             burnRateEstimate: false,
             modelsThisPeriod: false,
+            cycleChart: false,
             thisMacActivity: false,
             localRecentChats: false,
             cloudAgents: false
@@ -448,6 +451,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             daysRemaining: true,
             burnRateEstimate: true,
             modelsThisPeriod: true,
+            cycleChart: true,
             thisMacActivity: true,
             localRecentChats: true,
             cloudAgents: true
@@ -463,6 +467,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             daysRemaining: Bool,
             burnRateEstimate: Bool,
             modelsThisPeriod: Bool = false,
+            cycleChart: Bool = false,
             thisMacActivity: Bool = false,
             localRecentChats: Bool = false,
             cloudAgents: Bool = false
@@ -476,6 +481,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             self.daysRemaining = daysRemaining
             self.burnRateEstimate = burnRateEstimate
             self.modelsThisPeriod = modelsThisPeriod
+            self.cycleChart = cycleChart
             self.thisMacActivity = thisMacActivity
             self.localRecentChats = localRecentChats
             self.cloudAgents = cloudAgents
@@ -493,6 +499,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             burnRateEstimate = try c.decodeIfPresent(Bool.self, forKey: .burnRateEstimate) ?? false
             // Default on so upgraded installs get the popover section without a reset.
             modelsThisPeriod = try c.decodeIfPresent(Bool.self, forKey: .modelsThisPeriod) ?? true
+            cycleChart = try c.decodeIfPresent(Bool.self, forKey: .cycleChart) ?? true
             thisMacActivity = try c.decodeIfPresent(Bool.self, forKey: .thisMacActivity) ?? true
             localRecentChats = try c.decodeIfPresent(Bool.self, forKey: .localRecentChats) ?? true
             cloudAgents = try c.decodeIfPresent(Bool.self, forKey: .cloudAgents) ?? true

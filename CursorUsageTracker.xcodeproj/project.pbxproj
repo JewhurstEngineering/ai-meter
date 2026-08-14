@@ -69,6 +69,7 @@
 		A0CF719342249AB15C8805CF /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E095284BC3E3FF86B9D13476 /* UsageProgressBar.swift */; };
 		A2824C34788AD42C2385733D /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC72E88939ABE69249070845 /* OverviewView.swift */; };
 		A6F45C087B025A3C78F45693 /* PhoneAccountPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 542E18F13BB42C9B9E7893E0 /* PhoneAccountPager.swift */; };
+		A7746386AFBEF54F7E44415E /* UsageExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BCE0735378D24E300549CC5 /* UsageExportPanel.swift */; };
 		AB1CD943F35327A3FB09F25C /* CursorUsageTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */; };
 		ADED2DCB03BC6B3FC805B711 /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E095284BC3E3FF86B9D13476 /* UsageProgressBar.swift */; };
 		AE5C090C9E154B56360D7C9A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D056BFB5D0276D0C9EABCF5C /* PrivacyInfo.xcprivacy */; };
@@ -208,6 +209,7 @@
 		7E5AFE99C7EE27A406E96CE5 /* CursorUsageCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CursorUsageCore; path = Packages/CursorUsageCore; sourceTree = SOURCE_ROOT; };
 		8161504B9ED6174A8DF8349F /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
 		877B0F967CCC1D8C34B40F9D /* CursorUsageWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CursorUsageWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8BCE0735378D24E300549CC5 /* UsageExportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageExportPanel.swift; sourceTree = "<group>"; };
 		948D49D49FCB9D3FDA048F94 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A0023361D50A46D8DFCBE0AA /* CursorUsageWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWidgets.swift; sourceTree = "<group>"; };
 		A04551066C7CF7A9F8B0ED76 /* WatchSessionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionBridge.swift; sourceTree = "<group>"; };
@@ -486,6 +488,7 @@
 				4238390F852D7D39A70FEF75 /* CursorUsageTracker.entitlements */,
 				01D6BA7BBE2BE25C5CDE6B2C /* CursorUsageTrackerApp.swift */,
 				414F463E688494BCCD06CB18 /* StatusItemController.swift */,
+				8BCE0735378D24E300549CC5 /* UsageExportPanel.swift */,
 				128DC51DA8705D39A0DF709D /* Settings */,
 				7A3C43D1F32E634CAE905264 /* Views */,
 			);
@@ -837,6 +840,7 @@
 				38BEB562C58CFAE068095C59 /* SettingsRootView.swift in Sources */,
 				8E349FE64FC6A88D9E042E7B /* StatusItemController.swift in Sources */,
 				04361D3C3E751EF4831F2280 /* ThemeSettingsView.swift in Sources */,
+				A7746386AFBEF54F7E44415E /* UsageExportPanel.swift in Sources */,
 				ADED2DCB03BC6B3FC805B711 /* UsageProgressBar.swift in Sources */,
 				8C409FE10EFE01E694FCCB41 /* UsageUIComponents.swift in Sources */,
 				399B4894783E03F07141035C /* WidgetReload.swift in Sources */,

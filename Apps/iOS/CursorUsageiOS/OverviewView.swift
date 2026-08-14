@@ -7,6 +7,8 @@ struct OverviewView: View {
 
     private var layout: DisplayPreferences.SurfaceToggles { store.preferences.popover }
 
+    @State private var showReauth = false
+
     var body: some View {
         NavigationStack {
             PhoneAccountPager { account in
@@ -16,6 +18,15 @@ struct OverviewView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
+                    if let snapshot = store.snapshot,
+                       let url = try? UsageExport.writeTemporaryCSV(snapshot)
+                    {
+                        ShareLink(item: url) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task { await store.refresh() }
                     } label: {
@@ -24,13 +35,32 @@ struct OverviewView: View {
                     .disabled(store.activeAccount?.isAuthenticated != true || store.isRefreshing)
                 }
             }
+            .sheet(isPresented: $showReauth) {
+                NavigationStack {
+                    LoginWebView { token in
+                        showReauth = false
+                        let replacing = store.activeAccountID
+                        Task {
+                            try? await store.saveSessionToken(token, replacing: replacing)
+                        }
+                    }
+                    .ignoresSafeArea()
+                    .navigationTitle("Sign in again")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Cancel") { showReauth = false }
+                        }
+                    }
+                }
+            }
         }
     }
 
     @ViewBuilder
     private func accountPage(_ account: AccountRuntime?) -> some View {
         Group {
-            if account?.isAuthenticated != true {
+            if account?.isAuthenticated != true, store.connections.isEmpty {
                 unsignedHero(
                     title: "Not signed in",
                     detail: "Add a Cursor session in Accounts. Sign in with Cursor or paste a token — this phone cannot read the Mac IDE."
@@ -39,6 +69,12 @@ struct OverviewView: View {
                 usageList(snapshot, account: account)
             } else if account?.isRefreshing == true || store.isRefreshing {
                 ProgressView("Loading usage…")
+            } else if account?.isAuthenticated != true {
+                unsignedHero(
+                    title: "Session expired",
+                    detail: account?.lastError ?? "Sign in again from Accounts.",
+                    showSignIn: true
+                )
             } else {
                 unsignedHero(
                     title: "No usage data yet",
@@ -71,6 +107,21 @@ struct OverviewView: View {
                 PhoneAccountSwitcherChrome()
             }
 
+            if account?.isAuthenticated != true {
+                Section {
+                    Label(
+                        account?.lastError ?? "Session expired — sign in again.",
+                        systemImage: "exclamationmark.triangle.fill"
+                    )
+                    .foregroundStyle(.orange)
+                    Button {
+                        showReauth = true
+                    } label: {
+                        Label("Sign in again", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                }
+            }
+
             if layout.cursorModelsPercent || layout.otherModelsPercent || layout.totalPercent {
                 Section("Included usage") {
                     if layout.cursorModelsPercent {
@@ -85,7 +136,7 @@ struct OverviewView: View {
                 }
             }
 
-            if layout.planSpend || layout.bonus || layout.onDemand || layout.daysRemaining {
+            if layout.planSpend || layout.bonus || layout.onDemand || layout.daysRemaining || layout.burnRateEstimate {
                 Section("Spend") {
                     if layout.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
                         LabeledContent("Spend") {
@@ -115,6 +166,22 @@ struct OverviewView: View {
                             Text("\(days)d left")
                                 .monospacedDigit()
                         }
+                    }
+                    if layout.burnRateEstimate, let pace = snapshot.pace() {
+                        Text(pace.caption)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            if layout.cycleChart, !snapshot.cycleHistory.isEmpty {
+                Section("Spend by cycle") {
+                    CycleSpendChart(cycles: snapshot.cycleHistory, height: 140)
+                    if let caption = snapshot.cycleComparisonCaption {
+                        Text(caption)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -158,17 +225,20 @@ struct OverviewView: View {
                 cloudAgentsSection(account)
             }
 
-            if let error = account?.lastError ?? store.lastError {
+            if account?.isAuthenticated == true, let error = account?.lastError ?? store.lastError {
                 Section {
                     Label(error, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
+                    Link(destination: AppAbout.dashboardURL) {
+                        Label("Open Cursor dashboard", systemImage: "globe")
+                    }
                 }
             }
         }
         .listStyle(.insetGrouped)
     }
 
-    private func unsignedHero(title: String, detail: String) -> some View {
+    private func unsignedHero(title: String, detail: String, showSignIn: Bool = false) -> some View {
         VStack(spacing: 12) {
             AppLogo(size: 64)
             Text(title)
@@ -178,6 +248,14 @@ struct OverviewView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 28)
+            if showSignIn {
+                Button {
+                    showReauth = true
+                } label: {
+                    Label("Sign in again", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .buttonStyle(.borderedProminent)
+            }
             PhoneAccountSwitcherChrome()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

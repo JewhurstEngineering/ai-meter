@@ -76,12 +76,12 @@ struct AuthenticationSettingsView: View {
                             reauthAccountID = store.activeAccountID
                             showLogin = true
                         }
-                        .disabled(!store.isAuthenticated)
+                        .disabled(store.activeAccountID == nil)
                         authButton("Sign Out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                             store.signOut()
                             statusMessage = "Signed out."
                         }
-                        .disabled(!store.isAuthenticated)
+                        .disabled(store.connections.isEmpty)
                     }
 
                     Text("Prefers Cursor IDE (state.vscdb). Agent keychain can be a different account. Sign in again to add a second session.")

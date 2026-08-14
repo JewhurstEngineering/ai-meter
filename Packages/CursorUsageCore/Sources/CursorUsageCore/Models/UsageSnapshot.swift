@@ -202,6 +202,80 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         return "Last cycle \(Self.cycleUSD(previous.totalCents)) · this cycle \(Self.cycleUSD(currentCents))"
     }
 
+    public struct Pace: Sendable, Equatable {
+        public enum Status: String, Sendable, Equatable {
+            case onTrack
+            case ahead
+            case overCap
+        }
+
+        public var elapsedFraction: Double
+        public var usedCents: Double
+        public var projectedCycleEndCents: Double
+        public var status: Status
+        public var caption: String
+        public var menuBarText: String
+    }
+
+    /// Linear pace from cycle elapsed time. Nil when dates or spend are missing, or before the cycle starts.
+    public func pace(now: Date = Date()) -> Pace? {
+        guard let start = billingCycleStart, let end = billingCycleEnd else { return nil }
+        let length = end.timeIntervalSince(start)
+        guard length > 0 else { return nil }
+        let elapsed = now.timeIntervalSince(start)
+        guard elapsed > 0 else { return nil }
+
+        let used: Double
+        if let planUsedCents {
+            used = Double(planUsedCents)
+        } else if let current = currentCycleSpend?.totalCents {
+            used = current
+        } else if let totalModelCostCents {
+            used = totalModelCostCents
+        } else {
+            return nil
+        }
+
+        let fraction = min(1, elapsed / length)
+        let projected = fraction > 0 ? used / fraction : used
+        let status = paceStatus(projected: projected, used: used, elapsedFraction: fraction)
+        let projectedLabel = Self.cycleUSD(projected)
+        let caption: String
+        switch status {
+        case .onTrack:
+            caption = "On track · on pace for \(projectedLabel)"
+        case .ahead:
+            caption = "Ahead of calendar · on pace for \(projectedLabel)"
+        case .overCap:
+            if let limit = planLimitCents, limit > 0 {
+                caption = "Over cap · on pace for \(projectedLabel) vs \(Self.cycleUSD(Double(limit))) included"
+            } else {
+                caption = "Over cap · on pace for \(projectedLabel)"
+            }
+        }
+        return Pace(
+            elapsedFraction: fraction,
+            usedCents: used,
+            projectedCycleEndCents: projected,
+            status: status,
+            caption: caption,
+            menuBarText: "~\(projectedLabel)"
+        )
+    }
+
+    private func paceStatus(projected: Double, used: Double, elapsedFraction: Double) -> Pace.Status {
+        if let limit = planLimitCents, limit > 0 {
+            let cap = Double(limit)
+            if projected > cap { return .overCap }
+            if elapsedFraction > 0, used / cap > elapsedFraction + 0.08 { return .ahead }
+            return .onTrack
+        }
+        if let previous = previousCycle, previous.totalCents > 0, projected > previous.totalCents * 1.15 {
+            return .ahead
+        }
+        return .onTrack
+    }
+
     /// True when Stripe reported a problem worth showing (failed payment or pending cancel).
     public var hasBillingAlert: Bool {
         lastPaymentFailed || pendingCancellationDate != nil

@@ -14,8 +14,13 @@ struct IncludedUsageSettingsView: View {
                 if let snapshot = store.snapshot {
                     subscriptionHero(snapshot)
                     pools(snapshot)
-                    if snapshot.cycleHistory.count >= 2 {
+                    if !snapshot.cycleHistory.isEmpty {
                         cycleHistoryPanel(snapshot)
+                    }
+                    if store.preferences.popover.burnRateEstimate, let pace = snapshot.pace() {
+                        Text(pace.caption)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                     HStack(alignment: .top, spacing: 10) {
                         models(snapshot)
@@ -151,9 +156,19 @@ struct IncludedUsageSettingsView: View {
             compact: true
         ) {
             CycleSpendChart(cycles: snapshot.cycleHistory, height: 120)
-            Text("This cycle is still in progress. Invoices stay on Cursor’s dashboard.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            HStack {
+                Text("This cycle is still in progress. Invoices stay on Cursor’s dashboard.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Button {
+                    UsageExportPanel.present(snapshot: snapshot)
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
         }
     }
 
@@ -696,7 +711,7 @@ struct AboutSettingsView: View {
     @State private var aboutSplitHeight: CGFloat = 0
 
     private var isRunningFromApplications: Bool {
-        Bundle.main.bundleURL.path.hasPrefix("/Applications/")
+        AppInstall.isRunningFromApplications
     }
 
     var body: some View {

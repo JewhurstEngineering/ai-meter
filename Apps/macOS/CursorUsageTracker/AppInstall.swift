@@ -10,6 +10,12 @@ enum AppInstall {
         applicationsURL.appendingPathComponent("Cursor Usage Tracker.app", isDirectory: true)
     }
 
+    static var isRunningFromApplications: Bool {
+        Bundle.main.bundleURL.path.hasPrefix("/Applications/")
+    }
+
+    static let bannerDismissedKey = "installToApplications.bannerDismissed"
+
     static func copyRunningAppToApplications() throws -> URL {
         let src = Bundle.main.bundleURL
         let dest = installedAppURL

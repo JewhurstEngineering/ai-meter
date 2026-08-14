@@ -48,7 +48,7 @@ struct CursorBillingLinks: View {
             Link(destination: AppAbout.dashboardURL) {
                 Label("Cursor dashboard", systemImage: "globe")
             }
-            Link(destination: AppAbout.dashboardURL) {
+            Link(destination: AppAbout.billingURL) {
                 Label("Billing & invoices", systemImage: "doc.text")
             }
         }

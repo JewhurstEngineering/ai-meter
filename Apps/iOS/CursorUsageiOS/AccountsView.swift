@@ -43,8 +43,8 @@ struct AccountsView: View {
                     } label: {
                         Label("Re-authenticate", systemImage: "arrow.triangle.2.circlepath")
                     }
-                    .disabled(!store.isAuthenticated)
-                    if store.isAuthenticated {
+                    .disabled(store.activeAccountID == nil)
+                    if store.activeAccountID != nil {
                         Button(role: .destructive) {
                             store.signOut()
                             statusMessage = "Signed out."

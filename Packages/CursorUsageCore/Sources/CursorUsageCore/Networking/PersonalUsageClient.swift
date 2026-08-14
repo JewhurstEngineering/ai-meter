@@ -1,9 +1,36 @@
 import Foundation
 
-public enum PersonalAPIError: Error, Sendable {
+public enum PersonalAPIError: Error, Sendable, Equatable {
     case httpStatus(Int)
     case decodingFailed
     case unauthorized
+    /// HTTP 204 — empty body, not a signed-out session.
+    case emptyResponse
+
+    public static func from(httpStatus code: Int) -> PersonalAPIError {
+        switch code {
+        case 401: return .unauthorized
+        case 204: return .emptyResponse
+        default: return .httpStatus(code)
+        }
+    }
+}
+
+extension PersonalAPIError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .unauthorized:
+            return "Session expired — sign in again."
+        case .decodingFailed:
+            return "Cursor’s usage API changed. Last numbers are kept. Open the Cursor dashboard to check."
+        case .emptyResponse:
+            return "Cursor returned an empty usage response. Last numbers are kept."
+        case .httpStatus(let code) where (500...599).contains(code):
+            return "Cursor’s servers returned an error (\(code)). Try again in a few minutes."
+        case .httpStatus(let code):
+            return "Usage refresh failed (HTTP \(code))."
+        }
+    }
 }
 
 public actor PersonalUsageClient {
@@ -58,16 +85,6 @@ public actor PersonalUsageClient {
            let spend = BillingCycleHistory.spend(from: aggregated, start: start, end: end, isCurrent: true)
         {
             currentSpend = spend
-        } else if let start = UsageSnapshotMapper.parseDate(summary.billingCycleStart),
-                  let end = UsageSnapshotMapper.parseDate(summary.billingCycleEnd)
-        {
-            currentSpend = .init(
-                start: start,
-                end: end,
-                totalCents: aggregated?.resolvedTotalCents ?? 0,
-                modelCount: aggregated?.aggregations?.count ?? 0,
-                isCurrent: true
-            )
         } else {
             currentSpend = nil
         }
@@ -160,11 +177,12 @@ public actor PersonalUsageClient {
     private func send<T: Decodable>(_ request: URLRequest) async throws -> T {
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw PersonalAPIError.httpStatus(-1) }
-        if http.statusCode == 401 || http.statusCode == 204 {
-            throw PersonalAPIError.unauthorized
+        let classified = PersonalAPIError.from(httpStatus: http.statusCode)
+        if classified == .unauthorized || classified == .emptyResponse {
+            throw classified
         }
         guard (200..<300).contains(http.statusCode) else {
-            throw PersonalAPIError.httpStatus(http.statusCode)
+            throw classified
         }
         do {
             return try JSONDecoder().decode(T.self, from: data)

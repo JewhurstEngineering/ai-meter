@@ -155,4 +155,14 @@ public struct AccountRuntime: Equatable, Identifiable, Sendable {
         self.cloudAgents = cloudAgents
         self.cloudAgentsError = cloudAgentsError
     }
+
+    /// 401: drop the session, keep the row, last snapshot, and Cloud Agents key.
+    public mutating func markSessionExpired() {
+        isAuthenticated = false
+        lastError = PersonalAPIError.unauthorized.errorDescription
+    }
+
+    public var needsReauthentication: Bool {
+        !isAuthenticated
+    }
 }

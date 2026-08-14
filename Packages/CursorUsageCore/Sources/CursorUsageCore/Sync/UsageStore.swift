@@ -205,7 +205,10 @@ public final class UsageStore: ObservableObject {
     public func refreshAccount(_ id: UUID) async {
         guard let connection = connections.first(where: { $0.id == id }) else { return }
         guard let token = keychain.load(account: connection.keychainAccount) else {
-            markUnauthenticated(id: id, error: "Not signed in.")
+            markUnauthenticated(
+                id: id,
+                error: PersonalAPIError.unauthorized.errorDescription ?? "Session expired — sign in again."
+            )
             return
         }
         updateRuntime(id: id) { $0.isRefreshing = true }
@@ -226,27 +229,16 @@ public final class UsageStore: ObservableObject {
             )
             await refreshCloudAgents(id: id)
         } catch PersonalAPIError.unauthorized {
-            let email = connection.email
             keychain.delete(account: connection.keychainAccount)
-            keychain.delete(account: connection.cloudAPIKeychainAccount)
-            connections.removeAll { $0.id == id }
-            runtimes[id] = nil
-            if activeAccountID == id {
-                activeAccountID = connections.first?.id
-            }
-            persistRegistry()
+            updateRuntime(id: id) { $0.markSessionExpired() }
             await UsageNotificationService.notifySessionExpiredIfNeeded(
                 preferences: preferences,
-                accountEmail: email,
+                accountEmail: connection.email ?? connection.displayLabel,
                 accountID: id
             )
-            if connections.isEmpty {
-                refreshTask?.cancel()
-                refreshTask = nil
-            }
         } catch {
             updateRuntime(id: id) {
-                $0.lastError = "Refresh failed: \(error.localizedDescription)"
+                $0.lastError = error.localizedDescription
             }
         }
     }
@@ -438,7 +430,6 @@ public final class UsageStore: ObservableObject {
     private func markUnauthenticated(id: UUID, error: String) {
         updateRuntime(id: id) {
             $0.isAuthenticated = false
-            $0.snapshot = nil
             $0.lastError = error
         }
     }
