@@ -14,6 +14,9 @@ struct IncludedUsageSettingsView: View {
                 if let snapshot = store.snapshot {
                     subscriptionHero(snapshot)
                     pools(snapshot)
+                    if snapshot.cycleHistory.count >= 2 {
+                        cycleHistoryPanel(snapshot)
+                    }
                     HStack(alignment: .top, spacing: 10) {
                         models(snapshot)
                             .reportMatchedHeight()
@@ -137,6 +140,20 @@ struct IncludedUsageSettingsView: View {
                 .padding(.vertical, 6)
                 .background(RoundedRectangle(cornerRadius: 8).fill(theme.spend.opacity(0.08)))
             }
+        }
+    }
+
+    private func cycleHistoryPanel(_ snapshot: UsageSnapshot) -> some View {
+        SettingsPanel(
+            title: "Spend by cycle",
+            systemImage: "chart.bar.fill",
+            subtitle: snapshot.cycleComparisonCaption ?? "Model spend for each billing window.",
+            compact: true
+        ) {
+            CycleSpendChart(cycles: snapshot.cycleHistory, height: 120)
+            Text("This cycle is still in progress. Invoices stay on Cursor’s dashboard.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -446,6 +463,7 @@ struct PaidUsageSettingsView: View {
             VStack(alignment: .leading, spacing: 10) {
                 SettingsAccountPicker()
                 if let snapshot = store.snapshot {
+                    account(snapshot)
                     status(snapshot)
                     meters(snapshot)
                 } else {
@@ -460,6 +478,63 @@ struct PaidUsageSettingsView: View {
             .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private func account(_ snapshot: UsageSnapshot) -> some View {
+        SettingsPanel(
+            title: "Account",
+            systemImage: "person.crop.circle",
+            subtitle: snapshot.isYearlyPlan ? "Yearly plan" : "Monthly plan",
+            compact: true
+        ) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Text(snapshot.planDisplayName)
+                        .font(.headline)
+                    if let status = snapshot.subscriptionStatus {
+                        Text(status)
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill((snapshot.hasBillingAlert ? theme.danger : theme.ok).opacity(0.15)))
+                            .foregroundStyle(snapshot.hasBillingAlert ? theme.danger : theme.ok)
+                    }
+                    Spacer(minLength: 0)
+                }
+
+                if snapshot.lastPaymentFailed {
+                    Label("Last payment failed — update billing on Cursor’s site.", systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(theme.danger)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let date = snapshot.pendingCancellationDate {
+                    Label(
+                        "Cancels \(date.formatted(date: .abbreviated, time: .omitted))",
+                        systemImage: "calendar.badge.minus"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+                }
+                if let balance = snapshot.customerBalanceCents, balance > 0 {
+                    Label("Credit \(MenuBarFormatter.usd(balance))", systemImage: "gift")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if snapshot.isOnStudentPlan || snapshot.verifiedStudent || snapshot.studentDiscountApplied {
+                    Label("Student pricing", systemImage: "graduationcap")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if snapshot.isTeamMember {
+                    Label("Team member", systemImage: "person.2")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                CursorBillingLinks()
+            }
+        }
     }
 
     private func status(_ snapshot: UsageSnapshot) -> some View {
@@ -728,7 +803,7 @@ struct AboutSettingsView: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    Link(destination: URL(string: "https://cursor.com/dashboard")!) {
+                    Link(destination: AppAbout.dashboardURL) {
                         Label("Cursor dashboard", systemImage: "globe")
                     }
                     .buttonStyle(.bordered)

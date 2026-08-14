@@ -438,6 +438,16 @@ struct PhoneIncludedSettings: View {
                         LabeledContent("Remaining", value: "\(days)d")
                     }
                 }
+                if snapshot.cycleHistory.count >= 2 {
+                    Section("Spend by cycle") {
+                        CycleSpendChart(cycles: snapshot.cycleHistory, height: 140)
+                        if let caption = snapshot.cycleComparisonCaption {
+                            Text(caption)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
                 Section("Included pools") {
                     if let p = snapshot.cursorModelsPercentUsed {
                         pool("Cursor Models", "sparkles", p)
@@ -537,6 +547,41 @@ struct PhonePaidSettings: View {
         if let snapshot = account?.snapshot {
             List {
                 accountHeader(account)
+                Section("Account") {
+                    LabeledContent("Plan", value: snapshot.planDisplayName)
+                    if let status = snapshot.subscriptionStatus {
+                        LabeledContent("Status", value: status.capitalized)
+                    }
+                    LabeledContent("Billing", value: snapshot.isYearlyPlan ? "Yearly" : "Monthly")
+                    if snapshot.lastPaymentFailed {
+                        Label("Last payment failed", systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(theme.danger)
+                    }
+                    if let date = snapshot.pendingCancellationDate {
+                        LabeledContent("Cancels") {
+                            Text(date.formatted(date: .abbreviated, time: .omitted))
+                        }
+                    }
+                    if let balance = snapshot.customerBalanceCents, balance > 0 {
+                        LabeledContent("Credit") {
+                            Text(MenuBarFormatter.usd(balance)).monospacedDigit()
+                        }
+                    }
+                    if snapshot.isOnStudentPlan || snapshot.verifiedStudent || snapshot.studentDiscountApplied {
+                        LabeledContent("Student pricing", value: "On")
+                    }
+                    if snapshot.isTeamMember {
+                        LabeledContent("Team", value: "Member")
+                    }
+                }
+                Section("Billing") {
+                    Link(destination: AppAbout.dashboardURL) {
+                        Label("Cursor dashboard", systemImage: "globe")
+                    }
+                    Link(destination: AppAbout.dashboardURL) {
+                        Label("Billing & invoices", systemImage: "doc.text")
+                    }
+                }
                 Section("On-demand") {
                     LabeledContent("Status") {
                         Text(snapshot.onDemandEnabled ? "Enabled" : "Disabled")
@@ -619,6 +664,9 @@ struct PhoneAboutSettings: View {
                 Text("Personal Cursor Pro / Pro+ / Ultra meter. Team Admin API is parked. Tokens stay in this iPhone’s Keychain.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Link(destination: AppAbout.dashboardURL) {
+                    Label("Cursor dashboard", systemImage: "globe")
+                }
             }
         }
         .navigationTitle("About")

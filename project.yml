@@ -50,6 +50,8 @@ targets:
     sources:
       - path: Widgets/CursorUsageWidgets
       - path: Apps/Shared
+        excludes:
+          - CycleSpendChart.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app.widgets
@@ -103,6 +105,7 @@ targets:
       - path: Apps/Shared
         excludes:
           - Assets.xcassets/AppIcon.appiconset
+          - CycleSpendChart.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.ios.widgets
@@ -122,6 +125,7 @@ targets:
       - path: Apps/Shared
         excludes:
           - Assets.xcassets/AppIcon.appiconset
+          - CycleSpendChart.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.ios.watchkitapp

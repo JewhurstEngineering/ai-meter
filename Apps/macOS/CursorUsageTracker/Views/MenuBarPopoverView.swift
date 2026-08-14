@@ -410,6 +410,12 @@ struct MenuBarPopoverView: View {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
+            if let caption = snapshot.cycleComparisonCaption {
+                Text(caption)
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             if t.thisMacActivity || t.localRecentChats || t.cloudAgents {
                 PopoverAgentsCard(account: displayed)
             }

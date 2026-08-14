@@ -36,6 +36,7 @@
 		409D70B19BB27DB6AC3B650E /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57EB19D7295D17C38B246024 /* AppLogo.swift */; };
 		412A2C4BB2BA5DEA10F225A6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
 		41D20FDBBDE52E023500DAE2 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */; };
+		42F88995A8A8968C25CAB250 /* CycleSpendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E5B43BD30D891775FCBCD7 /* CycleSpendChart.swift */; };
 		44D27C3EB943F82E0B4DC7AD /* IncludedPaidAboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89E3E5D3E60B1018A960DDF /* IncludedPaidAboutSettings.swift */; };
 		46F7D44C7FE9EE10AFA2CADF /* CursorUsageCore in Frameworks */ = {isa = PBXBuildFile; productRef = 48DBE5173D95E86B452D5D95 /* CursorUsageCore */; };
 		4DBD41D473BA56E5DF08370B /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD38FF7739F2FCF0BBAAC89F /* MenuBarLabelView.swift */; };
@@ -81,6 +82,7 @@
 		CD4418AA969514551FE216C3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BD22F248322A14355D0DA81 /* WidgetKit.framework */; };
 		D896CBE48F91EBBBCAC93E51 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF872466A93EEF6AE698D30A /* GeneralSettingsView.swift */; };
 		E2E59DB52BA783D8F489583C /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BCF74C6401908A65BBCD44C8 /* AccountsView.swift */; };
+		E4673190AAA512635C5692F5 /* CycleSpendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E5B43BD30D891775FCBCD7 /* CycleSpendChart.swift */; };
 		E6CCE91BDB1D611E63C47A66 /* AuthenticationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8161504B9ED6174A8DF8349F /* AuthenticationSettingsView.swift */; };
 		EC29E8744DF6A536E16FE733 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */; };
 		ED163B73E90DC9B7EB6C2AFD /* CursorUsageiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA594D67C54BEA585DC20BE5 /* CursorUsageiOSApp.swift */; };
@@ -189,6 +191,7 @@
 		414F463E688494BCCD06CB18 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
 		41E8CCBE505DA6FB97811519 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
 		4238390F852D7D39A70FEF75 /* CursorUsageTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageTracker.entitlements; sourceTree = "<group>"; };
+		46E5B43BD30D891775FCBCD7 /* CycleSpendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleSpendChart.swift; sourceTree = "<group>"; };
 		48423E4A741FDC00766542BF /* CursorUsageiOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CursorUsageiOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4FAB8596DD57019AC7B46891 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -350,6 +353,7 @@
 				57EB19D7295D17C38B246024 /* AppLogo.swift */,
 				B54F8923D3370FB986328003 /* AppTheme.swift */,
 				4ADAD9B4996ACFF2DC5D3518 /* Assets.xcassets */,
+				46E5B43BD30D891775FCBCD7 /* CycleSpendChart.swift */,
 				E095284BC3E3FF86B9D13476 /* UsageProgressBar.swift */,
 				52013CCDE38EEAAFAD2A7A19 /* WidgetReload.swift */,
 			);
@@ -798,6 +802,7 @@
 				1EF01AA7F09F0CA45207EBE3 /* AppTheme.swift in Sources */,
 				62990F3039701FA5F9AABF51 /* BackgroundRefresh.swift in Sources */,
 				ED163B73E90DC9B7EB6C2AFD /* CursorUsageiOSApp.swift in Sources */,
+				42F88995A8A8968C25CAB250 /* CycleSpendChart.swift in Sources */,
 				523AFF71A2CD5409221620E7 /* LoginWebView.swift in Sources */,
 				A2824C34788AD42C2385733D /* OverviewView.swift in Sources */,
 				A6F45C087B025A3C78F45693 /* PhoneAccountPager.swift in Sources */,
@@ -822,6 +827,7 @@
 				509475A441E0BFEAAA6A59DD /* AppTheme.swift in Sources */,
 				E6CCE91BDB1D611E63C47A66 /* AuthenticationSettingsView.swift in Sources */,
 				AB1CD943F35327A3FB09F25C /* CursorUsageTrackerApp.swift in Sources */,
+				E4673190AAA512635C5692F5 /* CycleSpendChart.swift in Sources */,
 				D896CBE48F91EBBBCAC93E51 /* GeneralSettingsView.swift in Sources */,
 				44D27C3EB943F82E0B4DC7AD /* IncludedPaidAboutSettings.swift in Sources */,
 				50D97270BD876C1A51743BBB /* LayoutSettingsView.swift in Sources */,
