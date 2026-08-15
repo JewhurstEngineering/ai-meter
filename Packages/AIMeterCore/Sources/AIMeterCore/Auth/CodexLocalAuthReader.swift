@@ -23,9 +23,11 @@ public struct CodexOAuthCredential: Sendable, Equatable {
 }
 
 public enum CodexLocalAuthReader {
+    #if os(macOS)
     public static var authFileURL: URL {
         FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex/auth.json")
     }
+    #endif
 
     public static func preferredCredential() -> CodexOAuthCredential? {
         #if os(macOS)
@@ -35,8 +37,13 @@ public enum CodexLocalAuthReader {
         #endif
     }
 
-    public static func fromAuthFile(url: URL = authFileURL) -> CodexOAuthCredential? {
-        guard let data = try? Data(contentsOf: url) else { return nil }
+    public static func fromAuthFile(url: URL? = nil) -> CodexOAuthCredential? {
+        #if os(macOS)
+        let fileURL = url ?? authFileURL
+        #else
+        guard let fileURL = url else { return nil }
+        #endif
+        guard let data = try? Data(contentsOf: fileURL) else { return nil }
         return parse(data, source: "~/.codex/auth.json")
     }
 

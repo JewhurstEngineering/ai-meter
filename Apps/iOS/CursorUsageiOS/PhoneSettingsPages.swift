@@ -659,12 +659,13 @@ struct PhoneAboutSettings: View {
     var body: some View {
         List {
             Section {
-                HStack {
-                    Spacer()
-                    AppLogo(size: 64)
-                    Spacer()
-                }
-                .listRowBackground(Color.clear)
+                AppFullLogo(height: 92, color: true)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 4, trailing: 20))
+            }
+            Section {
                 LabeledContent("Version", value: version)
                 LabeledContent("Developer", value: AppAbout.organization)
                 LabeledContent("Copyright", value: AppAbout.copyrightLine)

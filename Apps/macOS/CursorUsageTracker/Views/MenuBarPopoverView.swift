@@ -828,38 +828,34 @@ struct MenuBarPopoverView: View {
     }
 
     private var footer: some View {
-        VStack(spacing: 6) {
-            HStack {
-                SettingsOpenLink {
-                    Label("Settings", systemImage: "gearshape")
-                }
-                .keyboardShortcut(",", modifiers: .command)
-                if let snapshot = displayed?.snapshot {
-                    Button {
-                        UsageExportPanel.present(snapshot: snapshot)
-                    } label: {
-                        Label("Export", systemImage: "square.and.arrow.up")
-                    }
-                }
-                Spacer(minLength: 8)
-                Button {
-                    NSApplication.shared.terminate(nil)
-                } label: {
-                    Label("Quit", systemImage: "xmark.circle")
-                }
-                .keyboardShortcut("q", modifiers: .command)
+        HStack(spacing: 6) {
+            SettingsOpenLink {
+                Label("Settings", systemImage: "gearshape")
             }
-            .labelStyle(.titleAndIcon)
-            .controlSize(.small)
-
-            AppFullLogo(height: 22)
-                .frame(maxWidth: .infinity)
-
-            Text((AppAbout.organization))
-                .appFont(.caption2)
-                .foregroundStyle(.tertiary)
-                .frame(maxWidth: .infinity)
+            .keyboardShortcut(",", modifiers: .command)
+            if let snapshot = displayed?.snapshot {
+                Button {
+                    UsageExportPanel.present(snapshot: snapshot)
+                } label: {
+                    Label("Export", systemImage: "square.and.arrow.up")
+                }
+            }
+            Spacer(minLength: 6)
+            AppNameLogo(height: 16)
+                .frame(maxWidth: 110)
+                .layoutPriority(-1)
+                .opacity(0.55)
+                .accessibilityHidden(true)
+            Spacer(minLength: 6)
+            Button {
+                NSApplication.shared.terminate(nil)
+            } label: {
+                Label("Quit", systemImage: "xmark.circle")
+            }
+            .keyboardShortcut("q", modifiers: .command)
         }
+        .labelStyle(.titleAndIcon)
+        .controlSize(.small)
     }
 }
 
