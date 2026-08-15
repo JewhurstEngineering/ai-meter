@@ -833,7 +833,6 @@ struct AboutSettingsView: View {
     private var hero: some View {
         HStack(alignment: .center, spacing: 14) {
             AppLogo(size: heroTextHeight)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {
                 Text(AppAbout.productLegalName)
                     .font(.title2.weight(.bold))

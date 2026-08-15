@@ -852,6 +852,9 @@ struct MenuBarPopoverView: View {
             .labelStyle(.titleAndIcon)
             .controlSize(.small)
 
+            AppFullLogo(height: 22)
+                .frame(maxWidth: .infinity)
+
             Text((AppAbout.organization))
                 .appFont(.caption2)
                 .foregroundStyle(.tertiary)

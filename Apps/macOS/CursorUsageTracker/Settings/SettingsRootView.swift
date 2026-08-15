@@ -36,6 +36,13 @@ struct SettingsRootView: View {
             alignment: .topLeading
         )
         .background(SettingsResizeUnlock())
+        .overlay(alignment: .bottom) {
+            AppFullLogo(height: 140)
+                .frame(maxWidth: 440)
+                .padding(.bottom, 28)
+                .opacity(0.10)
+                .allowsHitTesting(false)
+        }
         .environmentObject(store)
         .appThemed(store.preferences)
         .onAppear {

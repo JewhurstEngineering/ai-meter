@@ -1,7 +1,7 @@
 # JamesWare AI Meter
 
 <p align="center">
-  <img src="docs/images/cursor-usage-tracker-logo-dark.png" width="128" alt="AI Meter">
+  <img src="docs/images/jamesware-aimeter-logo-full.png" width="360" alt="JamesWare AI Meter">
 </p>
 
 A local-first usage meter for **Cursor**, **Claude Code**, and **Codex**. Glance at included pools, rolling windows, spend, and on-demand without opening each dashboard.

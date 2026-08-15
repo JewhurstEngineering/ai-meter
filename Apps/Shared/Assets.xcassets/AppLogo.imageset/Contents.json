@@ -2,17 +2,7 @@
   "images": [
     {
       "idiom": "universal",
-      "filename": "logo-light.png"
-    },
-    {
-      "idiom": "universal",
-      "filename": "logo-dark.png",
-      "appearances": [
-        {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ]
+      "filename": "logo-color.png"
     }
   ],
   "info": {
