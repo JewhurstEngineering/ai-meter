@@ -39,8 +39,13 @@ public actor PersonalUsageClient {
     private let session: URLSession
     private let baseURL = URL(string: "https://cursor.com")!
     private let historyStore: BillingCycleHistoryStore
+    private let dailySpendStore: DailySpendHistoryStore
 
-    public init(session: URLSession = .shared, historyStore: BillingCycleHistoryStore = BillingCycleHistoryStore()) {
+    public init(
+        session: URLSession = .shared,
+        historyStore: BillingCycleHistoryStore = BillingCycleHistoryStore(),
+        dailySpendStore: DailySpendHistoryStore = DailySpendHistoryStore()
+    ) {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 20
         config.httpAdditionalHeaders = [
@@ -48,6 +53,7 @@ public actor PersonalUsageClient {
         ]
         self.session = session == .shared ? URLSession(configuration: config) : session
         self.historyStore = historyStore
+        self.dailySpendStore = dailySpendStore
     }
 
     public func fetchSnapshot(sessionToken: String) async throws -> UsageSnapshot {
@@ -62,6 +68,7 @@ public actor PersonalUsageClient {
 
         var aggregated: AggregatedUsageResponse?
         var previousCycles: [UsageSnapshot.BillingCycleSpend] = []
+        var dailySpend: [UsageSnapshot.DailySpend] = []
         if let userId = me.id,
            let startISO = summary.billingCycleStart,
            let endISO = summary.billingCycleEnd,
@@ -75,6 +82,12 @@ public actor PersonalUsageClient {
                 currentStart: start,
                 currentEnd: end,
                 cached: historyStore.load(userID: userId)
+            )
+            dailySpend = await fillDailySpend(
+                cookie: cookie,
+                userId: userId,
+                start: start,
+                end: end
             )
         }
 
@@ -94,8 +107,43 @@ public actor PersonalUsageClient {
             summary: summary,
             stripe: stripe,
             aggregated: aggregated,
-            cycleHistory: history
+            cycleHistory: history,
+            dailySpend: dailySpend
         )
+    }
+
+    private func fillDailySpend(
+        cookie: String,
+        userId: Int,
+        start: Date,
+        end: Date
+    ) async -> [UsageSnapshot.DailySpend] {
+        let days = await DailySpendHistory.fill(
+            cycleStart: start,
+            cycleEnd: end,
+            cached: dailySpendStore.load(userID: userId)
+        ) { windowStart, windowEnd in
+            do {
+                let response = try await self.postAggregated(
+                    cookie: cookie,
+                    start: windowStart,
+                    end: windowEnd,
+                    userId: userId
+                )
+                return response.resolvedTotalCents
+            } catch {
+                return nil
+            }
+        }
+        let todayStart = Calendar.current.startOfDay(for: Date())
+        dailySpendStore.save(
+            userID: userId,
+            CachedDailySpend(
+                cycleStart: start,
+                days: days.filter { $0.day < todayStart }
+            )
+        )
+        return days
     }
 
     private func walkHistory(

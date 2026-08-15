@@ -21,6 +21,8 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
     public var billingCycleEnd: Date?
     /// Completed + current cycle model spend, oldest first. Current cycle is last when present.
     public var cycleHistory: [BillingCycleSpend]
+    /// Local-calendar $ totals for the current Cursor cycle (quiet days are $0).
+    public var dailySpend: [DailySpend]
 
     /// Cursor Models (dashboard "auto" / first-party pool).
     public var cursorModelsPercentUsed: Double?
@@ -70,6 +72,16 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
 
         public var shortLabel: String {
             start.formatted(.dateTime.month(.abbreviated).year(.twoDigits))
+        }
+    }
+
+    public struct DailySpend: Codable, Sendable, Equatable {
+        public var day: Date
+        public var cents: Double
+
+        public init(day: Date, cents: Double) {
+            self.day = day
+            self.cents = cents
         }
     }
 
@@ -130,6 +142,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         billingCycleStart: Date? = nil,
         billingCycleEnd: Date? = nil,
         cycleHistory: [BillingCycleSpend] = [],
+        dailySpend: [DailySpend] = [],
         cursorModelsPercentUsed: Double? = nil,
         otherModelsPercentUsed: Double? = nil,
         totalPercentUsed: Double? = nil,
@@ -169,6 +182,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         self.billingCycleStart = billingCycleStart
         self.billingCycleEnd = billingCycleEnd
         self.cycleHistory = cycleHistory
+        self.dailySpend = dailySpend
         self.cursorModelsPercentUsed = cursorModelsPercentUsed
         self.otherModelsPercentUsed = otherModelsPercentUsed
         self.totalPercentUsed = totalPercentUsed
@@ -267,10 +281,21 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         public var status: Status
         public var caption: String
         public var menuBarText: String
+
+        public var systemImage: String {
+            switch status {
+            case .onTrack: return "flame"
+            case .ahead, .overCap: return "flame.fill"
+            }
+        }
     }
 
-    /// Linear pace from cycle elapsed time. Nil when dates or spend are missing, or before the cycle starts.
-    public func pace(now: Date = Date()) -> Pace? {
+    /// Typical-day pace: already spent + typical remaining days. Cursor only.
+    /// 1 calendar day: too soon to project. After that, pad quiet $0 days through
+    /// at least a week, drop the highest day, then median (so a spike plus one
+    /// work day cannot set the rest of the month).
+    public func pace(now: Date = Date(), calendar: Calendar = .current) -> Pace? {
+        guard provider == .cursor else { return nil }
         guard let start = billingCycleStart, let end = billingCycleEnd else { return nil }
         let length = end.timeIntervalSince(start)
         guard length > 0 else { return nil }
@@ -289,21 +314,60 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         }
 
         let fraction = min(1, elapsed / length)
-        let projected = fraction > 0 ? used / fraction : used
-        let status = paceStatus(projected: projected, used: used, elapsedFraction: fraction)
-        let projectedLabel = Self.cycleUSD(projected)
+        let elapsedDays = elapsedCalendarDays(now: now, calendar: calendar)
+        let typical = DailySpendHistory.typicalDailyCents(
+            dailySpend.map(\.cents),
+            elapsedDays: elapsedDays
+        )
+        let daysLeft = remainingDaysAfterToday(now: now, calendar: calendar)
+        let includedSuffix: String = {
+            guard let limit = planLimitCents, limit > 0 else { return "" }
+            return " vs \(Self.cycleUSD(Double(limit))) included"
+        }()
+
+        if let typical {
+            let projected = used + typical * Double(daysLeft)
+            let projectedLabel = Self.cycleUSD(projected)
+            let typicalLabel = "Typical ~\(Self.cycleUSD(typical))/day · on pace for \(projectedLabel)\(includedSuffix)"
+            let status = paceStatus(
+                projected: projected,
+                used: used,
+                elapsedFraction: fraction,
+                extrapolating: true
+            )
+            let caption: String
+            switch status {
+            case .onTrack:
+                caption = typicalLabel
+            case .ahead:
+                caption = "Ahead of calendar · \(typicalLabel)"
+            case .overCap:
+                caption = "Over cap · \(typicalLabel)"
+            }
+            return Pace(
+                elapsedFraction: fraction,
+                usedCents: used,
+                projectedCycleEndCents: projected,
+                status: status,
+                caption: caption,
+                menuBarText: "~\(projectedLabel)"
+            )
+        }
+
+        let projected = used
+        let status = paceStatus(
+            projected: projected,
+            used: used,
+            elapsedFraction: fraction,
+            extrapolating: false
+        )
+        let soFar = "~\(Self.cycleUSD(used)) so far"
         let caption: String
         switch status {
-        case .onTrack:
-            caption = "On track · on pace for \(projectedLabel)"
-        case .ahead:
-            caption = "Ahead of calendar · on pace for \(projectedLabel)"
         case .overCap:
-            if let limit = planLimitCents, limit > 0 {
-                caption = "Over cap · on pace for \(projectedLabel) vs \(Self.cycleUSD(Double(limit))) included"
-            } else {
-                caption = "Over cap · on pace for \(projectedLabel)"
-            }
+            caption = "Over cap · \(soFar)\(includedSuffix)"
+        default:
+            caption = "\(soFar) · too soon to pace"
         }
         return Pace(
             elapsedFraction: fraction,
@@ -311,18 +375,42 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
             projectedCycleEndCents: projected,
             status: status,
             caption: caption,
-            menuBarText: "~\(projectedLabel)"
+            menuBarText: "~\(Self.cycleUSD(used))"
         )
     }
 
-    private func paceStatus(projected: Double, used: Double, elapsedFraction: Double) -> Pace.Status {
+    private func elapsedCalendarDays(now: Date, calendar: Calendar) -> Int {
+        guard let start = billingCycleStart else { return 0 }
+        let startDay = calendar.startOfDay(for: start)
+        let today = calendar.startOfDay(for: now)
+        guard today >= startDay else { return 0 }
+        let days = calendar.dateComponents([.day], from: startDay, to: today).day ?? 0
+        return days + 1
+    }
+
+    private func remainingDaysAfterToday(now: Date, calendar: Calendar) -> Int {
+        guard let end = billingCycleEnd else { return 0 }
+        let today = calendar.startOfDay(for: now)
+        let endDay = calendar.startOfDay(for: end)
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: today) else { return 0 }
+        let days = calendar.dateComponents([.day], from: tomorrow, to: endDay).day ?? 0
+        return max(0, days)
+    }
+
+    private func paceStatus(
+        projected: Double,
+        used: Double,
+        elapsedFraction: Double,
+        extrapolating: Bool
+    ) -> Pace.Status {
         if let limit = planLimitCents, limit > 0 {
             let cap = Double(limit)
-            if projected > cap { return .overCap }
-            if elapsedFraction > 0, used / cap > elapsedFraction + 0.08 { return .ahead }
+            if used > cap { return .overCap }
+            if extrapolating, projected > cap { return .overCap }
+            if extrapolating, elapsedFraction > 0, used / cap > elapsedFraction + 0.08 { return .ahead }
             return .onTrack
         }
-        if let previous = previousCycle, previous.totalCents > 0, projected > previous.totalCents * 1.15 {
+        if extrapolating, let previous = previousCycle, previous.totalCents > 0, projected > previous.totalCents * 1.15 {
             return .ahead
         }
         return .onTrack

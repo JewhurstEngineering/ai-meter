@@ -440,7 +440,7 @@ struct PhoneIncludedSettings: View {
                         LabeledContent("Remaining", value: "\(days)d")
                     }
                     if let pace = snapshot.pace() {
-                        Text(pace.caption)
+                        Label(pace.caption, systemImage: pace.systemImage)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

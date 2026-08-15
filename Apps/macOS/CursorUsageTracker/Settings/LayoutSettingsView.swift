@@ -150,7 +150,7 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
             MetricToggleRow(title: "Days remaining", systemImage: "calendar", isOn: binding(\.daysRemaining))
-            MetricToggleRow(title: "Burn-rate pace", systemImage: "speedometer", isOn: binding(\.burnRateEstimate))
+            MetricToggleRow(title: "Burn-rate pace", systemImage: "flame", isOn: binding(\.burnRateEstimate))
             if includeModelsThisPeriod {
                 MetricToggleRow(
                     title: "Spend by cycle",
@@ -409,7 +409,7 @@ private struct PopoverPreviewCard: View {
                         .foregroundStyle(.secondary)
                 }
                 if t.burnRateEstimate {
-                    Label(snapshot?.pace()?.caption ?? "On track · on pace for $20", systemImage: "speedometer")
+                    Label(snapshot?.pace()?.caption ?? "Typical ~$17/day · on pace for $400 vs $400 included", systemImage: snapshot?.pace()?.systemImage ?? "flame")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

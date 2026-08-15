@@ -729,7 +729,7 @@ struct MenuBarPopoverView: View {
                         }
                     }
                     if snapshot.provider == .cursor, t.burnRateEstimate, let pace = snapshot.pace() {
-                        Label(pace.caption, systemImage: "speedometer")
+                        Label(pace.caption, systemImage: pace.systemImage)
                             .appFont(.caption)
                             .foregroundStyle(.secondary)
                     }

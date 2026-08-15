@@ -23,6 +23,7 @@ public enum UsageSnapshotMapper {
         stripe: AuthStripeResponse?,
         aggregated: AggregatedUsageResponse?,
         cycleHistory: [UsageSnapshot.BillingCycleSpend] = [],
+        dailySpend: [UsageSnapshot.DailySpend] = [],
         fetchedAt: Date = .now
     ) -> UsageSnapshot {
         let membership = summary.membershipType
@@ -71,6 +72,7 @@ public enum UsageSnapshotMapper {
             billingCycleStart: parseDate(summary.billingCycleStart),
             billingCycleEnd: parseDate(summary.billingCycleEnd),
             cycleHistory: cycleHistory,
+            dailySpend: dailySpend,
             cursorModelsPercentUsed: cursorPct,
             otherModelsPercentUsed: otherPct,
             totalPercentUsed: plan?.totalPercentUsed,

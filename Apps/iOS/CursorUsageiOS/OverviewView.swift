@@ -170,7 +170,7 @@ struct OverviewView: View {
                         }
                     }
                     if layout.burnRateEstimate, let pace = snapshot.pace() {
-                        Text(pace.caption)
+                        Label(pace.caption, systemImage: pace.systemImage)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }

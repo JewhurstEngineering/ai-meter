@@ -18,7 +18,7 @@ struct IncludedUsageSettingsView: View {
                         cycleHistoryPanel(snapshot)
                     }
                     if store.preferences.popover.burnRateEstimate, let pace = snapshot.pace() {
-                        Text(pace.caption)
+                        Label(pace.caption, systemImage: pace.systemImage)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
