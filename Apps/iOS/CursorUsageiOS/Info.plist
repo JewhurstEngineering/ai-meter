@@ -4,10 +4,10 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.cursorusagetracker.ios.refresh</string>
+		<string>com.jamesware.aimeter.ios.refresh</string>
 	</array>
 	<key>CFBundleDisplayName</key>
-	<string>Cursor Usage</string>
+	<string>AI Meter</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>UIBackgroundModes</key>

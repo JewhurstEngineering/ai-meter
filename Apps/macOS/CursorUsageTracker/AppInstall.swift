@@ -7,7 +7,7 @@ enum AppInstall {
     }
 
     static var installedAppURL: URL {
-        applicationsURL.appendingPathComponent("Cursor Usage Tracker.app", isDirectory: true)
+        applicationsURL.appendingPathComponent("AI Meter.app", isDirectory: true)
     }
 
     static var isRunningFromApplications: Bool {
@@ -76,13 +76,13 @@ enum AppInstall {
 
     private static func registerLaunchServices(at appURL: URL) {
         let plugin = appURL
-            .appendingPathComponent("Contents/PlugIns/CursorUsageWidgets.appex", isDirectory: true)
+            .appendingPathComponent("Contents/PlugIns/AIMeterWidgets.appex", isDirectory: true)
         let lsregister = "/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
         _ = run("/usr/bin/xattr", ["-cr", appURL.path])
         _ = run(lsregister, ["-f", appURL.path])
         if FileManager.default.fileExists(atPath: plugin.path) {
             _ = run("/usr/bin/pluginkit", ["-a", plugin.path])
-            _ = run("/usr/bin/pluginkit", ["-e", "use", "-i", "com.cursorusagetracker.app.widgets"])
+            _ = run("/usr/bin/pluginkit", ["-e", "use", "-i", "com.jamesware.aimeter.app.widgets"])
         }
     }
 

@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import CursorUsageCore
+import AIMeterCore
 
 struct MenuBarPopoverView: View {
     @EnvironmentObject private var store: UsageStore
@@ -167,7 +167,7 @@ struct MenuBarPopoverView: View {
             .foregroundStyle(.orange)
             .fixedSize(horizontal: false, vertical: true)
             Button {
-                showReauth = true
+                reconnectDisplayed()
             } label: {
                 Label("Sign in again", systemImage: "arrow.triangle.2.circlepath")
             }
@@ -315,7 +315,7 @@ struct MenuBarPopoverView: View {
         return HStack(alignment: .center, spacing: 8) {
             AppLogo(size: 34)
             VStack(alignment: .leading, spacing: 2) {
-                Text(snapshot?.planDisplayName ?? "Cursor")
+                Text(snapshot?.planDisplayName ?? displayed?.connection.provider.displayName ?? AppAbout.productName)
                     .appFont(.headline)
                 if let fetched = snapshot?.fetchedAt {
                     Text("Updated \(fetched.formatted(date: .omitted, time: .shortened))")
@@ -353,11 +353,29 @@ struct MenuBarPopoverView: View {
         }
     }
 
+    private func reconnectDisplayed() {
+        let provider = displayed?.connection.provider ?? .cursor
+        switch provider {
+        case .claude:
+            Task {
+                do { try await store.connectClaude() }
+                catch { /* lastError is set on the store */ }
+            }
+        case .codex:
+            Task {
+                do { try await store.connectCodex() }
+                catch { /* lastError is set on the store */ }
+            }
+        case .cursor:
+            showReauth = true
+        }
+    }
+
     private var signInPrompt: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Not signed in", systemImage: "person.crop.circle.badge.exclamationmark")
                 .appFont(.subheadline, weight: .semibold)
-            Text("Open Settings → Authentication to connect with Cursor, local session, or a pasted token.")
+            Text("Open Settings → Authentication to connect Cursor, Claude Code, or Codex.")
                 .appFont(.caption)
                 .foregroundStyle(.secondary)
             if store.preferences.popover.thisMacActivity
@@ -445,41 +463,26 @@ struct MenuBarPopoverView: View {
                 alertList(hits)
             }
 
-            if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent {
-                Text("Included usage")
+            if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent || t.sessionPercent || t.weeklyPercent {
+                Text(snapshot.provider == .cursor ? "Included usage" : "Usage windows")
                     .appFont(.caption, weight: .semibold)
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
 
-                if t.cursorModelsPercent, let p = snapshot.cursorModelsPercentUsed {
+                ForEach(visibleWindows(snapshot, toggles: t)) { window in
                     PopoverPoolRow(
-                        title: "Cursor Models",
-                        systemImage: "sparkles",
-                        percent: p,
-                        caption: "First-party included pool"
-                    )
-                }
-                if t.otherModelsPercent, let p = snapshot.otherModelsPercentUsed {
-                    PopoverPoolRow(
-                        title: "Other Models",
-                        systemImage: "cpu",
-                        percent: p,
-                        caption: "API / third-party included pool"
-                    )
-                }
-                if t.totalPercent, let p = snapshot.totalPercentUsed {
-                    PopoverPoolRow(
-                        title: "Total included",
-                        systemImage: "chart.pie.fill",
-                        percent: p,
-                        caption: nil
+                        title: window.title,
+                        systemImage: icon(for: window.role),
+                        percent: window.percentUsed,
+                        caption: windowCaption(window),
+                        role: window.role
                     )
                 }
             }
 
             if t.planSpend || t.bonus || t.onDemand || t.daysRemaining || t.burnRateEstimate {
                 VStack(alignment: .leading, spacing: 8) {
-                    if t.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
+                    if snapshot.provider == .cursor, t.planSpend, let used = snapshot.planUsedCents, let limit = snapshot.planLimitCents {
                         Label {
                             HStack {
                                 Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
@@ -500,6 +503,7 @@ struct MenuBarPopoverView: View {
                     }
 
                     if t.onDemand {
+                        if snapshot.provider == .cursor {
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
                                 Label("On-demand", systemImage: "creditcard.fill")
@@ -537,17 +541,64 @@ struct MenuBarPopoverView: View {
                             }
                             .appFont(.caption)
                         }
+                        } else if let spend = snapshot.spend {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Label(spend.title, systemImage: "creditcard.fill")
+                                    Spacer()
+                                    Text(spend.unlimited ? "Unlimited" : (spend.enabled ? "On" : "Off"))
+                                        .appFont(.caption, weight: .bold)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(
+                                            Capsule().fill(
+                                                (spend.enabled ? theme.ok : theme.danger).opacity(0.18)
+                                            )
+                                        )
+                                        .foregroundStyle(spend.enabled ? theme.ok : theme.danger)
+                                }
+                                .appFont(.subheadline)
+                                if let used = spend.usedCents, let limit = spend.limitCents {
+                                    HStack {
+                                        Text("Used")
+                                            .foregroundStyle(.secondary)
+                                        Spacer()
+                                        Text("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")
+                                            .appFont(.subheadline, weight: .semibold, mono: true)
+                                    }
+                                    .appFont(.caption)
+                                } else if let remaining = spend.remainingCents {
+                                    HStack {
+                                        Text("Balance")
+                                            .foregroundStyle(.secondary)
+                                        Spacer()
+                                        Text(MenuBarFormatter.usd(remaining))
+                                            .appFont(.subheadline, weight: .semibold, mono: true)
+                                    }
+                                    .appFont(.caption)
+                                }
+                            }
+                        }
                     }
 
-                    if t.daysRemaining, let end = snapshot.billingCycleEnd, let days = snapshot.daysRemainingInCycle {
-                        Label(
-                            "Ends \(end.formatted(date: .abbreviated, time: .shortened)) · \(days)d left",
-                            systemImage: "calendar"
-                        )
-                        .appFont(.caption)
-                        .foregroundStyle(.secondary)
+                    if t.daysRemaining {
+                        if snapshot.provider == .cursor, let end = snapshot.billingCycleEnd, let days = snapshot.daysRemainingInCycle {
+                            Label(
+                                "Ends \(end.formatted(date: .abbreviated, time: .shortened)) · \(days)d left",
+                                systemImage: "calendar"
+                            )
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                        } else if let reset = snapshot.nextResetAt {
+                            Label(
+                                "Resets \(reset.formatted(date: .omitted, time: .shortened)) · \(MenuBarFormatter.relative(reset))",
+                                systemImage: "clock.arrow.circlepath"
+                            )
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                        }
                     }
-                    if t.burnRateEstimate, let pace = snapshot.pace() {
+                    if snapshot.provider == .cursor, t.burnRateEstimate, let pace = snapshot.pace() {
                         Label(pace.caption, systemImage: "speedometer")
                             .appFont(.caption)
                             .foregroundStyle(.secondary)
@@ -561,11 +612,11 @@ struct MenuBarPopoverView: View {
                 )
             }
 
-            if t.modelsThisPeriod {
+            if snapshot.provider == .cursor, t.modelsThisPeriod {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
-            if t.cycleChart, !snapshot.cycleHistory.isEmpty {
+            if snapshot.provider == .cursor, t.cycleChart, !snapshot.cycleHistory.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Spend by cycle")
                         .appFont(.caption, weight: .semibold)
@@ -577,13 +628,13 @@ struct MenuBarPopoverView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-            } else if let caption = snapshot.cycleComparisonCaption {
+            } else if snapshot.provider == .cursor, let caption = snapshot.cycleComparisonCaption {
                 Text(caption)
                     .appFont(.caption)
                     .foregroundStyle(.secondary)
             }
 
-            if t.thisMacActivity || t.localRecentChats || t.cloudAgents {
+            if snapshot.provider == .cursor, t.thisMacActivity || t.localRecentChats || t.cloudAgents {
                 PopoverAgentsCard(account: displayed)
             }
 
@@ -592,6 +643,47 @@ struct MenuBarPopoverView: View {
                     .appFont(.caption)
                     .foregroundStyle(.orange)
             }
+        }
+    }
+
+    private func visibleWindows(
+        _ snapshot: UsageSnapshot,
+        toggles: DisplayPreferences.SurfaceToggles
+    ) -> [QuotaWindow] {
+        snapshot.effectiveWindows.filter { window in
+            switch window.role {
+            case .cursorModels: return toggles.cursorModelsPercent
+            case .otherModels: return toggles.otherModelsPercent
+            case .totalIncluded: return toggles.totalPercent
+            case .session: return toggles.sessionPercent
+            case .weekly: return toggles.weeklyPercent
+            case .extra: return true
+            }
+        }
+    }
+
+    private func windowCaption(_ window: QuotaWindow) -> String? {
+        switch window.role {
+        case .cursorModels: return "First-party included pool"
+        case .otherModels: return "API / third-party included pool"
+        case .session, .weekly, .extra:
+            if let reset = window.resetsAt {
+                return "Resets \(MenuBarFormatter.relative(reset))"
+            }
+            return nil
+        case .totalIncluded:
+            return nil
+        }
+    }
+
+    private func icon(for role: QuotaWindowRole) -> String {
+        switch role {
+        case .cursorModels: return "sparkles"
+        case .otherModels: return "cpu"
+        case .totalIncluded: return "chart.pie.fill"
+        case .session: return "clock"
+        case .weekly: return "calendar"
+        case .extra: return "square.grid.2x2"
         }
     }
 
@@ -643,10 +735,11 @@ private struct PopoverPoolRow: View {
     let systemImage: String
     let percent: Double
     let caption: String?
+    var role: QuotaWindowRole = .extra
     @Environment(\.appTheme) private var theme
 
     var body: some View {
-        let tint = theme.color(forPool: title, percent: percent)
+        let tint = theme.color(forRole: role, percent: percent)
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 Image(systemName: systemImage)
@@ -659,7 +752,7 @@ private struct PopoverPoolRow: View {
                     .appFont(.subheadline, weight: .bold, mono: true)
                     .foregroundStyle(tint)
             }
-            UsageProgressBar(percent: percent, tint: tint, pattern: .forPool(title))
+            UsageProgressBar(percent: percent, tint: tint, pattern: .forRole(role))
             if let caption {
                 Text(caption)
                     .appFont(.caption2)

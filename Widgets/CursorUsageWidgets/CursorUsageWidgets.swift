@@ -1,7 +1,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
-import CursorUsageCore
+import AIMeterCore
 
 enum WidgetMetric: String, AppEnum {
     case otherModels
@@ -384,7 +384,7 @@ struct CursorUsageWidgetEntryView: View {
     }
 
     private var emptyLabel: some View {
-        Text("Open Cursor Usage Tracker to sync.")
+        Text("Open AI Meter to sync.")
             .font(.caption)
             .foregroundStyle(.secondary)
     }
@@ -478,7 +478,7 @@ struct CursorUsageWidget: Widget {
         AppIntentConfiguration(kind: kind, provider: Provider<UsageWidgetIntent>()) { entry in
             CursorUsageWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Cursor Usage")
+        .configurationDisplayName("AI Meter")
         .description("Included pools, spend, and on-demand. Small, medium, and large.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }

@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct PhoneSettingsView: View {
     var body: some View {

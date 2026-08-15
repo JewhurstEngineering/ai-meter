@@ -1,8 +1,8 @@
 import BackgroundTasks
-import CursorUsageCore
+import AIMeterCore
 
 enum BackgroundRefresh {
-    static let identifier = "com.cursorusagetracker.ios.refresh"
+    static let identifier = "com.jamesware.aimeter.ios.refresh"
 
     static func register(store: UsageStore) {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in

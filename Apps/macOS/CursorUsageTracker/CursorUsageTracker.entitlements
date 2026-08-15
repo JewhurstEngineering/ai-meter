@@ -8,7 +8,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>6998422DKP.com.cursorusagetracker.shared</string>
+		<string>6998422DKP.com.jamesware.aimeter.shared</string>
 	</array>
 </dict>
 </plist>

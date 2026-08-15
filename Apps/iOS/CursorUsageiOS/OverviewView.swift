@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct OverviewView: View {
     @EnvironmentObject private var store: UsageStore
@@ -14,7 +14,7 @@ struct OverviewView: View {
             PhoneAccountPager { account in
                 accountPage(account)
             }
-            .navigationTitle("Cursor Usage Tracker")
+            .navigationTitle("AI Meter")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

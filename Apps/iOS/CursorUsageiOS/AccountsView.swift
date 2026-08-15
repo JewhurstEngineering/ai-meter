@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct AccountsView: View {
     @EnvironmentObject private var store: UsageStore

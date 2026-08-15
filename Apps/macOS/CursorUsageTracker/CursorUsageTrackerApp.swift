@@ -1,6 +1,6 @@
 import AppKit
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {

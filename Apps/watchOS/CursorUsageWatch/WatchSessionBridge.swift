@@ -1,7 +1,7 @@
 import SwiftUI
 import WatchConnectivity
 import WidgetKit
-import CursorUsageCore
+import AIMeterCore
 
 @MainActor
 final class WatchSessionBridge: NSObject, WCSessionDelegate, ObservableObject {

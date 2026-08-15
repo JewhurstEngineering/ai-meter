@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 #if os(macOS)
 import AppKit
 #elseif os(iOS)
@@ -25,12 +25,31 @@ struct ThemePalette: Equatable {
     }
 
     func color(forPool title: String, percent: Double) -> Color {
+        color(forRole: role(forPoolTitle: title), percent: percent)
+    }
+
+    func color(forWindow window: QuotaWindow, percent: Double) -> Color {
+        color(forRole: window.role, percent: percent)
+    }
+
+    func color(forRole role: QuotaWindowRole, percent: Double) -> Color {
         if percent >= 85 { return poolColor(percent: percent) }
+        switch role {
+        case .cursorModels, .session: return cursorModels
+        case .otherModels, .weekly: return otherModels
+        case .totalIncluded: return total
+        case .extra: return spend
+        }
+    }
+
+    private func role(forPoolTitle title: String) -> QuotaWindowRole {
         switch title {
-        case "Cursor Models": return cursorModels
-        case "Other Models": return otherModels
-        case "Total included", "Total Included", "Total": return total
-        default: return poolColor(percent: percent)
+        case "Cursor Models": return .cursorModels
+        case "Other Models": return .otherModels
+        case "Total included", "Total Included", "Total": return .totalIncluded
+        case "5-hour", "Session": return .session
+        case "7-day", "Weekly": return .weekly
+        default: return .extra
         }
     }
 

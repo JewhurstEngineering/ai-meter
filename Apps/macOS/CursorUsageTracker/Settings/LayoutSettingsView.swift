@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct LayoutSettingsView: View {
     @EnvironmentObject private var store: UsageStore
@@ -134,6 +134,8 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: binding(\.cursorModelsPercent))
             MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: binding(\.otherModelsPercent))
             MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: binding(\.totalPercent))
+            MetricToggleRow(title: "Session %", systemImage: "clock", isOn: binding(\.sessionPercent))
+            MetricToggleRow(title: "Weekly %", systemImage: "calendar", isOn: binding(\.weeklyPercent))
             MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: binding(\.planSpend))
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
@@ -174,7 +176,7 @@ struct LayoutSettingsView: View {
         case .icons:
             return "Icons: sparkles / cpu / credit card stand in for each metric."
         case .shortWords:
-            return "Words: “Cursor 12% · Other 88% · On-demand off”."
+            return "Words: “Cursor 12% · Claude 44% · Session 8%”."
         }
     }
 
@@ -183,7 +185,7 @@ struct LayoutSettingsView: View {
         case .activeOnly:
             return "One account in the menu bar. Switch in Authentication or with popover tabs."
         case .combined:
-            return "One item stacks a headline % for each saved account, e.g. work 12% · personal 88%."
+            return "One item stacks a headline % for each saved account, e.g. Cursor 12% · Claude 44% · Codex 8%."
         case .separateItems:
             return "One menu bar extra per account, each with its own popover."
         }
@@ -355,6 +357,14 @@ private struct PopoverPreviewCard: View {
                 }
                 if t.totalPercent {
                     previewPool(title: "Total included", icon: "chart.pie", percent: snapshot?.totalPercentUsed ?? 12)
+                }
+                if t.sessionPercent {
+                    let p = snapshot?.effectiveWindows.first { $0.role == .session }?.percentUsed ?? 40
+                    previewPool(title: "5-hour", icon: "clock", percent: p)
+                }
+                if t.weeklyPercent {
+                    let p = snapshot?.effectiveWindows.first { $0.role == .weekly }?.percentUsed ?? 22
+                    previewPool(title: "7-day", icon: "calendar", percent: p)
                 }
 
                 if t.planSpend, let used = snapshot?.planUsedCents, let limit = snapshot?.planLimitCents {

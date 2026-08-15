@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 import Combine
-import CursorUsageCore
+import AIMeterCore
 
 /// AppKit status item — SwiftUI `MenuBarExtra` labels get clipped/`…` truncated.
 @MainActor

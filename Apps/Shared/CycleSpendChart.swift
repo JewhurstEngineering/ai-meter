@@ -1,6 +1,6 @@
 import SwiftUI
 import Charts
-import CursorUsageCore
+import AIMeterCore
 
 struct CycleSpendChart: View {
     let cycles: [UsageSnapshot.BillingCycleSpend]

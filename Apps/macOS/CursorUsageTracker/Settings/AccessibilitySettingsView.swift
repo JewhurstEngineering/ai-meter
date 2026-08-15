@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct AccessibilitySettingsView: View {
     @EnvironmentObject private var store: UsageStore

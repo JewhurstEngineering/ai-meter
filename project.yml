@@ -1,6 +1,6 @@
-name: CursorUsageTracker
+name: AIMeter
 options:
-  bundleIdPrefix: com.cursorusagetracker
+  bundleIdPrefix: com.jamesware.aimeter
   deploymentTarget:
     macOS: "14.0"
     iOS: "17.0"
@@ -14,12 +14,12 @@ settings:
     CURRENT_PROJECT_VERSION: "36"
     DEVELOPMENT_TEAM: "6998422DKP"
     CODE_SIGN_STYLE: Automatic
-    INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 James Jewhurst"
+    INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 JamesWare.dev"
 packages:
-  CursorUsageCore:
-    path: Packages/CursorUsageCore
+  AIMeterCore:
+    path: Packages/AIMeterCore
 targets:
-  CursorUsageTracker:
+  AIMeter:
     type: application
     platform: macOS
     sources:
@@ -27,8 +27,8 @@ targets:
       - path: Apps/Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app
-        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage Tracker
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app
+        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         INFOPLIST_KEY_LSUIElement: YES
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
         INFOPLIST_KEY_CFBundleIconName: AppIcon
@@ -40,11 +40,11 @@ targets:
         COMBINE_HIDPI_IMAGES: YES
         ENABLE_DEBUG_DYLIB: NO
     dependencies:
-      - package: CursorUsageCore
-      - target: CursorUsageWidgets
+      - package: AIMeterCore
+      - target: AIMeterWidgets
         embed: true
       - sdk: WidgetKit.framework
-  CursorUsageWidgets:
+  AIMeterWidgets:
     type: app-extension
     platform: macOS
     sources:
@@ -54,10 +54,10 @@ targets:
           - CycleSpendChart.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.app.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app.widgets
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/CursorUsageWidgets/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage
+        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
         CODE_SIGN_ENTITLEMENTS: Widgets/CursorUsageWidgets/CursorUsageWidgets.entitlements
         SKIP_INSTALL: YES
@@ -69,8 +69,8 @@ targets:
           - "@executable_path/../Frameworks"
           - "@executable_path/../../../../Frameworks"
     dependencies:
-      - package: CursorUsageCore
-  CursorUsageiOS:
+      - package: AIMeterCore
+  AIMeteriOS:
     type: application
     platform: iOS
     sources:
@@ -80,23 +80,23 @@ targets:
           - Assets.xcassets/AppIcon.appiconset
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.ios
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: "NO"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Apps/iOS/CursorUsageiOS/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage
+        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_ENTITLEMENTS: Apps/iOS/CursorUsageiOS/CursorUsageiOS.entitlements
     dependencies:
-      - package: CursorUsageCore
-      - target: CursorUsageiOSWidgets
+      - package: AIMeterCore
+      - target: AIMeteriOSWidgets
         embed: true
-      - target: CursorUsageWatch
+      - target: AIMeterWatch
         embed: true
       - sdk: WidgetKit.framework
       - sdk: WatchConnectivity.framework
-  CursorUsageiOSWidgets:
+  AIMeteriOSWidgets:
     type: app-extension
     platform: iOS
     sources:
@@ -108,16 +108,16 @@ targets:
           - CycleSpendChart.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.ios.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.widgets
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/CursorUsageWidgets/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage
+        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         CODE_SIGN_ENTITLEMENTS: Widgets/iOS/CursorUsageiOSWidgets.entitlements
         SKIP_INSTALL: YES
     dependencies:
-      - package: CursorUsageCore
-  CursorUsageWatch:
+      - package: AIMeterCore
+  AIMeterWatch:
     type: application
     platform: watchOS
     sources:
@@ -128,56 +128,56 @@ targets:
           - CycleSpendChart.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.ios.watchkitapp
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.watchkitapp
         TARGETED_DEVICE_FAMILY: "4"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Apps/watchOS/CursorUsageWatch/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage
+        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_ENTITLEMENTS: Apps/watchOS/CursorUsageWatch/CursorUsageWatch.entitlements
         SKIP_INSTALL: YES
     dependencies:
-      - package: CursorUsageCore
-      - target: CursorUsageWatchWidgets
+      - package: AIMeterCore
+      - target: AIMeterWatchWidgets
         embed: true
       - sdk: WidgetKit.framework
       - sdk: WatchConnectivity.framework
-  CursorUsageWatchWidgets:
+  AIMeterWatchWidgets:
     type: app-extension
     platform: watchOS
     sources:
       - Widgets/watchOS
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.cursorusagetracker.ios.watchkitapp.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.watchkitapp.widgets
         TARGETED_DEVICE_FAMILY: "4"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/watchOS/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Cursor Usage
+        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         CODE_SIGN_ENTITLEMENTS: Widgets/watchOS/CursorUsageWatchWidgets.entitlements
         SKIP_INSTALL: YES
     dependencies:
-      - package: CursorUsageCore
+      - package: AIMeterCore
 schemes:
-  CursorUsageTracker:
+  AIMeter:
     build:
       targets:
-        CursorUsageTracker: all
-        CursorUsageWidgets: all
+        AIMeter: all
+        AIMeterWidgets: all
     run:
       config: Release
     archive:
       config: Release
-  CursorUsageiOS:
+  AIMeteriOS:
     build:
       targets:
-        CursorUsageiOS: all
-        CursorUsageiOSWidgets: all
-        CursorUsageWatch: all
-        CursorUsageWatchWidgets: all
+        AIMeteriOS: all
+        AIMeteriOSWidgets: all
+        AIMeterWatch: all
+        AIMeterWatchWidgets: all
     run:
       config: Debug
-      executable: CursorUsageiOS
+      executable: AIMeteriOS
     archive:
       config: Release
       revealArchiveInOrganizer: true

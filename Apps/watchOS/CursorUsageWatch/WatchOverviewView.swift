@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct WatchOverviewView: View {
     @EnvironmentObject private var session: WatchSessionBridge
@@ -13,7 +13,7 @@ struct WatchOverviewView: View {
                     ContentUnavailableView(
                         "Waiting for iPhone",
                         systemImage: "iphone",
-                        description: Text("Open Cursor Usage on iPhone to sync a snapshot. Tokens never come to the Watch.")
+                        description: Text("Open AI Meter on iPhone to sync a snapshot. Tokens never come to the Watch.")
                     )
                 }
             }

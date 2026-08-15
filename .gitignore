@@ -2,6 +2,7 @@
 DerivedData/
 .swiftpm/
 Packages/CursorUsageCore/.build/
+Packages/AIMeterCore/.build/
 xcuserdata/
 *.xcuserstate
 *.moved-aside

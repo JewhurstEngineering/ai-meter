@@ -1,6 +1,6 @@
 import Foundation
 import WatchConnectivity
-import CursorUsageCore
+import AIMeterCore
 
 /// Pushes sanitized `WidgetSnapshot` JSON to the paired Watch. Never sends tokens.
 @MainActor

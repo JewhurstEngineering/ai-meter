@@ -1,6 +1,8 @@
 import Foundation
 
 enum AppAbout {
+    static let productName = "AI Meter"
+    static let productLegalName = "JamesWare AI Meter"
     static let copyrightHolder = "JAMESWARE.DEV"
     static let organization = "Made with care by JamesWare.dev"
     static var copyrightYear: String {

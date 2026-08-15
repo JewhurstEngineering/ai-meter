@@ -1,4 +1,5 @@
 import SwiftUI
+import AIMeterCore
 
 struct UsageProgressBar: View {
     let percent: Double
@@ -38,10 +39,19 @@ enum ProgressBarPattern {
 
     static func forPool(_ title: String) -> ProgressBarPattern {
         switch title {
-        case "Cursor Models": return .stripes
-        case "Other Models": return .dots
+        case "Cursor Models", "5-hour", "Session": return .stripes
+        case "Other Models", "7-day", "Weekly": return .dots
         case "Total included", "Total Included", "Total": return .hatch
         default: return .dashes
+        }
+    }
+
+    static func forRole(_ role: QuotaWindowRole) -> ProgressBarPattern {
+        switch role {
+        case .cursorModels, .session: return .stripes
+        case .otherModels, .weekly: return .dots
+        case .totalIncluded: return .hatch
+        case .extra: return .dashes
         }
     }
 

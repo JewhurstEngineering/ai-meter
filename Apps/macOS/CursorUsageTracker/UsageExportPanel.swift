@@ -1,6 +1,6 @@
 import AppKit
 import UniformTypeIdentifiers
-import CursorUsageCore
+import AIMeterCore
 
 enum UsageExportPanel {
     static func present(snapshot: UsageSnapshot) {

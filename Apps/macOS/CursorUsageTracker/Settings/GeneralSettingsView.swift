@@ -1,5 +1,5 @@
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 import ServiceManagement
 
 struct GeneralSettingsView: View {
@@ -70,6 +70,21 @@ struct GeneralSettingsView: View {
                         }
                     }
 
+                    HStack(alignment: .top, spacing: 8) {
+                        warningCard(
+                            title: "Session",
+                            systemImage: "clock",
+                            tint: theme.cursorModels,
+                            percent: warningBinding(\.sessionPercent)
+                        )
+                        warningCard(
+                            title: "Weekly",
+                            systemImage: "calendar",
+                            tint: theme.otherModels,
+                            percent: warningBinding(\.weeklyPercent)
+                        )
+                    }
+
                     Text(
                         onDemandUnlimited
                             ? "On-demand is unlimited — menu bar warns at the spend amount you set."
@@ -132,6 +147,18 @@ struct GeneralSettingsView: View {
                             ) {
                                 totalThresholdStepper
                             }
+                            channelToggle(
+                                "Session",
+                                detail: "\(Int(store.preferences.menuBarWarnings.sessionPercent))%",
+                                tint: theme.cursorModels,
+                                isOn: channelBinding(\.session)
+                            )
+                            channelToggle(
+                                "Weekly",
+                                detail: "\(Int(store.preferences.menuBarWarnings.weeklyPercent))%",
+                                tint: theme.otherModels,
+                                isOn: channelBinding(\.weekly)
+                            )
                         }
 
                         VStack(alignment: .leading, spacing: 6) {
@@ -367,7 +394,9 @@ struct GeneralSettingsView: View {
                     w.cursorModelsPercent,
                     w.otherModelsPercent,
                     w.onDemandAndLimitsPercent,
-                    w.totalIncludedPercent
+                    w.totalIncludedPercent,
+                    w.sessionPercent,
+                    w.weeklyPercent
                 )
                 store.applyPreferences(prefs)
             }

@@ -1,6 +1,6 @@
 import WidgetKit
 import SwiftUI
-import CursorUsageCore
+import AIMeterCore
 
 struct WatchProvider: TimelineProvider {
     func placeholder(in context: Context) -> WatchEntry {
@@ -95,7 +95,7 @@ struct CursorUsageWatchWidget: Widget {
         StaticConfiguration(kind: kind, provider: WatchProvider()) { entry in
             WatchComplicationView(entry: entry)
         }
-        .configurationDisplayName("Cursor Usage")
+        .configurationDisplayName("AI Meter")
         .description("Other Models % from the iPhone snapshot. No tokens on Watch.")
         .supportedFamilies([.accessoryCircular, .accessoryRectangular, .accessoryInline, .accessoryCorner])
     }

@@ -1,6 +1,6 @@
 import SwiftUI
 import AppKit
-import CursorUsageCore
+import AIMeterCore
 
 struct IncludedUsageSettingsView: View {
     @EnvironmentObject private var store: UsageStore
@@ -752,7 +752,7 @@ struct AboutSettingsView: View {
                                 .fixedSize(horizontal: false, vertical: true)
 
                             if isRunningFromApplications {
-                                Label("Installed in Applications — search “Cursor Usage”.", systemImage: "checkmark.circle.fill")
+                                Label("Installed in Applications — search “AI Meter”.", systemImage: "checkmark.circle.fill")
                                     .font(.caption)
                                     .foregroundStyle(.green)
                                     .fixedSize(horizontal: false, vertical: true)
@@ -790,8 +790,8 @@ struct AboutSettingsView: View {
                             }
 
                             aboutBullet("1.circle", "Install (button above) — does not launch a second copy")
-                            aboutBullet("2.circle", "Quit this Xcode build, then open Applications ▸ Cursor Usage Tracker")
-                            aboutBullet("3.circle", "Right-click desktop → Edit Widgets → Cursor Usage presets. Re-add after this update.")
+                            aboutBullet("2.circle", "Quit this Xcode build, then open Applications ▸ AI Meter")
+                            aboutBullet("3.circle", "Right-click desktop → Edit Widgets → AI Meter presets. Re-add after this update.")
 
                             if let installMessage {
                                 Text(installMessage)
@@ -835,9 +835,9 @@ struct AboutSettingsView: View {
             AppLogo(size: heroTextHeight)
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {
-                Text("Cursor Usage Tracker")
+                Text(AppAbout.productLegalName)
                     .font(.title2.weight(.bold))
-                Text("Menu bar meter for Cursor usage — unofficial, local-first.")
+                Text("Menu bar meter for Cursor, Claude, and Codex — unofficial, local-first.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

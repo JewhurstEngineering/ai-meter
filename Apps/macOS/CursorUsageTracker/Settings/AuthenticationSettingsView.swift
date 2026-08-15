@@ -1,6 +1,6 @@
 import SwiftUI
 import WebKit
-import CursorUsageCore
+import AIMeterCore
 
 struct AuthenticationSettingsView: View {
     @EnvironmentObject private var store: UsageStore
@@ -72,9 +72,28 @@ struct AuthenticationSettingsView: View {
                                 }
                             }
                         }
+                        authButton("Add Claude Code", systemImage: "brain") {
+                            Task {
+                                do {
+                                    try await store.connectClaude()
+                                    statusMessage = "Connected Claude."
+                                } catch {
+                                    statusMessage = store.lastError ?? error.localizedDescription
+                                }
+                            }
+                        }
+                        authButton("Add Codex", systemImage: "chevron.left.forwardslash.chevron.right") {
+                            Task {
+                                do {
+                                    try await store.connectCodex()
+                                    statusMessage = "Connected Codex."
+                                } catch {
+                                    statusMessage = store.lastError ?? error.localizedDescription
+                                }
+                            }
+                        }
                         authButton("Re-authenticate", systemImage: "arrow.triangle.2.circlepath") {
-                            reauthAccountID = store.activeAccountID
-                            showLogin = true
+                            Task { await reauthenticateActive() }
                         }
                         .disabled(store.activeAccountID == nil)
                         authButton("Sign Out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
@@ -84,7 +103,7 @@ struct AuthenticationSettingsView: View {
                         .disabled(store.connections.isEmpty)
                     }
 
-                    Text("Prefers Cursor IDE (state.vscdb). Agent keychain can be a different account. Sign in again to add a second session.")
+                    Text("Prefers Cursor IDE (state.vscdb). Claude uses Claude Code credentials; Codex uses ~/.codex/auth.json. Sign in again to add a second Cursor session.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -125,7 +144,7 @@ struct AuthenticationSettingsView: View {
                     compact: true
                 ) {
                     if store.connections.isEmpty {
-                        Text("Add an account with Sign in, Connect from Cursor IDE, or paste a token.")
+                        Text("Add Cursor, Claude Code, or Codex from the buttons above.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -145,6 +164,7 @@ struct AuthenticationSettingsView: View {
                     }
                 }
 
+                if store.activeAccount?.connection.provider == .cursor {
                 SettingsPanel(
                     title: "Cloud Agents API key",
                     systemImage: "cloud",
@@ -209,6 +229,7 @@ struct AuthenticationSettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                }
                 }
 
                 SettingsPanel(
@@ -280,6 +301,9 @@ struct AuthenticationSettingsView: View {
                     Text(account.connection.displayLabel)
                         .font(.caption.weight(.semibold))
                 }
+                Text(account.connection.provider.displayName)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
                 if let email = account.connection.email {
                     Text(email)
                         .font(.caption2)
@@ -320,6 +344,29 @@ struct AuthenticationSettingsView: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(Color.primary.opacity(isActive ? 0.06 : 0.03))
         )
+    }
+
+    private func reauthenticateActive() async {
+        guard let account = store.activeAccount else { return }
+        switch account.connection.provider {
+        case .cursor:
+            reauthAccountID = account.id
+            showLogin = true
+        case .claude:
+            do {
+                try await store.connectClaude()
+                statusMessage = "Claude session refreshed."
+            } catch {
+                statusMessage = store.lastError ?? error.localizedDescription
+            }
+        case .codex:
+            do {
+                try await store.connectCodex()
+                statusMessage = "Codex session refreshed."
+            } catch {
+                statusMessage = store.lastError ?? error.localizedDescription
+            }
+        }
     }
 
     private func authButton(
