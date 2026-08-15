@@ -156,7 +156,11 @@ public final class UsageStore: ObservableObject {
     private func connectClaude(setErrorOnFailure: Bool) async throws -> UUID? {
         #if os(macOS)
         guard let cred = ClaudeLocalAuthReader.preferredCredential() else {
-            if setErrorOnFailure { setActiveError("No local Claude Code session found.") }
+            if setErrorOnFailure {
+                setActiveError(
+                    "No local Claude Code session found. Sign in with Claude Code (`claude` in Terminal), click Always Allow on the Keychain prompt, then try Add Claude Code again."
+                )
+            }
             throw ProviderUsageError.missingCredentials
         }
         do {
@@ -177,7 +181,9 @@ public final class UsageStore: ObservableObject {
             return id
         } catch {
             if setErrorOnFailure {
-                setActiveError("Claude connect failed. \(error.localizedDescription)")
+                setActiveError(
+                    "Claude connect failed. Click Always Allow on the Keychain prompt, or sign in with Claude Code first (`claude` in Terminal), then try again."
+                )
             }
             throw error
         }
@@ -190,7 +196,11 @@ public final class UsageStore: ObservableObject {
     private func connectCodex(setErrorOnFailure: Bool) async throws -> UUID? {
         #if os(macOS)
         guard let cred = CodexLocalAuthReader.preferredCredential() else {
-            if setErrorOnFailure { setActiveError("No local Codex session found.") }
+            if setErrorOnFailure {
+                setActiveError(
+                    "No local Codex session found. In Terminal run `codex login`, then click Add Codex."
+                )
+            }
             throw ProviderUsageError.missingCredentials
         }
         do {
@@ -212,7 +222,9 @@ public final class UsageStore: ObservableObject {
             return id
         } catch {
             if setErrorOnFailure {
-                setActiveError("Codex connect failed. \(error.localizedDescription)")
+                setActiveError(
+                    "Codex connect failed. Your ~/.codex/auth.json login is stale. In Terminal run `codex login`, then click Add Codex again."
+                )
             }
             throw error
         }

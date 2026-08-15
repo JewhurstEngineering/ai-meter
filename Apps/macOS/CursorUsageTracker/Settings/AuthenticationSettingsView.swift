@@ -103,7 +103,7 @@ struct AuthenticationSettingsView: View {
                         .disabled(store.connections.isEmpty)
                     }
 
-                    Text("Prefers Cursor IDE (state.vscdb). Claude uses Claude Code credentials; Codex uses ~/.codex/auth.json. Sign in again to add a second Cursor session.")
+                    Text("Cursor can sign in in-app. Claude and Codex reuse the CLI login on this Mac — there is no browser OAuth in AI Meter. Claude: click Always Allow on the Keychain prompt. Codex: run `codex login` in Terminal, then Add Codex.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
