@@ -8,17 +8,18 @@ cd "$(dirname "$0")/.."
 
 PROFILE="${NOTARY_KEYCHAIN_PROFILE:-AC_PASSWORD}"
 DIST="${PWD}/dist/mac"
-ARCHIVE="${DIST}/CursorUsageTracker.xcarchive"
+ARCHIVE="${DIST}/AIMeter.xcarchive"
 EXPORT="${DIST}/export"
-ZIP="${DIST}/CursorUsageTracker.zip"
+APP="${EXPORT}/AIMeter.app"
+ZIP="${DIST}/AIMeter.zip"
 
 mkdir -p "${DIST}"
 xcodegen generate
 
 echo "Archiving Mac Release…"
 xcodebuild \
-  -project CursorUsageTracker.xcodeproj \
-  -scheme CursorUsageTracker \
+  -project AIMeter.xcodeproj \
+  -scheme AIMeter \
   -destination 'generic/platform=macOS' \
   -configuration Release \
   -archivePath "${ARCHIVE}" \
@@ -37,9 +38,8 @@ then
   exit 1
 fi
 
-APP="${EXPORT}/CursorUsageTracker.app"
 if [[ ! -d "${APP}" ]]; then
-  echo "Export did not produce CursorUsageTracker.app" >&2
+  echo "Export did not produce AIMeter.app" >&2
   exit 1
 fi
 
@@ -56,4 +56,6 @@ fi
 echo "Submitting to Apple notary service…"
 xcrun notarytool submit "${ZIP}" --keychain-profile "${PROFILE}" --wait
 xcrun stapler staple "${APP}"
+ditto -c -k --keepParent "${APP}" "${ZIP}"
+echo "Notarized zip: ${ZIP}"
 echo "Notarized app: ${APP}"

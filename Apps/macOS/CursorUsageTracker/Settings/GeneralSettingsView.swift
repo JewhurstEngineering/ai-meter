@@ -75,13 +75,15 @@ struct GeneralSettingsView: View {
                             title: "Session",
                             systemImage: "clock",
                             tint: theme.cursorModels,
-                            percent: warningBinding(\.sessionPercent)
+                            percent: warningBinding(\.sessionPercent),
+                            providers: [.claude, .codex]
                         )
                         warningCard(
                             title: "Weekly",
                             systemImage: "calendar",
                             tint: theme.otherModels,
-                            percent: warningBinding(\.weeklyPercent)
+                            percent: warningBinding(\.weeklyPercent),
+                            providers: [.claude, .codex]
                         )
                     }
 
@@ -151,13 +153,15 @@ struct GeneralSettingsView: View {
                                 "Session",
                                 detail: "\(Int(store.preferences.menuBarWarnings.sessionPercent))%",
                                 tint: theme.cursorModels,
-                                isOn: channelBinding(\.session)
+                                isOn: channelBinding(\.session),
+                                providers: [.claude, .codex]
                             )
                             channelToggle(
                                 "Weekly",
                                 detail: "\(Int(store.preferences.menuBarWarnings.weeklyPercent))%",
                                 tint: theme.otherModels,
-                                isOn: channelBinding(\.weekly)
+                                isOn: channelBinding(\.weekly),
+                                providers: [.claude, .codex]
                             )
                         }
 
@@ -265,7 +269,8 @@ struct GeneralSettingsView: View {
         title: String,
         systemImage: String,
         tint: Color,
-        percent: Binding<Double>
+        percent: Binding<Double>,
+        providers: [ProviderKind] = []
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 4) {
@@ -275,6 +280,9 @@ struct GeneralSettingsView: View {
                 Text(title)
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
+                if !providers.isEmpty {
+                    ProviderScopeIcons(providers: providers)
+                }
                 Spacer(minLength: 0)
                 Text("\(Int(percent.wrappedValue))%")
                     .font(.subheadline.monospacedDigit().weight(.bold))
@@ -303,9 +311,10 @@ struct GeneralSettingsView: View {
         _ title: String,
         detail: String,
         tint: Color,
-        isOn: Binding<Bool>
+        isOn: Binding<Bool>,
+        providers: [ProviderKind] = []
     ) -> some View {
-        channelToggle(title, detail: detail, tint: tint, isOn: isOn) { EmptyView() }
+        channelToggle(title, detail: detail, tint: tint, isOn: isOn, providers: providers) { EmptyView() }
     }
 
     private func channelToggle<Trailing: View>(
@@ -313,13 +322,19 @@ struct GeneralSettingsView: View {
         detail: String,
         tint: Color,
         isOn: Binding<Bool>,
+        providers: [ProviderKind] = [],
         @ViewBuilder trailing: () -> Trailing
     ) -> some View {
         HStack(spacing: 8) {
             Toggle(isOn: isOn) {
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(title)
-                        .font(.caption.weight(.semibold))
+                    HStack(spacing: 4) {
+                        Text(title)
+                            .font(.caption.weight(.semibold))
+                        if !providers.isEmpty {
+                            ProviderScopeIcons(providers: providers)
+                        }
+                    }
                     Text(detail)
                         .font(.caption2.monospacedDigit())
                         .foregroundStyle(tint)

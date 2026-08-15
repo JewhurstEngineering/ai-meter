@@ -19,6 +19,15 @@ final class ProviderUsageMapperTests: XCTestCase {
         XCTAssertTrue(snap.spend?.enabled == true)
     }
 
+    func testClaudeUtilizationOneIsOnePercentNotOneHundred() throws {
+        let json = """
+        {"five_hour":{"utilization":1.0,"resets_at":"2026-08-15T01:00:00.000Z"},"seven_day":{"utilization":0.4}}
+        """.data(using: .utf8)!
+        let snap = try ClaudeUsageMapper.map(json)
+        XCTAssertEqual(snap.windows.first { $0.role == .session }?.percentUsed ?? 0, 1, accuracy: 0.01)
+        XCTAssertEqual(snap.windows.first { $0.role == .weekly }?.percentUsed ?? 0, 0.4, accuracy: 0.01)
+    }
+
     func testCodexMapperReadsWindowsCreditsAndExtras() throws {
         let data = try fixture("codex_wham_usage.json")
         let snap = try CodexUsageMapper.map(data)

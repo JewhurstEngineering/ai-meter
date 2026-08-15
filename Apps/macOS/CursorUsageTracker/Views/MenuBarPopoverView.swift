@@ -2,13 +2,18 @@ import SwiftUI
 import AppKit
 import AIMeterCore
 
+private enum PopoverPane: Equatable {
+    case all
+    case account(UUID)
+}
+
 struct MenuBarPopoverView: View {
     @EnvironmentObject private var store: UsageStore
     @Environment(\.appTheme) private var theme
     /// When set (separate menu bar items), lock this popover to one account — no tabs.
     var focusedAccountID: UUID? = nil
     var onIdealHeight: ((CGFloat) -> Void)? = nil
-    @State private var selectedTab: UUID?
+    @State private var pane: PopoverPane = .all
     @State private var bodyHeight: CGFloat = 0
     @State private var topChromeHeight: CGFloat = 70
     @State private var bottomChromeHeight: CGFloat = 44
@@ -26,12 +31,17 @@ struct MenuBarPopoverView: View {
         max(80, popoverMaxHeight - topChromeHeight - bottomChromeHeight)
     }
 
+    private var showingAll: Bool {
+        focusedAccountID == nil && showAccountTabs && pane == .all
+    }
+
     private var displayed: AccountRuntime? {
         if let focusedAccountID {
             return store.account(focusedAccountID)
         }
-        if let selectedTab, let account = store.account(selectedTab) {
-            return account
+        if showingAll { return nil }
+        if case .account(let id) = pane {
+            return store.account(id) ?? store.activeAccount
         }
         return store.activeAccount
     }
@@ -68,7 +78,13 @@ struct MenuBarPopoverView: View {
             }
 
             ScrollView(.vertical, showsIndicators: bodyHeight > maxBodyHeight + 1) {
-                popoverBody
+                Group {
+                    if showingAll {
+                        allAccountsBody
+                    } else {
+                        popoverBody
+                    }
+                }
                     .background {
                         GeometryReader { geo in
                             Color.clear.preference(key: PopoverBodyHeightKey.self, value: geo.size.height)
@@ -109,12 +125,18 @@ struct MenuBarPopoverView: View {
             reportIdealHeight(body: bodyHeight, top: topChromeHeight, bottom: newValue)
         }
         .onAppear {
-            selectedTab = focusedAccountID ?? store.activeAccountID
+            if let focusedAccountID {
+                pane = .account(focusedAccountID)
+            } else if store.connections.count > 1 {
+                pane = .all
+            } else if let id = store.activeAccountID {
+                pane = .account(id)
+            }
             store.refreshLocalActivity()
         }
         .onChange(of: store.activeAccountID) { _, newValue in
-            if focusedAccountID == nil, selectedTab == nil {
-                selectedTab = newValue
+            if focusedAccountID == nil, pane == .all, store.connections.count < 2, let newValue {
+                pane = .account(newValue)
             }
         }
         .sheet(isPresented: $showReauth) {
@@ -127,6 +149,85 @@ struct MenuBarPopoverView: View {
         let total = top + scroll + bottom
         guard total > 1 else { return }
         onIdealHeight?(total)
+    }
+
+    @ViewBuilder
+    private var allAccountsBody: some View {
+        let t = store.preferences.popover
+        VStack(alignment: .leading, spacing: 10) {
+            if !AppInstall.isRunningFromApplications, !installBannerDismissed {
+                installBanner
+            }
+            ForEach(store.accounts) { account in
+                allAccountCard(account, toggles: t)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func allAccountCard(
+        _ account: AccountRuntime,
+        toggles: DisplayPreferences.SurfaceToggles
+    ) -> some View {
+        let provider = account.connection.provider
+        return VStack(alignment: .leading, spacing: 8) {
+            Button {
+                pane = .account(account.id)
+                if store.preferences.menuBarAccountMode == .activeOnly {
+                    store.setActive(id: account.id)
+                }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: provider.systemImage)
+                    Text(account.connection.displayLabel)
+                        .appFont(.subheadline, weight: .semibold)
+                    Spacer(minLength: 4)
+                    Text(account.snapshot?.planDisplayName ?? provider.displayName)
+                        .appFont(.caption)
+                        .foregroundStyle(.secondary)
+                    Image(systemName: "chevron.right")
+                        .appFont(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .buttonStyle(.plain)
+            .help("Open \(account.connection.displayLabel) details")
+
+            if let snapshot = account.snapshot {
+                let windows = visibleWindows(snapshot, toggles: toggles)
+                if windows.isEmpty {
+                    Text("No usage bars enabled for this provider.")
+                        .appFont(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    ForEach(windows) { window in
+                        PopoverPoolRow(
+                            title: window.title,
+                            systemImage: icon(for: window.role),
+                            percent: window.percentUsed,
+                            caption: nil,
+                            role: window.role
+                        )
+                    }
+                }
+            } else if account.isRefreshing {
+                ProgressView()
+                    .controlSize(.small)
+            } else {
+                Text(account.lastError ?? "No usage data yet.")
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
     }
 
     @ViewBuilder
@@ -285,29 +386,43 @@ struct MenuBarPopoverView: View {
 
     private var accountTabs: some View {
         HStack(spacing: 6) {
+            tabChip("All", selected: pane == .all, systemImage: "square.grid.2x2") {
+                pane = .all
+            }
             ForEach(store.accounts) { account in
-                let selected = (selectedTab ?? store.activeAccountID) == account.id
-                Button {
-                    selectedTab = account.id
+                let selected = {
+                    if case .account(let id) = pane { return id == account.id }
+                    return false
+                }()
+                tabChip(account.connection.displayLabel, selected: selected, systemImage: account.connection.provider.systemImage) {
+                    pane = .account(account.id)
                     if store.preferences.menuBarAccountMode == .activeOnly {
                         store.setActive(id: account.id)
                     }
-                } label: {
-                    Text(account.connection.displayLabel)
-                        .appFont(.caption, weight: .semibold)
-                        .lineLimit(1)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(
-                            Capsule()
-                                .fill(selected ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.06))
-                        )
-                        .foregroundStyle(selected ? Color.accentColor : Color.secondary)
                 }
-                .buttonStyle(.plain)
             }
             Spacer(minLength: 0)
         }
+    }
+
+    private func tabChip(_ title: String, selected: Bool, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 4) {
+                Image(systemName: systemImage)
+                    .appFont(.caption2)
+                Text(title)
+                    .appFont(.caption, weight: .semibold)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                Capsule()
+                    .fill(selected ? Color.accentColor.opacity(0.18) : Color.primary.opacity(0.06))
+            )
+            .foregroundStyle(selected ? Color.accentColor : Color.secondary)
+        }
+        .buttonStyle(.plain)
     }
 
     private var header: some View {
@@ -315,20 +430,28 @@ struct MenuBarPopoverView: View {
         return HStack(alignment: .center, spacing: 8) {
             AppLogo(size: 34)
             VStack(alignment: .leading, spacing: 2) {
-                Text(snapshot?.planDisplayName ?? displayed?.connection.provider.displayName ?? AppAbout.productName)
-                    .appFont(.headline)
-                if let fetched = snapshot?.fetchedAt {
-                    Text("Updated \(fetched.formatted(date: .omitted, time: .shortened))")
-                        .appFont(.caption)
-                        .foregroundStyle(.secondary)
-                } else if let email = displayed?.connection.email {
-                    Text(email)
+                if showingAll {
+                    Text("All accounts")
+                        .appFont(.headline)
+                    Text(store.accounts.map(\.connection.provider.displayName).joined(separator: " · "))
                         .appFont(.caption)
                         .foregroundStyle(.secondary)
                 } else {
-                    Text("Subscription")
-                        .appFont(.caption)
-                        .foregroundStyle(.secondary)
+                    Text(snapshot?.planDisplayName ?? displayed?.connection.provider.displayName ?? AppAbout.productName)
+                        .appFont(.headline)
+                    if let fetched = snapshot?.fetchedAt {
+                        Text("Updated \(fetched.formatted(date: .omitted, time: .shortened))")
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                    } else if let email = displayed?.connection.email {
+                        Text(email)
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("Subscription")
+                            .appFont(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .fixedSize()
@@ -337,7 +460,9 @@ struct MenuBarPopoverView: View {
 
             Button {
                 Task {
-                    if let id = displayed?.id {
+                    if showingAll {
+                        await store.refresh()
+                    } else if let id = displayed?.id {
                         await store.refreshAccount(id)
                     } else {
                         await store.refresh()
@@ -348,7 +473,7 @@ struct MenuBarPopoverView: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
-            .disabled(displayed?.isRefreshing == true || displayed?.isAuthenticated != true)
+            .disabled(showingAll ? store.isRefreshing : (displayed?.isRefreshing == true || displayed?.isAuthenticated != true))
             .help("Refresh")
         }
     }

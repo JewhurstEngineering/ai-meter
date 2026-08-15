@@ -32,7 +32,8 @@ public actor ClaudeUsageClient {
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("AIMeter", forHTTPHeaderField: "User-Agent")
+        // Anthropic rate-limits unknown UAs on this endpoint; Claude Code's prefix shares its bucket.
+        request.setValue("claude-code/2.1.94", forHTTPHeaderField: "User-Agent")
         request.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw ProviderUsageError.emptyResponse }

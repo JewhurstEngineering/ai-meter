@@ -95,9 +95,14 @@ enum ClaudeUsageMapper {
         let overage = obj["overage"] as? [String: Any] ?? extra
         guard let overage else { return nil }
         let used = cents(overage["used"] ?? overage["used_credits"] ?? overage["used_cents"])
-        let limit = cents(overage["limit"] ?? overage["monthly_credit_limit"] ?? overage["limit_cents"])
+        let limit = cents(
+            overage["limit"]
+                ?? overage["monthly_limit"]
+                ?? overage["monthly_credit_limit"]
+                ?? overage["limit_cents"]
+        )
         let remaining = cents(overage["remaining"] ?? overage["remaining_credits"])
-        let enabled = bool(overage["enabled"]) ?? (used != nil || limit != nil)
+        let enabled = bool(overage["is_enabled"] ?? overage["enabled"]) ?? (used != nil || limit != nil)
         guard enabled || used != nil else { return nil }
         return SpendMeter(
             title: "Extra usage",
@@ -109,24 +114,23 @@ enum ClaudeUsageMapper {
         )
     }
 
+    /// Claude `/api/oauth/usage` reports `utilization` / `used_percentage` on a 0–100 scale.
+    /// Values like `1.0` mean 1%, not a fraction — do not multiply by 100.
     static func percent(from obj: [String: Any]) -> Double? {
-        if let v = obj["utilization"] { return fractionToPercent(v) }
-        if let v = obj["used_percent"] ?? obj["usedPercent"] ?? obj["percent"] {
-            return scalarPercent(v)
+        if let v = obj["utilization"]
+            ?? obj["used_percentage"]
+            ?? obj["usedPercentage"]
+            ?? obj["used_percent"]
+            ?? obj["usedPercent"]
+            ?? obj["percent"]
+        {
+            return number(v)
         }
         return nil
     }
 
     private static func scalarPercent(_ value: Any) -> Double? {
-        guard let n = number(value) else { return nil }
-        if n <= 1.5 { return n * 100 }
-        return n
-    }
-
-    private static func fractionToPercent(_ value: Any) -> Double? {
-        guard let n = number(value) else { return nil }
-        if n <= 1.5 { return n * 100 }
-        return n
+        number(value)
     }
 
     private static func number(_ value: Any) -> Double? {

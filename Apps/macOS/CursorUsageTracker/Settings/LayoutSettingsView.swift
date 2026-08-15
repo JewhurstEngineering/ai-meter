@@ -134,8 +134,18 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Cursor Models %", systemImage: "sparkles", isOn: binding(\.cursorModelsPercent))
             MetricToggleRow(title: "Other Models %", systemImage: "cpu", isOn: binding(\.otherModelsPercent))
             MetricToggleRow(title: "Total included %", systemImage: "chart.pie", isOn: binding(\.totalPercent))
-            MetricToggleRow(title: "Session %", systemImage: "clock", isOn: binding(\.sessionPercent))
-            MetricToggleRow(title: "Weekly %", systemImage: "calendar", isOn: binding(\.weeklyPercent))
+            MetricToggleRow(
+                title: "Session %",
+                systemImage: "clock",
+                providers: [.claude, .codex],
+                isOn: binding(\.sessionPercent)
+            )
+            MetricToggleRow(
+                title: "Weekly %",
+                systemImage: "calendar",
+                providers: [.claude, .codex],
+                isOn: binding(\.weeklyPercent)
+            )
             MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: binding(\.planSpend))
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
@@ -183,9 +193,9 @@ struct LayoutSettingsView: View {
     private var accountModeHelp: String {
         switch store.preferences.menuBarAccountMode {
         case .activeOnly:
-            return "One account in the menu bar. Switch in Authentication or with popover tabs."
+            return "One account in the menu bar. Switch in Authentication or with popover tabs. All stacks every account’s bars."
         case .combined:
-            return "One item stacks a headline % for each saved account, e.g. Cursor 12% · Claude 44% · Codex 8%."
+            return "One item stacks a headline % for each saved account, e.g. Cursor 12% · Claude 44% · Codex 8%. The popover opens on All (bars only)."
         case .separateItems:
             return "One menu bar extra per account, each with its own popover."
         }

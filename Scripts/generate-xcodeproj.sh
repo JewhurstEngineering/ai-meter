@@ -2,4 +2,4 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 xcodegen generate
-echo "Opened via: open CursorUsageTracker.xcodeproj"
+echo "Opened via: open AIMeter.xcodeproj"

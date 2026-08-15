@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import AIMeterCore
 
 struct SettingsPanel<Content: View>: View {
     let title: String
@@ -77,6 +78,7 @@ extension View {
 struct MetricToggleRow: View {
     let title: String
     let systemImage: String
+    var providers: [ProviderKind] = []
     @Binding var isOn: Bool
 
     var body: some View {
@@ -84,6 +86,9 @@ struct MetricToggleRow: View {
             Label(title, systemImage: systemImage)
                 .labelStyle(.titleAndIcon)
                 .appFont(.subheadline)
+            if !providers.isEmpty {
+                ProviderScopeIcons(providers: providers)
+            }
             Spacer(minLength: 8)
             Toggle("", isOn: $isOn)
                 .labelsHidden()
@@ -91,9 +96,32 @@ struct MetricToggleRow: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(title)
+        .accessibilityLabel(accessibilityTitle)
         .accessibilityValue(isOn ? "On" : "Off")
         .accessibilityAddTraits(.isButton)
+    }
+
+    private var accessibilityTitle: String {
+        guard !providers.isEmpty else { return title }
+        let names = providers.map(\.displayName).joined(separator: " and ")
+        return "\(title), \(names)"
+    }
+}
+
+/// Tiny provider glyphs so a setting’s audience is obvious (Claude + Codex vs Cursor).
+struct ProviderScopeIcons: View {
+    let providers: [ProviderKind]
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(providers) { provider in
+                Image(systemName: provider.systemImage)
+                    .font(.caption2.weight(.semibold))
+                    .accessibilityLabel(provider.displayName)
+            }
+        }
+        .foregroundStyle(.secondary)
+        .help(providers.map(\.displayName).joined(separator: " · "))
     }
 }
 
