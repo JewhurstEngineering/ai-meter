@@ -181,7 +181,7 @@
 		1686BC27920FFC986B7838E3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		18550B5DAB0A58A7550E2D37 /* CursorUsageWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWatch.entitlements; sourceTree = "<group>"; };
 		1BEF188E51A67251007C2B86 /* CursorUsageWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWatchApp.swift; sourceTree = "<group>"; };
-		257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		2D1D42766A6FA5B309CA0BF5 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
 		2EF4620C706B4466F8768010 /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
 		341E4F22889BCB4B3DC7ECC1 /* AIMeterWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AIMeterWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -196,7 +196,7 @@
 		62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageProgressBar.swift; sourceTree = "<group>"; };
 		65DEA15FFEE22241E905192E /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
 		6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		717E7D09CC57D7F5D7398B7F /* AppInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstall.swift; sourceTree = "<group>"; };
 		75064BFADC7A4AA9882A6FCA /* AccessibilitySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySettingsView.swift; sourceTree = "<group>"; };
 		77673FED8698C6DE02E10A2D /* UsageExportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageExportPanel.swift; sourceTree = "<group>"; };
@@ -205,14 +205,14 @@
 		7EF1441771B3169A171A981A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		806BEB0D503AC4B869CCE547 /* PhoneAccountPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAccountPager.swift; sourceTree = "<group>"; };
 		8398BB36C62D7C6DC18483FF /* CursorUsageTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageTracker.entitlements; sourceTree = "<group>"; };
-		8662CEA0D6278EB8298B4F57 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8662CEA0D6278EB8298B4F57 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		8989AC4AF0701B28EDA9C799 /* LayoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsView.swift; sourceTree = "<group>"; };
 		89C1C9B3961215ABE00DF53C /* CursorUsageiOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageiOSWidgets.entitlements; sourceTree = "<group>"; };
 		8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAbout.swift; sourceTree = "<group>"; };
 		8D63C5971395AB85F87A7764 /* PhoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsView.swift; sourceTree = "<group>"; };
 		9384B8DF44862EC38A415940 /* WatchOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOverviewView.swift; sourceTree = "<group>"; };
 		948C31689433DBE76F95DB0D /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
-		9598CA4BCB968107F76B10F2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		9598CA4BCB968107F76B10F2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9DBCC3BA81D0DAA2FD9B73D9 /* CursorUsageWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWidgets.entitlements; sourceTree = "<group>"; };
 		B045B92220333802077CE0B8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetReload.swift; sourceTree = "<group>"; };
@@ -656,6 +656,7 @@
 						ProvisioningStyle = Automatic;
 					};
 					A92723C49AEADF802953D655 = {
+						DevelopmentTeam = 6998422DKP;
 						ProvisioningStyle = Automatic;
 					};
 					B53219F1684AE065007A8509 = {
@@ -1030,7 +1031,6 @@
 				CODE_SIGN_ENTITLEMENTS = Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1088,7 +1088,6 @@
 				CODE_SIGN_ENTITLEMENTS = Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;

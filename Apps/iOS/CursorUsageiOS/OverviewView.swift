@@ -67,7 +67,9 @@ struct OverviewView: View {
                 )
             } else if let snapshot = account?.snapshot {
                 usageList(snapshot, account: account)
-            } else if account?.isRefreshing == true || store.isRefreshing {
+            } else if let error = account?.lastError {
+                unsignedHero(title: "Couldn’t refresh", detail: error)
+            } else if account?.isRefreshing == true {
                 ProgressView("Loading usage…")
             } else if account?.isAuthenticated != true {
                 unsignedHero(

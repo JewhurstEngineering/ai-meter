@@ -141,6 +141,8 @@ extension ProviderUsageError: LocalizedError {
             return "No local session found."
         case .refreshFailed:
             return "Could not refresh the sign-in token."
+        case .httpStatus(429):
+            return "Too many usage checks (HTTP 429). Last numbers are kept — try again in a minute."
         case .httpStatus(let code) where (500...599).contains(code):
             return "Servers returned an error (\(code)). Try again in a few minutes."
         case .httpStatus(let code):

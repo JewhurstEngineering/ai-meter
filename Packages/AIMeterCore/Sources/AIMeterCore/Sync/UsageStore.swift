@@ -168,7 +168,8 @@ public final class UsageStore: ObservableObject {
             let token = storedTokenJSON(
                 access: cred.accessToken,
                 refresh: cred.refreshToken,
-                email: nil
+                email: nil,
+                expiresAt: cred.expiresAt
             )
             let id = try upsertAccount(
                 token: token,
@@ -357,7 +358,20 @@ public final class UsageStore: ObservableObject {
         case .cursor:
             return try await client.fetchSnapshot(sessionToken: token)
         case .claude:
-            let cred = claudeCredential(fromStored: token)
+            var cred = claudeCredential(fromStored: token)
+            #if os(macOS)
+            // Claude Code rotates OAuth tokens in its own keychain. A frozen copy
+            // from "Add Claude" goes stale overnight; always prefer the live session.
+            if let live = ClaudeLocalAuthReader.preferredCredential() {
+                cred = live
+                let json = storedTokenJSON(
+                    access: live.accessToken,
+                    refresh: live.refreshToken,
+                    expiresAt: live.expiresAt
+                )
+                try? keychain.save(token: json, account: connection.keychainAccount)
+            }
+            #endif
             return try await claudeClient.fetchSnapshot(credential: cred)
         case .codex:
             let cred = codexCredential(fromStored: token)
@@ -576,12 +590,14 @@ public final class UsageStore: ObservableObject {
         access: String,
         refresh: String? = nil,
         accountID: String? = nil,
-        email: String? = nil
+        email: String? = nil,
+        expiresAt: Date? = nil
     ) -> String {
         var obj: [String: Any] = ["access_token": access]
         if let refresh { obj["refresh_token"] = refresh }
         if let accountID { obj["account_id"] = accountID }
         if let email { obj["email"] = email }
+        if let expiresAt { obj["expires_at"] = expiresAt.timeIntervalSince1970 * 1000 }
         if let data = try? JSONSerialization.data(withJSONObject: obj),
            let text = String(data: data, encoding: .utf8)
         {

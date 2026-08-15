@@ -81,6 +81,53 @@ final class ProviderUsageMapperTests: XCTestCase {
         XCTAssertEqual(cred.email, "user@example.com")
     }
 
+    func testHTTP429KeepsLastNumbersCopy() {
+        XCTAssertEqual(
+            ProviderUsageError.httpStatus(429).errorDescription,
+            "Too many usage checks (HTTP 429). Last numbers are kept — try again in a minute."
+        )
+    }
+
+    func testClaudeUserAgentUsesInstalledVersion() {
+        XCTAssertEqual(ClaudeCodeVersion.userAgent(installed: "2.1.233"), "claude-code/2.1.233")
+        XCTAssertEqual(ClaudeCodeVersion.userAgent(installed: nil), "claude-code/\(ClaudeCodeVersion.fallback)")
+    }
+
+    func testParseClaudeCodeVersionStrings() {
+        XCTAssertEqual(ClaudeCodeVersion.parse("2.1.233 (Claude Code)"), "2.1.233")
+        XCTAssertEqual(ClaudeCodeVersion.parse("/Users/me/.local/share/claude/versions/2.1.240"), "2.1.240")
+        XCTAssertEqual(ClaudeCodeVersion.parse("v2.1.9"), "2.1.9")
+        XCTAssertNil(ClaudeCodeVersion.parse("not-a-version"))
+    }
+
+    func testClaudeCodeVersionSort() {
+        XCTAssertTrue(ClaudeCodeVersion.isNewer("2.1.94", "2.1.233"))
+        XCTAssertFalse(ClaudeCodeVersion.isNewer("2.1.233", "2.1.94"))
+    }
+
+    #if os(macOS)
+    func testReadsClaudeCodeVersionFromNativeBinaryWhenPresent() {
+        let url = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".local/bin/claude")
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        let version = ClaudeCodeVersion.version(fromBinary: url)
+        XCTAssertNotNil(version)
+        XCTAssertEqual(ClaudeCodeVersion.detectInstalled(), version)
+        XCTAssertEqual(ClaudeCodeVersion.userAgent(), "claude-code/\(version!)")
+    }
+
+    func testPackageJSONMustBeClaudeCode() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let other = dir.appendingPathComponent("package.json")
+        try Data("{\"name\":\"unrelated\",\"version\":\"9.9.9\"}".utf8).write(to: other)
+        XCTAssertNil(ClaudeCodeVersion.version(fromPackageJSON: other))
+        try Data("{\"name\":\"@anthropic-ai/claude-code\",\"version\":\"2.1.250\"}".utf8).write(to: other)
+        XCTAssertEqual(ClaudeCodeVersion.version(fromPackageJSON: other), "2.1.250")
+    }
+    #endif
+
     private func fixture(_ name: String) throws -> Data {
         let fixtures = Bundle.module.resourceURL!.appendingPathComponent("Fixtures").appendingPathComponent(name)
         return try Data(contentsOf: fixtures)

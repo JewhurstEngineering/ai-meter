@@ -7,10 +7,12 @@ public actor ClaudeUsageClient {
     private let usageURL = URL(string: "https://api.anthropic.com/api/oauth/usage")!
     private let tokenURL = URL(string: "https://console.anthropic.com/v1/oauth/token")!
     private let clientID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
+    private var cachedUserAgent: String?
 
     public init(session: URLSession = .shared) {
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 20
+        config.timeoutIntervalForResource = 25
         self.session = session == .shared ? URLSession(configuration: config) : session
     }
 
@@ -20,31 +22,46 @@ public actor ClaudeUsageClient {
             token = try await refreshAccessToken(refresh)
         }
         do {
-            return try await fetch(token: token)
+            return try await fetch(token: token, attempt: 0)
         } catch ProviderUsageError.unauthorized where credential.refreshToken != nil {
             let refreshed = try await refreshAccessToken(credential.refreshToken!)
-            return try await fetch(token: refreshed)
+            return try await fetch(token: refreshed, attempt: 0)
         }
     }
 
-    private func fetch(token: String) async throws -> UsageSnapshot {
+    private func fetch(token: String, attempt: Int) async throws -> UsageSnapshot {
+        let agent = userAgent(reload: attempt > 0)
         var request = URLRequest(url: usageURL)
         request.httpMethod = "GET"
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        // Anthropic rate-limits unknown UAs on this endpoint; Claude Code's prefix shares its bucket.
-        request.setValue("claude-code/2.1.94", forHTTPHeaderField: "User-Agent")
+        request.setValue(agent, forHTTPHeaderField: "User-Agent")
         request.setValue("oauth-2025-04-20", forHTTPHeaderField: "anthropic-beta")
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw ProviderUsageError.emptyResponse }
         if http.statusCode == 401 || http.statusCode == 403 {
             throw ProviderUsageError.unauthorized
         }
+        if http.statusCode == 429, attempt == 0 {
+            cachedUserAgent = nil
+            let refreshed = userAgent(reload: true)
+            if refreshed != agent {
+                return try await fetch(token: token, attempt: 1)
+            }
+            throw ProviderUsageError.from(httpStatus: 429)
+        }
         guard (200...299).contains(http.statusCode) else {
             throw ProviderUsageError.from(httpStatus: http.statusCode)
         }
         guard !data.isEmpty else { throw ProviderUsageError.emptyResponse }
         return try ClaudeUsageMapper.map(data)
+    }
+
+    private func userAgent(reload: Bool) -> String {
+        if !reload, let cachedUserAgent { return cachedUserAgent }
+        let value = ClaudeCodeVersion.userAgent()
+        cachedUserAgent = value
+        return value
     }
 
     private func refreshAccessToken(_ refreshToken: String) async throws -> String {

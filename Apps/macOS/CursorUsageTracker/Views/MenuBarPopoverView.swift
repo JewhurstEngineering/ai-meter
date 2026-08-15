@@ -241,14 +241,19 @@ struct MenuBarPopoverView: View {
             }
             if let snapshot = displayed?.snapshot {
                 usageBody(snapshot)
-            } else if displayed?.isRefreshing == true || store.isRefreshing {
+            } else if let error = displayed?.lastError {
+                Text(error)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 20)
+            } else if displayed?.isRefreshing == true {
                 ProgressView("Loading usage…")
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 28)
             } else if store.connections.isEmpty {
                 signInPrompt
             } else {
-                Text(displayed?.lastError ?? store.lastError ?? "No usage data yet.")
+                Text("No usage data yet.")
                     .foregroundStyle(.secondary)
             }
         }

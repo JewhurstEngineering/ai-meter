@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Archive the iOS app (embeds Watch + widgets) for TestFlight / App Store Connect.
-# Create the App Store Connect record for com.cursorusagetracker.ios first.
+# Create the App Store Connect record for com.jamesware.aimeter.ios first.
 # Upload with Transporter or:
 #   xcrun altool --upload-app -f dist/ios/export/*.ipa -t ios --apiKey … --apiIssuer …
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 DIST="${PWD}/dist/ios"
-ARCHIVE="${DIST}/CursorUsageiOS.xcarchive"
+ARCHIVE="${DIST}/AIMeteriOS.xcarchive"
 EXPORT="${DIST}/export"
 
 mkdir -p "${DIST}"
@@ -15,8 +15,8 @@ xcodegen generate
 
 echo "Archiving iOS Release (Watch + widgets embedded)…"
 xcodebuild \
-  -project CursorUsageTracker.xcodeproj \
-  -scheme CursorUsageiOS \
+  -project AIMeter.xcodeproj \
+  -scheme AIMeteriOS \
   -destination 'generic/platform=iOS' \
   -configuration Release \
   -archivePath "${ARCHIVE}" \
