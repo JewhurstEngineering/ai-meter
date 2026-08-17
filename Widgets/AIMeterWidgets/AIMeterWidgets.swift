@@ -169,7 +169,7 @@ private enum WidgetPalette {
     static let total = Color(red: 0.20, green: 0.55, blue: 0.58)
 }
 
-struct CursorUsageWidgetEntryView: View {
+struct AIMeterWidgetEntryView: View {
     @Environment(\.widgetFamily) private var family
     var entry: Entry
 
@@ -460,9 +460,9 @@ struct CursorUsageWidgetEntryView: View {
 }
 
 @main
-struct CursorUsageWidgetsBundle: WidgetBundle {
+struct AIMeterWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        CursorUsageWidget()
+        AIMeterWidget()
         CursorModelsUsageWidget()
         OtherModelsUsageWidget()
         TotalUsageWidget()
@@ -471,12 +471,12 @@ struct CursorUsageWidgetsBundle: WidgetBundle {
     }
 }
 
-struct CursorUsageWidget: Widget {
+struct AIMeterWidget: Widget {
     let kind = "CursorUsageWidget"
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, provider: Provider<UsageWidgetIntent>()) { entry in
-            CursorUsageWidgetEntryView(entry: entry)
+            AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("AI Meter")
         .description("Included pools, spend, and on-demand. Small, medium, and large.")
@@ -489,7 +489,7 @@ struct CursorModelsUsageWidget: Widget {
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, provider: Provider<CursorModelsWidgetIntent>()) { entry in
-            CursorUsageWidgetEntryView(entry: entry)
+            AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Cursor Models")
         .description("Included Cursor Models pool.")
@@ -502,7 +502,7 @@ struct OtherModelsUsageWidget: Widget {
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, provider: Provider<OtherModelsWidgetIntent>()) { entry in
-            CursorUsageWidgetEntryView(entry: entry)
+            AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Other Models")
         .description("Included Other Models pool.")
@@ -515,7 +515,7 @@ struct TotalUsageWidget: Widget {
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, provider: Provider<TotalUsageWidgetIntent>()) { entry in
-            CursorUsageWidgetEntryView(entry: entry)
+            AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Total")
         .description("Total included usage.")
@@ -528,7 +528,7 @@ struct OnDemandUsageWidget: Widget {
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, provider: Provider<OnDemandWidgetIntent>()) { entry in
-            CursorUsageWidgetEntryView(entry: entry)
+            AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("On-demand")
         .description("On-demand billable usage.")
@@ -541,7 +541,7 @@ struct RotateUsageWidget: Widget {
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, provider: Provider<RotateUsageWidgetIntent>()) { entry in
-            CursorUsageWidgetEntryView(entry: entry)
+            AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Rotate")
         .description("Cycles Cursor, Other, Total, and On-demand every 15 minutes.")

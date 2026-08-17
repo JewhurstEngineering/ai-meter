@@ -2,7 +2,7 @@ import SwiftUI
 import AIMeterCore
 
 @main
-struct CursorUsageiOSApp: App {
+struct AIMeteriOSApp: App {
     @StateObject private var store = UsageStore()
     @Environment(\.scenePhase) private var scenePhase
 

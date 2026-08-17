@@ -2,7 +2,7 @@ import SwiftUI
 import AIMeterCore
 
 @main
-struct CursorUsageWatchApp: App {
+struct AIMeterWatchApp: App {
     @StateObject private var session = WatchSessionBridge()
 
     var body: some Scene {

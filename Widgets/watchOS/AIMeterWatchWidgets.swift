@@ -82,13 +82,13 @@ struct WatchComplicationView: View {
 }
 
 @main
-struct CursorUsageWatchWidgetsBundle: WidgetBundle {
+struct AIMeterWatchWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        CursorUsageWatchWidget()
+        AIMeterWatchWidget()
     }
 }
 
-struct CursorUsageWatchWidget: Widget {
+struct AIMeterWatchWidget: Widget {
     let kind = "CursorUsageWatchWidget"
 
     var body: some WidgetConfiguration {

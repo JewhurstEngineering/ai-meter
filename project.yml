@@ -10,37 +10,56 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    MARKETING_VERSION: "0.3.1"
-    CURRENT_PROJECT_VERSION: "36"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "37"
     DEVELOPMENT_TEAM: "6998422DKP"
     CODE_SIGN_STYLE: Automatic
     INFOPLIST_KEY_NSHumanReadableCopyright: "Copyright © 2026 JamesWare.dev"
 packages:
   AIMeterCore:
     path: Packages/AIMeterCore
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    exactVersion: 2.9.6
 targets:
   AIMeter:
     type: application
     platform: macOS
     sources:
-      - path: Apps/macOS/CursorUsageTracker
+      - path: Apps/macOS/AIMeter
       - path: Apps/Shared
+    info:
+      path: Apps/macOS/AIMeter/Info.plist
+      properties:
+        CFBundleName: AI Meter
+        CFBundleDisplayName: AI Meter
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSUIElement: true
+        LSApplicationCategoryType: public.app-category.developer-tools
+        NSHumanReadableCopyright: "Copyright © 2026 JamesWare.dev"
+        SUEnableAutomaticChecks: true
+        SUFeedURL: https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/appcast.xml
+        SUPublicEDKey: qijKx335WMhnQRru81bLR+sN8uoaHJ0SjzwaFP1Lg7M=
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app
-        INFOPLIST_KEY_CFBundleDisplayName: AI Meter
-        INFOPLIST_KEY_LSUIElement: YES
-        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
-        INFOPLIST_KEY_CFBundleIconName: AppIcon
+        PRODUCT_NAME: AI Meter
+        INFOPLIST_FILE: Apps/macOS/AIMeter/Info.plist
+        GENERATE_INFOPLIST_FILE: false
+        CODE_SIGN_ENTITLEMENTS: Apps/macOS/AIMeter/AIMeter.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        GENERATE_INFOPLIST_FILE: YES
-        CODE_SIGN_ENTITLEMENTS: Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_STYLE: Automatic
         COMBINE_HIDPI_IMAGES: YES
         ENABLE_DEBUG_DYLIB: NO
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/../Frameworks"
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
     dependencies:
       - package: AIMeterCore
+      - package: Sparkle
       - target: AIMeterWidgets
         embed: true
       - sdk: WidgetKit.framework
@@ -48,7 +67,7 @@ targets:
     type: app-extension
     platform: macOS
     sources:
-      - path: Widgets/CursorUsageWidgets
+      - path: Widgets/AIMeterWidgets
       - path: Apps/Shared
         excludes:
           - CycleSpendChart.swift
@@ -56,10 +75,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app.widgets
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Widgets/CursorUsageWidgets/Info.plist
+        INFOPLIST_FILE: Widgets/AIMeterWidgets/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
-        CODE_SIGN_ENTITLEMENTS: Widgets/CursorUsageWidgets/CursorUsageWidgets.entitlements
+        CODE_SIGN_ENTITLEMENTS: Widgets/AIMeterWidgets/AIMeterWidgets.entitlements
         SKIP_INSTALL: YES
         ENABLE_DEBUG_DYLIB: NO
         ENABLE_HARDENED_RUNTIME: YES
@@ -74,7 +93,7 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Apps/iOS/CursorUsageiOS
+      - Apps/iOS/AIMeteriOS
       - path: Apps/Shared
         excludes:
           - Assets.xcassets/AppIcon.appiconset
@@ -84,10 +103,10 @@ targets:
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: "NO"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Apps/iOS/CursorUsageiOS/Info.plist
+        INFOPLIST_FILE: Apps/iOS/AIMeteriOS/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CODE_SIGN_ENTITLEMENTS: Apps/iOS/CursorUsageiOS/CursorUsageiOS.entitlements
+        CODE_SIGN_ENTITLEMENTS: Apps/iOS/AIMeteriOS/AIMeteriOS.entitlements
     dependencies:
       - package: AIMeterCore
       - target: AIMeteriOSWidgets
@@ -100,7 +119,7 @@ targets:
     type: app-extension
     platform: iOS
     sources:
-      - Widgets/CursorUsageWidgets
+      - Widgets/AIMeterWidgets
       - Widgets/iOS
       - path: Apps/Shared
         excludes:
@@ -111,9 +130,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.widgets
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Widgets/CursorUsageWidgets/Info.plist
+        INFOPLIST_FILE: Widgets/AIMeterWidgets/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: AI Meter
-        CODE_SIGN_ENTITLEMENTS: Widgets/iOS/CursorUsageiOSWidgets.entitlements
+        CODE_SIGN_ENTITLEMENTS: Widgets/iOS/AIMeteriOSWidgets.entitlements
         SKIP_INSTALL: YES
     dependencies:
       - package: AIMeterCore
@@ -121,7 +140,7 @@ targets:
     type: application
     platform: watchOS
     sources:
-      - Apps/watchOS/CursorUsageWatch
+      - Apps/watchOS/AIMeterWatch
       - path: Apps/Shared
         excludes:
           - Assets.xcassets/AppIcon.appiconset
@@ -131,10 +150,10 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.watchkitapp
         TARGETED_DEVICE_FAMILY: "4"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Apps/watchOS/CursorUsageWatch/Info.plist
+        INFOPLIST_FILE: Apps/watchOS/AIMeterWatch/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: AI Meter
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        CODE_SIGN_ENTITLEMENTS: Apps/watchOS/CursorUsageWatch/CursorUsageWatch.entitlements
+        CODE_SIGN_ENTITLEMENTS: Apps/watchOS/AIMeterWatch/AIMeterWatch.entitlements
         SKIP_INSTALL: YES
     dependencies:
       - package: AIMeterCore
@@ -154,7 +173,7 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/watchOS/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: AI Meter
-        CODE_SIGN_ENTITLEMENTS: Widgets/watchOS/CursorUsageWatchWidgets.entitlements
+        CODE_SIGN_ENTITLEMENTS: Widgets/watchOS/AIMeterWatchWidgets.entitlements
         SKIP_INSTALL: YES
     dependencies:
       - package: AIMeterCore

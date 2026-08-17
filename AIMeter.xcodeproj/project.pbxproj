@@ -7,91 +7,92 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00A0BB3E31C00F7135D07276 /* AIMeterWatchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872068A4034224EE60EF6AC3 /* AIMeterWatchWidgets.swift */; };
+		01466355E983B5405CC8DA60 /* UsageExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 803A59935476DF447FF46A66 /* UsageExportPanel.swift */; };
 		05D7C74F232987CC8C9E9E2F /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BA471CD0BC79EB447309B0 /* AppLogo.swift */; };
+		06BA4E44C3145E8D2DA5C3A2 /* PhoneWatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5E5AF64A566E2D72A41FAC9 /* PhoneWatchBridge.swift */; };
 		06F87BCDFA97406A58913743 /* AppAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */; };
-		0B181B253A8A36277EA25057 /* IncludedPaidAboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59564FBDFCB9248D1F00CEFC /* IncludedPaidAboutSettings.swift */; };
 		0F9BC6E82ABB0F0CB7F3E5D7 /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */; };
-		107AC83274274706AFDCC328 /* LayoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8989AC4AF0701B28EDA9C799 /* LayoutSettingsView.swift */; };
-		1604FD2255FE26EE425AA689 /* UsageUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E5A473723031FC54D050771 /* UsageUIComponents.swift */; };
-		16C217813CAFAB307A19078D /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1D42766A6FA5B309CA0BF5 /* SettingsRootView.swift */; };
+		130B4BB1F42C6E4B25F87004 /* AIMeteriOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FDF674D798E974D4617B12D /* AIMeteriOSApp.swift */; };
 		16F99EACE6CEF349FB77704E /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BA471CD0BC79EB447309B0 /* AppLogo.swift */; };
 		1C53A14B84E506DE83B54BCC /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BA471CD0BC79EB447309B0 /* AppLogo.swift */; };
+		1D3A1A3B093D6AC5D8D9943C /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83633A9BFD2831055CBDCFC8 /* ThemeSettingsView.swift */; };
 		1E29A9BF222BC59F0A87C8FA /* AppAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */; };
+		1E679AE188376C519E57EBB1 /* PhoneAccountPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAB96960CDE22E1A134E627B /* PhoneAccountPager.swift */; };
 		222ECAA1FB9DE9D5790D4A21 /* AIMeterCore in Frameworks */ = {isa = PBXBuildFile; productRef = 898F86D4E3561DCA66DE66C0 /* AIMeterCore */; };
+		2250D1435FC412BEA06BFB29 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3383E6B8B045F83EF0EBD1 /* AccountsView.swift */; };
+		23A82A3887234983CC1F2BC2 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D464B97526A34BA33D75904D /* OverviewView.swift */; };
 		23E221C042FE7EA7AAAD9E97 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */; };
-		27D13850CB54420DFF9828B1 /* UsageExportPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77673FED8698C6DE02E10A2D /* UsageExportPanel.swift */; };
-		283005FD7C9B19B5F40B1C48 /* PhoneSettingsPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447A013F7281C732DD16E031 /* PhoneSettingsPages.swift */; };
-		2B5F019EE161D2973209F7CB /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F0EBF07357A8079AF647D0 /* OverviewView.swift */; };
+		2EE75F4F66F52E0F9A218244 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B5192E96420300FA87B812B /* LoginWebView.swift */; };
 		2F787B1ACC79125D4AAC842E /* AppAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */; };
 		32BCC39824070416D4F91348 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB8C0BF23307D51ED65AF6C0 /* WidgetKit.framework */; };
+		3533996B8F23679C6B551EC7 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9103D2E7706D855FFE48BF6E /* MenuBarPopoverView.swift */; };
+		3813F92CF82184CC67013112 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 041105927FDF963B6EC429AF /* PrivacyInfo.xcprivacy */; };
 		3B77BFAF702D981D386BA1DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7BDEBA04112B17F56857DB05 /* Assets.xcassets */; };
 		3D06A2B226D0FD9F425EC88A /* AIMeterCore in Frameworks */ = {isa = PBXBuildFile; productRef = 56F0512A6C8447B78D569A0C /* AIMeterCore */; };
-		42C5418B2D2AC844618E55AC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8662CEA0D6278EB8298B4F57 /* PrivacyInfo.xcprivacy */; };
 		44B9BD5879C9819C6CF6EB8F /* AIMeterCore in Frameworks */ = {isa = PBXBuildFile; productRef = BA69FFD0BDD37A99CE9845DF /* AIMeterCore */; };
+		468690C7442955A44BCF6A29 /* AppActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A27C1B6423A4ED2041174DE /* AppActivation.swift */; };
+		48E9852649EDDF1863002F82 /* AIMeterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE89107E326FE924787E9513 /* AIMeterApp.swift */; };
 		4901436BD7C1394014DDB7E0 /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BA471CD0BC79EB447309B0 /* AppLogo.swift */; };
 		4E8C588F5165490704C5C7ED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */; };
-		52D6D6F7CBDD3EC923D6F422 /* LoginWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004721403802C738907EA9B4 /* LoginWebView.swift */; };
 		5431645CC6D4BD22E01E77AE /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA0FBEEF4287E9B00C7B6CB2 /* WatchConnectivity.framework */; };
-		581E7EFF686B8181040E5CAF /* AccessibilitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75064BFADC7A4AA9882A6FCA /* AccessibilitySettingsView.swift */; };
+		5AD2166A95668A12033E9C17 /* WatchSessionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3556BD63C6FD41405C06E8D4 /* WatchSessionBridge.swift */; };
 		630783F957E52BE4FADF40A5 /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */; };
 		64765E6839599A8908BA15CC /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
-		64F1ED9488B74EDFAD422AC3 /* MenuBarPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C601E3824EC5AD3019C0B7A0 /* MenuBarPopoverView.swift */; };
 		65181A745884F12CAA8FE86D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */; };
+		65630D6A580645667FAF0C2A /* IncludedPaidAboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1456110BEF73F3079C3F89FC /* IncludedPaidAboutSettings.swift */; };
 		6B866DBC0E1BD8F4E802748B /* AIMeterWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 341E4F22889BCB4B3DC7ECC1 /* AIMeterWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		6DB8956406A0699CE4288E6E /* AuthenticationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DEA15FFEE22241E905192E /* AuthenticationSettingsView.swift */; };
 		6DE7DFDD4F86B6534251D0EC /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */; };
-		7120C8F53C1DAEA27BD677CE /* ThemeSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF312AA3BAE06DD797A529B0 /* ThemeSettingsView.swift */; };
 		73CB481D1F843595D66B8DA8 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */; };
-		757B51960C9EEA266B506BC0 /* CursorUsageWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BEF188E51A67251007C2B86 /* CursorUsageWatchApp.swift */; };
-		77987E6A3D3543C1A3BEC03E /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D2D9126BDF9A73016B3D05 /* StatusItemController.swift */; };
+		742610918337CFFE1E9A2D6C /* UsageUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F843C6FD3B5D1330F2ED1F /* UsageUIComponents.swift */; };
+		77EA69F7BA6272942E969932 /* PhoneSettingsPages.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD23017F5B3D54FFC6D6D0EB /* PhoneSettingsPages.swift */; };
 		78FD3A627D0B8D9926C68398 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB8C0BF23307D51ED65AF6C0 /* WidgetKit.framework */; };
 		7A823078C65F60A69F97AF14 /* CycleSpendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC210DA9732F3ACFD46D2A7 /* CycleSpendChart.swift */; };
-		7AFE4EE22E473CC5EC2CC6C0 /* CursorUsageTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12186B7BF7B729FB6933410 /* CursorUsageTrackerApp.swift */; };
 		7BFBA223759D308B14A48435 /* AIMeterWatchWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = DB3EB94E7CE06AD3E0658827 /* AIMeterWatchWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7EA9CCB2DF5C37B4D636FB42 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
 		851504DDEEA97D120EE2F740 /* AIMeterWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 0FCC7FC12DBB1A85E7847C86 /* AIMeterWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8562936F5DB66DC6A8B9B311 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */; };
+		88B66D41416CE0AADAE14FC3 /* AIMeterWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7249493E46A5C9054A8794 /* AIMeterWidgets.swift */; };
 		8990C5139D16549B562096B8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */; };
-		8ED19B2B9E33F6AF046E0E4C /* CursorUsageWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11CD29F887F1129B35ABB90 /* CursorUsageWidgets.swift */; };
-		90B39F4E481D68542C77516F /* AppActivation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F975C56330E733A7F03F5A6C /* AppActivation.swift */; };
+		950FA61DBFE901089753440E /* WatchOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8A651CA1321E6AC848C2316 /* WatchOverviewView.swift */; };
 		9558CDDBF1139BD357323AE6 /* AIMeterCore in Frameworks */ = {isa = PBXBuildFile; productRef = FCE0358F1DBD0E0E21745874 /* AIMeterCore */; };
 		96938F49F23E259DE1477BE8 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */; };
 		97A17BDE047421623758E64C /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
+		9C68A3842709825E49E7EE6A /* SettingsOpenLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D96DE1FA2AE1FB26BF85A78 /* SettingsOpenLink.swift */; };
+		A07164D4807101CA77C92ECC /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E83DCA27C6CECE3F3FC7B9 /* SettingsRootView.swift */; };
 		A45D263258F7647970599390 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
 		A5BB7CDADE20B97B02C180C6 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
-		A86416CA69F8D45FDB617B47 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374F506FF494A46809BE5604 /* RootTabView.swift */; };
+		A6AFF141D5343C44E7560DC6 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CED586AFE92A28214C6B06 /* GeneralSettingsView.swift */; };
 		AB451BA78F14A5B3989E75BD /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */; };
+		ABD9C595282F61AE54B8C4E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6E19744A17745DD0BEA721EA /* Assets.xcassets */; };
 		AD3738F265996FA92A332157 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */; };
-		AD5FBDCAA8C0745E73D341E0 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E307BE2817F097ACA7DE446 /* GeneralSettingsView.swift */; };
 		AE79486658FD5DA743477905 /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */; };
 		AE84DB7371356BCC3C8F0C71 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EA0FBEEF4287E9B00C7B6CB2 /* WatchConnectivity.framework */; };
-		AF390BCBA0E983477852CC50 /* WatchSessionBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C64F4C2636F574B09626C152 /* WatchSessionBridge.swift */; };
+		AEC5DCDD91365283A6AD60C3 /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C1EF0A9B19808A8E3EC81E /* BackgroundRefresh.swift */; };
+		B1E21B395DFFC0AB2EE7099F /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5223BB27279503FF18BFD417 /* RootTabView.swift */; };
 		B4942BC54C23D27B3B0C692F /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */; };
-		B4FA7ED0D1F9776816226FA3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4FF03EAE4A6ACD4EE2F9BCF /* Assets.xcassets */; };
+		B4E326E754AA0153945CC7F0 /* AccessibilitySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D3E6CF4EF27F58F6D7934A /* AccessibilitySettingsView.swift */; };
 		B51D93447326EA459AC26458 /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */; };
+		B53E3C6C505CAB92C8C6FF5B /* AppInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = C80C34FDEF0972576972DAEF /* AppInstall.swift */; };
 		B55DA86C142551C977D6AEF0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */; };
-		B75AEDAB0DD942001B9D63CD /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF4620C706B4466F8768010 /* MenuBarLabelView.swift */; };
+		B8367C1036AD6176B57C62FB /* LayoutSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD3E6C9568301DCB7CFAF4ED /* LayoutSettingsView.swift */; };
 		BC2E3D80E5FFA1D4E38CE105 /* AIMeteriOSWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E52DF7B14350AD6A849B45AB /* AIMeteriOSWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		BC64C7BC55F5A405B21E2F2C /* PhoneWatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83E1BCECA4D53FC1A0FD982 /* PhoneWatchBridge.swift */; };
 		C1791AEF8061DB891B6CCE7C /* AppAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */; };
-		C39169A212ABB68E33776EDA /* CursorUsageiOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2224D18CBF8585886BC8142 /* CursorUsageiOSApp.swift */; };
-		CB15EFCFF4C599BB05472385 /* SettingsOpenLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76C6F00BD5A61769BB4C468 /* SettingsOpenLink.swift */; };
-		D1F55791393488F95EBC99ED /* CursorUsageWatchWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5179D6B3B18B476276BBE83D /* CursorUsageWatchWidgets.swift */; };
-		D7EBAE09CDC28932AAA30275 /* BackgroundRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = B70553EDCE6F1C838121490C /* BackgroundRefresh.swift */; };
+		C8BBC52B8CD41CAB5400FC33 /* AIMeterWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C7249493E46A5C9054A8794 /* AIMeterWidgets.swift */; };
+		CA316B4C1AA5277BAAD1F95C /* AuthenticationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CCA4666EE82EC9F70F928F6 /* AuthenticationSettingsView.swift */; };
+		CF4D4F57A675BFED62578DF5 /* PhoneSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 354D045F087E27160D7F8123 /* PhoneSettingsView.swift */; };
+		D14350E45B6731CC58D0A0E7 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 2D973033E752AB9B14EEDD8C /* Sparkle */; };
 		D9247407D6F4E9B05C05384A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB8C0BF23307D51ED65AF6C0 /* WidgetKit.framework */; };
 		DB78EC2E83A1BC0B1253BB60 /* CycleSpendChart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC210DA9732F3ACFD46D2A7 /* CycleSpendChart.swift */; };
+		DCD9A5BB80D0ADF3AC093E01 /* StatusItemController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 767FDFADCE92928E5093F315 /* StatusItemController.swift */; };
 		E0C7B7A420F0483495B760D0 /* AppAbout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */; };
 		E225EF788DC0271A93393FE8 /* AIMeterCore in Frameworks */ = {isa = PBXBuildFile; productRef = F65517D5DDE9E2607FD7FF1E /* AIMeterCore */; };
-		E2ABD76DA94A9CD4FB0321BF /* AppInstall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 717E7D09CC57D7F5D7398B7F /* AppInstall.swift */; };
-		E5D4992DABB697AB01EE8BA0 /* WatchOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384B8DF44862EC38A415940 /* WatchOverviewView.swift */; };
-		EC40B2DCA63EA3F58C320A0E /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9598CA4BCB968107F76B10F2 /* PrivacyInfo.xcprivacy */; };
+		E741D8FC9FF74D03C602924A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1421B6CB05574E02990F7B6 /* Assets.xcassets */; };
 		EEF29D88993D50E05FD5CAD3 /* AIMeterCore in Frameworks */ = {isa = PBXBuildFile; productRef = 67AD2003BE5EA2E9FAA007D1 /* AIMeterCore */; };
-		F0B6697689C00FCDA3828122 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58B3BBE7BF7E0BFFA5C961C1 /* Assets.xcassets */; };
-		F0D0D873AEE9FA5F3F958388 /* AccountsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73C6442F65EF00E065F75CB /* AccountsView.swift */; };
+		F3631E4B9DC7F636B9062DA1 /* AIMeterWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD9C953D1E0BF3360E1D666 /* AIMeterWatchApp.swift */; };
 		F7C2649689C05587B9048869 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */; };
-		F8A6BA493D32F58B89D771EA /* PhoneSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D63C5971395AB85F87A7764 /* PhoneSettingsView.swift */; };
-		FB563CDE8FAA3C67CF27D9BC /* CursorUsageWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D11CD29F887F1129B35ABB90 /* CursorUsageWidgets.swift */; };
-		FDC1AA0B43A7947ECEBBE602 /* PhoneAccountPager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806BEB0D503AC4B869CCE547 /* PhoneAccountPager.swift */; };
+		F84ADD3287C0725AA8022371 /* MenuBarLabelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C2638ABAD0D7EC663F57016 /* MenuBarLabelView.swift */; };
+		FE7376F6CDF45F8A3364B2A8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 1B082DCF3205CD73BE4DEBE7 /* PrivacyInfo.xcprivacy */; };
 		FFD913F6E12E81E2429F4665 /* AppLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6BA471CD0BC79EB447309B0 /* AppLogo.swift */; };
 /* End PBXBuildFile section */
 
@@ -174,69 +175,70 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		004721403802C738907EA9B4 /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
-		0E307BE2817F097ACA7DE446 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		041105927FDF963B6EC429AF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		0FCC7FC12DBB1A85E7847C86 /* AIMeterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIMeterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		141727A8F34B7F080C67AB53 /* CursorUsageiOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageiOS.entitlements; sourceTree = "<group>"; };
-		1686BC27920FFC986B7838E3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		18550B5DAB0A58A7550E2D37 /* CursorUsageWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWatch.entitlements; sourceTree = "<group>"; };
-		1BEF188E51A67251007C2B86 /* CursorUsageWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWatchApp.swift; sourceTree = "<group>"; };
+		11A564A7E7B2F48740184610 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		11FC10295B1ECCA7631E1965 /* AIMeterWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeterWatchWidgets.entitlements; sourceTree = "<group>"; };
+		1456110BEF73F3079C3F89FC /* IncludedPaidAboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncludedPaidAboutSettings.swift; sourceTree = "<group>"; };
+		15C1EF0A9B19808A8E3EC81E /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
+		1B082DCF3205CD73BE4DEBE7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1FDF674D798E974D4617B12D /* AIMeteriOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeteriOSApp.swift; sourceTree = "<group>"; };
 		257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		2D1D42766A6FA5B309CA0BF5 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
-		2EF4620C706B4466F8768010 /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
+		26CED586AFE92A28214C6B06 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
+		2DD9C953D1E0BF3360E1D666 /* AIMeterWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterWatchApp.swift; sourceTree = "<group>"; };
 		341E4F22889BCB4B3DC7ECC1 /* AIMeterWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AIMeterWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		34C4915DE1BC7918F371797C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		34D2D9126BDF9A73016B3D05 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
-		374F506FF494A46809BE5604 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
-		447A013F7281C732DD16E031 /* PhoneSettingsPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsPages.swift; sourceTree = "<group>"; };
-		5179D6B3B18B476276BBE83D /* CursorUsageWatchWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWatchWidgets.swift; sourceTree = "<group>"; };
-		58B3BBE7BF7E0BFFA5C961C1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		59564FBDFCB9248D1F00CEFC /* IncludedPaidAboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncludedPaidAboutSettings.swift; sourceTree = "<group>"; };
+		354D045F087E27160D7F8123 /* PhoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsView.swift; sourceTree = "<group>"; };
+		3556BD63C6FD41405C06E8D4 /* WatchSessionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionBridge.swift; sourceTree = "<group>"; };
+		3A27C1B6423A4ED2041174DE /* AppActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActivation.swift; sourceTree = "<group>"; };
+		3C7249493E46A5C9054A8794 /* AIMeterWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterWidgets.swift; sourceTree = "<group>"; };
+		4CCA4666EE82EC9F70F928F6 /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
+		5223BB27279503FF18BFD417 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		5AC210DA9732F3ACFD46D2A7 /* CycleSpendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleSpendChart.swift; sourceTree = "<group>"; };
+		5B5192E96420300FA87B812B /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
+		5D3383E6B8B045F83EF0EBD1 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
+		5D96DE1FA2AE1FB26BF85A78 /* SettingsOpenLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsOpenLink.swift; sourceTree = "<group>"; };
 		62EEC10533BB397BB0C1D0FC /* UsageProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageProgressBar.swift; sourceTree = "<group>"; };
-		65DEA15FFEE22241E905192E /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
+		68B7CC0A828B16C2DEB9C7A1 /* AIMeter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeter.entitlements; sourceTree = "<group>"; };
 		6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6C2638ABAD0D7EC663F57016 /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
 		6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		717E7D09CC57D7F5D7398B7F /* AppInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstall.swift; sourceTree = "<group>"; };
-		75064BFADC7A4AA9882A6FCA /* AccessibilitySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySettingsView.swift; sourceTree = "<group>"; };
-		77673FED8698C6DE02E10A2D /* UsageExportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageExportPanel.swift; sourceTree = "<group>"; };
+		6E19744A17745DD0BEA721EA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		750A6F1BAB775E9ED9D6DE01 /* AIMeteriOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeteriOS.entitlements; sourceTree = "<group>"; };
+		767FDFADCE92928E5093F315 /* StatusItemController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusItemController.swift; sourceTree = "<group>"; };
 		7BDEBA04112B17F56857DB05 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		7E5A473723031FC54D050771 /* UsageUIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageUIComponents.swift; sourceTree = "<group>"; };
-		7EF1441771B3169A171A981A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		806BEB0D503AC4B869CCE547 /* PhoneAccountPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAccountPager.swift; sourceTree = "<group>"; };
-		8398BB36C62D7C6DC18483FF /* CursorUsageTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageTracker.entitlements; sourceTree = "<group>"; };
-		8662CEA0D6278EB8298B4F57 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		8989AC4AF0701B28EDA9C799 /* LayoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsView.swift; sourceTree = "<group>"; };
-		89C1C9B3961215ABE00DF53C /* CursorUsageiOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageiOSWidgets.entitlements; sourceTree = "<group>"; };
+		803A59935476DF447FF46A66 /* UsageExportPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageExportPanel.swift; sourceTree = "<group>"; };
+		83633A9BFD2831055CBDCFC8 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
+		872068A4034224EE60EF6AC3 /* AIMeterWatchWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterWatchWidgets.swift; sourceTree = "<group>"; };
 		8A20DD7643E1F0B03F44DFA8 /* AppAbout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAbout.swift; sourceTree = "<group>"; };
-		8D63C5971395AB85F87A7764 /* PhoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsView.swift; sourceTree = "<group>"; };
-		9384B8DF44862EC38A415940 /* WatchOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOverviewView.swift; sourceTree = "<group>"; };
+		9103D2E7706D855FFE48BF6E /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
 		948C31689433DBE76F95DB0D /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
-		9598CA4BCB968107F76B10F2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		9DBCC3BA81D0DAA2FD9B73D9 /* CursorUsageWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWidgets.entitlements; sourceTree = "<group>"; };
+		9D060B83AB4A974FFE75CD0D /* AIMeterWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeterWatch.entitlements; sourceTree = "<group>"; };
+		A9BCBB6E898E92F1AF59A7F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A9DCE6A36F621C08C9C8C7EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		AD3E6C9568301DCB7CFAF4ED /* LayoutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutSettingsView.swift; sourceTree = "<group>"; };
 		B045B92220333802077CE0B8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B1421B6CB05574E02990F7B6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B2BB3E26B57F0380511FC8C9 /* AIMeterWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeterWidgets.entitlements; sourceTree = "<group>"; };
 		B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetReload.swift; sourceTree = "<group>"; };
 		B6BA471CD0BC79EB447309B0 /* AppLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogo.swift; sourceTree = "<group>"; };
-		B70553EDCE6F1C838121490C /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
-		B73C6442F65EF00E065F75CB /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
-		C4FF03EAE4A6ACD4EE2F9BCF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		C601E3824EC5AD3019C0B7A0 /* MenuBarPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopoverView.swift; sourceTree = "<group>"; };
-		C64F4C2636F574B09626C152 /* WatchSessionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionBridge.swift; sourceTree = "<group>"; };
-		CF312AA3BAE06DD797A529B0 /* ThemeSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeSettingsView.swift; sourceTree = "<group>"; };
-		D11CD29F887F1129B35ABB90 /* CursorUsageWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageWidgets.swift; sourceTree = "<group>"; };
-		D2224D18CBF8585886BC8142 /* CursorUsageiOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageiOSApp.swift; sourceTree = "<group>"; };
-		D83E1BCECA4D53FC1A0FD982 /* PhoneWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchBridge.swift; sourceTree = "<group>"; };
+		B7E83DCA27C6CECE3F3FC7B9 /* SettingsRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRootView.swift; sourceTree = "<group>"; };
+		B8A651CA1321E6AC848C2316 /* WatchOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchOverviewView.swift; sourceTree = "<group>"; };
+		B9F843C6FD3B5D1330F2ED1F /* UsageUIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageUIComponents.swift; sourceTree = "<group>"; };
+		BD23017F5B3D54FFC6D6D0EB /* PhoneSettingsPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsPages.swift; sourceTree = "<group>"; };
+		C1ACFF6D35C07AC736E05668 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C80C34FDEF0972576972DAEF /* AppInstall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInstall.swift; sourceTree = "<group>"; };
+		CAB96960CDE22E1A134E627B /* PhoneAccountPager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneAccountPager.swift; sourceTree = "<group>"; };
+		D464B97526A34BA33D75904D /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
+		D6D3E6CF4EF27F58F6D7934A /* AccessibilitySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySettingsView.swift; sourceTree = "<group>"; };
 		DB3EB94E7CE06AD3E0658827 /* AIMeterWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AIMeterWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB8C0BF23307D51ED65AF6C0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DCCE03C63274F395695294F1 /* AIMeterCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AIMeterCore; path = Packages/AIMeterCore; sourceTree = SOURCE_ROOT; };
 		DD26B89C7E9BA6AC6671E2A1 /* AIMeteriOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIMeteriOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E12186B7BF7B729FB6933410 /* CursorUsageTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorUsageTrackerApp.swift; sourceTree = "<group>"; };
 		E52DF7B14350AD6A849B45AB /* AIMeteriOSWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = AIMeteriOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		E8F0EBF07357A8079AF647D0 /* OverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewView.swift; sourceTree = "<group>"; };
 		EA0FBEEF4287E9B00C7B6CB2 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
-		F40DC9C298E16C4F9BBE914B /* CursorUsageWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CursorUsageWatchWidgets.entitlements; sourceTree = "<group>"; };
-		F76C6F00BD5A61769BB4C468 /* SettingsOpenLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsOpenLink.swift; sourceTree = "<group>"; };
-		F975C56330E733A7F03F5A6C /* AppActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActivation.swift; sourceTree = "<group>"; };
+		EE89107E326FE924787E9513 /* AIMeterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterApp.swift; sourceTree = "<group>"; };
+		F5E5AF64A566E2D72A41FAC9 /* PhoneWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchBridge.swift; sourceTree = "<group>"; };
+		F69D4291A319752DA5194F06 /* AIMeteriOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeteriOSWidgets.entitlements; sourceTree = "<group>"; };
 		FE73A1851218DA4462AA95A8 /* AIMeter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIMeter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -254,6 +256,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9558CDDBF1139BD357323AE6 /* AIMeterCore in Frameworks */,
+				D14350E45B6731CC58D0A0E7 /* Sparkle in Frameworks */,
 				D9247407D6F4E9B05C05384A /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -297,12 +300,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		11F6769ED7B60E79555D7692 /* AIMeterWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				B2BB3E26B57F0380511FC8C9 /* AIMeterWidgets.entitlements */,
+				3C7249493E46A5C9054A8794 /* AIMeterWidgets.swift */,
+				C1ACFF6D35C07AC736E05668 /* Info.plist */,
+			);
+			path = AIMeterWidgets;
+			sourceTree = "<group>";
+		};
 		25BE981F93BA0F1EE5B90833 /* watchOS */ = {
 			isa = PBXGroup;
 			children = (
+				11FC10295B1ECCA7631E1965 /* AIMeterWatchWidgets.entitlements */,
+				872068A4034224EE60EF6AC3 /* AIMeterWatchWidgets.swift */,
 				7BDEBA04112B17F56857DB05 /* Assets.xcassets */,
-				F40DC9C298E16C4F9BBE914B /* CursorUsageWatchWidgets.entitlements */,
-				5179D6B3B18B476276BBE83D /* CursorUsageWatchWidgets.swift */,
 				B045B92220333802077CE0B8 /* Info.plist */,
 				6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */,
 			);
@@ -347,23 +360,33 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		57CE8C817B6FD4ECF9A65560 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				2EF4620C706B4466F8768010 /* MenuBarLabelView.swift */,
-				C601E3824EC5AD3019C0B7A0 /* MenuBarPopoverView.swift */,
-				F76C6F00BD5A61769BB4C468 /* SettingsOpenLink.swift */,
-				7E5A473723031FC54D050771 /* UsageUIComponents.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
 		59CE223C07AB0AB7C14565F4 /* macOS */ = {
 			isa = PBXGroup;
 			children = (
-				78A9BC6BA7051CD0D778AEBB /* CursorUsageTracker */,
+				B65A4819B1C851B1A5DEAA1B /* AIMeter */,
 			);
 			path = macOS;
+			sourceTree = "<group>";
+		};
+		59E47D4EACF3EFD9FBF9A0A3 /* AIMeteriOS */ = {
+			isa = PBXGroup;
+			children = (
+				5D3383E6B8B045F83EF0EBD1 /* AccountsView.swift */,
+				750A6F1BAB775E9ED9D6DE01 /* AIMeteriOS.entitlements */,
+				1FDF674D798E974D4617B12D /* AIMeteriOSApp.swift */,
+				6E19744A17745DD0BEA721EA /* Assets.xcassets */,
+				15C1EF0A9B19808A8E3EC81E /* BackgroundRefresh.swift */,
+				A9BCBB6E898E92F1AF59A7F6 /* Info.plist */,
+				5B5192E96420300FA87B812B /* LoginWebView.swift */,
+				D464B97526A34BA33D75904D /* OverviewView.swift */,
+				CAB96960CDE22E1A134E627B /* PhoneAccountPager.swift */,
+				BD23017F5B3D54FFC6D6D0EB /* PhoneSettingsPages.swift */,
+				354D045F087E27160D7F8123 /* PhoneSettingsView.swift */,
+				F5E5AF64A566E2D72A41FAC9 /* PhoneWatchBridge.swift */,
+				1B082DCF3205CD73BE4DEBE7 /* PrivacyInfo.xcprivacy */,
+				5223BB27279503FF18BFD417 /* RootTabView.swift */,
+			);
+			path = AIMeteriOS;
 			sourceTree = "<group>";
 		};
 		6BA9FA428F6CE28CCADE8B16 = {
@@ -380,25 +403,10 @@
 		72593BE95A0C6487074473AB /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				89C1C9B3961215ABE00DF53C /* CursorUsageiOSWidgets.entitlements */,
+				F69D4291A319752DA5194F06 /* AIMeteriOSWidgets.entitlements */,
 				257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */,
 			);
 			path = iOS;
-			sourceTree = "<group>";
-		};
-		78A9BC6BA7051CD0D778AEBB /* CursorUsageTracker */ = {
-			isa = PBXGroup;
-			children = (
-				F975C56330E733A7F03F5A6C /* AppActivation.swift */,
-				717E7D09CC57D7F5D7398B7F /* AppInstall.swift */,
-				8398BB36C62D7C6DC18483FF /* CursorUsageTracker.entitlements */,
-				E12186B7BF7B729FB6933410 /* CursorUsageTrackerApp.swift */,
-				34D2D9126BDF9A73016B3D05 /* StatusItemController.swift */,
-				77673FED8698C6DE02E10A2D /* UsageExportPanel.swift */,
-				85FEB2960EEB32B57751678F /* Settings */,
-				57CE8C817B6FD4ECF9A65560 /* Views */,
-			);
-			path = CursorUsageTracker;
 			sourceTree = "<group>";
 		};
 		7DD9385B77AE82B08E291287 /* Frameworks */ = {
@@ -410,87 +418,83 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		7F3B35D8E1DC85C2B0C135C3 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				D6D3E6CF4EF27F58F6D7934A /* AccessibilitySettingsView.swift */,
+				4CCA4666EE82EC9F70F928F6 /* AuthenticationSettingsView.swift */,
+				26CED586AFE92A28214C6B06 /* GeneralSettingsView.swift */,
+				1456110BEF73F3079C3F89FC /* IncludedPaidAboutSettings.swift */,
+				AD3E6C9568301DCB7CFAF4ED /* LayoutSettingsView.swift */,
+				B7E83DCA27C6CECE3F3FC7B9 /* SettingsRootView.swift */,
+				83633A9BFD2831055CBDCFC8 /* ThemeSettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		802E437741D8E55F7C4DDBB9 /* watchOS */ = {
 			isa = PBXGroup;
 			children = (
-				B8942A94C961BD67BE571149 /* CursorUsageWatch */,
+				83E686867E70539003B258F5 /* AIMeterWatch */,
 			);
 			path = watchOS;
 			sourceTree = "<group>";
 		};
-		85FEB2960EEB32B57751678F /* Settings */ = {
+		83E686867E70539003B258F5 /* AIMeterWatch */ = {
 			isa = PBXGroup;
 			children = (
-				75064BFADC7A4AA9882A6FCA /* AccessibilitySettingsView.swift */,
-				65DEA15FFEE22241E905192E /* AuthenticationSettingsView.swift */,
-				0E307BE2817F097ACA7DE446 /* GeneralSettingsView.swift */,
-				59564FBDFCB9248D1F00CEFC /* IncludedPaidAboutSettings.swift */,
-				8989AC4AF0701B28EDA9C799 /* LayoutSettingsView.swift */,
-				2D1D42766A6FA5B309CA0BF5 /* SettingsRootView.swift */,
-				CF312AA3BAE06DD797A529B0 /* ThemeSettingsView.swift */,
+				9D060B83AB4A974FFE75CD0D /* AIMeterWatch.entitlements */,
+				2DD9C953D1E0BF3360E1D666 /* AIMeterWatchApp.swift */,
+				B1421B6CB05574E02990F7B6 /* Assets.xcassets */,
+				11A564A7E7B2F48740184610 /* Info.plist */,
+				041105927FDF963B6EC429AF /* PrivacyInfo.xcprivacy */,
+				B8A651CA1321E6AC848C2316 /* WatchOverviewView.swift */,
+				3556BD63C6FD41405C06E8D4 /* WatchSessionBridge.swift */,
 			);
-			path = Settings;
+			path = AIMeterWatch;
 			sourceTree = "<group>";
 		};
 		A543176FF8962C7BBC6458B2 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				A9B9BA14575297CCB3389B05 /* CursorUsageWidgets */,
+				11F6769ED7B60E79555D7692 /* AIMeterWidgets */,
 				72593BE95A0C6487074473AB /* iOS */,
 				25BE981F93BA0F1EE5B90833 /* watchOS */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
 		};
-		A9B9BA14575297CCB3389B05 /* CursorUsageWidgets */ = {
+		B65A4819B1C851B1A5DEAA1B /* AIMeter */ = {
 			isa = PBXGroup;
 			children = (
-				9DBCC3BA81D0DAA2FD9B73D9 /* CursorUsageWidgets.entitlements */,
-				D11CD29F887F1129B35ABB90 /* CursorUsageWidgets.swift */,
-				7EF1441771B3169A171A981A /* Info.plist */,
+				68B7CC0A828B16C2DEB9C7A1 /* AIMeter.entitlements */,
+				EE89107E326FE924787E9513 /* AIMeterApp.swift */,
+				3A27C1B6423A4ED2041174DE /* AppActivation.swift */,
+				C80C34FDEF0972576972DAEF /* AppInstall.swift */,
+				A9DCE6A36F621C08C9C8C7EC /* Info.plist */,
+				767FDFADCE92928E5093F315 /* StatusItemController.swift */,
+				803A59935476DF447FF46A66 /* UsageExportPanel.swift */,
+				7F3B35D8E1DC85C2B0C135C3 /* Settings */,
+				CBD3A0293D1D60711C8990F9 /* Views */,
 			);
-			path = CursorUsageWidgets;
+			path = AIMeter;
 			sourceTree = "<group>";
 		};
-		AD2F3AE0B4B900CF00787159 /* CursorUsageiOS */ = {
+		CBD3A0293D1D60711C8990F9 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				B73C6442F65EF00E065F75CB /* AccountsView.swift */,
-				58B3BBE7BF7E0BFFA5C961C1 /* Assets.xcassets */,
-				B70553EDCE6F1C838121490C /* BackgroundRefresh.swift */,
-				141727A8F34B7F080C67AB53 /* CursorUsageiOS.entitlements */,
-				D2224D18CBF8585886BC8142 /* CursorUsageiOSApp.swift */,
-				34C4915DE1BC7918F371797C /* Info.plist */,
-				004721403802C738907EA9B4 /* LoginWebView.swift */,
-				E8F0EBF07357A8079AF647D0 /* OverviewView.swift */,
-				806BEB0D503AC4B869CCE547 /* PhoneAccountPager.swift */,
-				447A013F7281C732DD16E031 /* PhoneSettingsPages.swift */,
-				8D63C5971395AB85F87A7764 /* PhoneSettingsView.swift */,
-				D83E1BCECA4D53FC1A0FD982 /* PhoneWatchBridge.swift */,
-				8662CEA0D6278EB8298B4F57 /* PrivacyInfo.xcprivacy */,
-				374F506FF494A46809BE5604 /* RootTabView.swift */,
+				6C2638ABAD0D7EC663F57016 /* MenuBarLabelView.swift */,
+				9103D2E7706D855FFE48BF6E /* MenuBarPopoverView.swift */,
+				5D96DE1FA2AE1FB26BF85A78 /* SettingsOpenLink.swift */,
+				B9F843C6FD3B5D1330F2ED1F /* UsageUIComponents.swift */,
 			);
-			path = CursorUsageiOS;
-			sourceTree = "<group>";
-		};
-		B8942A94C961BD67BE571149 /* CursorUsageWatch */ = {
-			isa = PBXGroup;
-			children = (
-				C4FF03EAE4A6ACD4EE2F9BCF /* Assets.xcassets */,
-				18550B5DAB0A58A7550E2D37 /* CursorUsageWatch.entitlements */,
-				1BEF188E51A67251007C2B86 /* CursorUsageWatchApp.swift */,
-				1686BC27920FFC986B7838E3 /* Info.plist */,
-				9598CA4BCB968107F76B10F2 /* PrivacyInfo.xcprivacy */,
-				9384B8DF44862EC38A415940 /* WatchOverviewView.swift */,
-				C64F4C2636F574B09626C152 /* WatchSessionBridge.swift */,
-			);
-			path = CursorUsageWatch;
+			path = Views;
 			sourceTree = "<group>";
 		};
 		E08CE85288FC2B8F18C6E793 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				AD2F3AE0B4B900CF00787159 /* CursorUsageiOS */,
+				59E47D4EACF3EFD9FBF9A0A3 /* AIMeteriOS */,
 			);
 			path = iOS;
 			sourceTree = "<group>";
@@ -587,6 +591,7 @@
 			name = AIMeter;
 			packageProductDependencies = (
 				FCE0358F1DBD0E0E21745874 /* AIMeterCore */,
+				2D973033E752AB9B14EEDD8C /* Sparkle */,
 			);
 			productName = AIMeter;
 			productReference = FE73A1851218DA4462AA95A8 /* AIMeter.app */;
@@ -679,6 +684,7 @@
 			mainGroup = 6BA9FA428F6CE28CCADE8B16;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				618454AA413E77CE568B4AFE /* XCRemoteSwiftPackageReference "Sparkle" */,
 				2141F5BA2E9DFFA0B9A59B9F /* XCLocalSwiftPackageReference "Packages/AIMeterCore" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -727,9 +733,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F0B6697689C00FCDA3828122 /* Assets.xcassets in Resources */,
+				ABD9C595282F61AE54B8C4E1 /* Assets.xcassets in Resources */,
 				AD3738F265996FA92A332157 /* Assets.xcassets in Resources */,
-				42C5418B2D2AC844618E55AC /* PrivacyInfo.xcprivacy in Resources */,
+				FE7376F6CDF45F8A3364B2A8 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -737,9 +743,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B4FA7ED0D1F9776816226FA3 /* Assets.xcassets in Resources */,
+				E741D8FC9FF74D03C602924A /* Assets.xcassets in Resources */,
 				B55DA86C142551C977D6AEF0 /* Assets.xcassets in Resources */,
-				EC40B2DCA63EA3F58C320A0E /* PrivacyInfo.xcprivacy in Resources */,
+				3813F92CF82184CC67013112 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -758,20 +764,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F0D0D873AEE9FA5F3F958388 /* AccountsView.swift in Sources */,
+				130B4BB1F42C6E4B25F87004 /* AIMeteriOSApp.swift in Sources */,
+				2250D1435FC412BEA06BFB29 /* AccountsView.swift in Sources */,
 				06F87BCDFA97406A58913743 /* AppAbout.swift in Sources */,
 				1C53A14B84E506DE83B54BCC /* AppLogo.swift in Sources */,
 				A5BB7CDADE20B97B02C180C6 /* AppTheme.swift in Sources */,
-				D7EBAE09CDC28932AAA30275 /* BackgroundRefresh.swift in Sources */,
-				C39169A212ABB68E33776EDA /* CursorUsageiOSApp.swift in Sources */,
+				AEC5DCDD91365283A6AD60C3 /* BackgroundRefresh.swift in Sources */,
 				DB78EC2E83A1BC0B1253BB60 /* CycleSpendChart.swift in Sources */,
-				52D6D6F7CBDD3EC923D6F422 /* LoginWebView.swift in Sources */,
-				2B5F019EE161D2973209F7CB /* OverviewView.swift in Sources */,
-				FDC1AA0B43A7947ECEBBE602 /* PhoneAccountPager.swift in Sources */,
-				283005FD7C9B19B5F40B1C48 /* PhoneSettingsPages.swift in Sources */,
-				F8A6BA493D32F58B89D771EA /* PhoneSettingsView.swift in Sources */,
-				BC64C7BC55F5A405B21E2F2C /* PhoneWatchBridge.swift in Sources */,
-				A86416CA69F8D45FDB617B47 /* RootTabView.swift in Sources */,
+				2EE75F4F66F52E0F9A218244 /* LoginWebView.swift in Sources */,
+				23A82A3887234983CC1F2BC2 /* OverviewView.swift in Sources */,
+				1E679AE188376C519E57EBB1 /* PhoneAccountPager.swift in Sources */,
+				77EA69F7BA6272942E969932 /* PhoneSettingsPages.swift in Sources */,
+				CF4D4F57A675BFED62578DF5 /* PhoneSettingsView.swift in Sources */,
+				06BA4E44C3145E8D2DA5C3A2 /* PhoneWatchBridge.swift in Sources */,
+				B1E21B395DFFC0AB2EE7099F /* RootTabView.swift in Sources */,
 				630783F957E52BE4FADF40A5 /* UsageProgressBar.swift in Sources */,
 				B51D93447326EA459AC26458 /* WidgetReload.swift in Sources */,
 			);
@@ -781,10 +787,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				88B66D41416CE0AADAE14FC3 /* AIMeterWidgets.swift in Sources */,
 				1E29A9BF222BC59F0A87C8FA /* AppAbout.swift in Sources */,
 				FFD913F6E12E81E2429F4665 /* AppLogo.swift in Sources */,
 				64765E6839599A8908BA15CC /* AppTheme.swift in Sources */,
-				FB563CDE8FAA3C67CF27D9BC /* CursorUsageWidgets.swift in Sources */,
 				AE79486658FD5DA743477905 /* UsageProgressBar.swift in Sources */,
 				8562936F5DB66DC6A8B9B311 /* WidgetReload.swift in Sources */,
 			);
@@ -794,7 +800,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D1F55791393488F95EBC99ED /* CursorUsageWatchWidgets.swift in Sources */,
+				00A0BB3E31C00F7135D07276 /* AIMeterWatchWidgets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -802,27 +808,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				581E7EFF686B8181040E5CAF /* AccessibilitySettingsView.swift in Sources */,
+				48E9852649EDDF1863002F82 /* AIMeterApp.swift in Sources */,
+				B4E326E754AA0153945CC7F0 /* AccessibilitySettingsView.swift in Sources */,
 				2F787B1ACC79125D4AAC842E /* AppAbout.swift in Sources */,
-				90B39F4E481D68542C77516F /* AppActivation.swift in Sources */,
-				E2ABD76DA94A9CD4FB0321BF /* AppInstall.swift in Sources */,
+				468690C7442955A44BCF6A29 /* AppActivation.swift in Sources */,
+				B53E3C6C505CAB92C8C6FF5B /* AppInstall.swift in Sources */,
 				16F99EACE6CEF349FB77704E /* AppLogo.swift in Sources */,
 				7EA9CCB2DF5C37B4D636FB42 /* AppTheme.swift in Sources */,
-				6DB8956406A0699CE4288E6E /* AuthenticationSettingsView.swift in Sources */,
-				7AFE4EE22E473CC5EC2CC6C0 /* CursorUsageTrackerApp.swift in Sources */,
+				CA316B4C1AA5277BAAD1F95C /* AuthenticationSettingsView.swift in Sources */,
 				7A823078C65F60A69F97AF14 /* CycleSpendChart.swift in Sources */,
-				AD5FBDCAA8C0745E73D341E0 /* GeneralSettingsView.swift in Sources */,
-				0B181B253A8A36277EA25057 /* IncludedPaidAboutSettings.swift in Sources */,
-				107AC83274274706AFDCC328 /* LayoutSettingsView.swift in Sources */,
-				B75AEDAB0DD942001B9D63CD /* MenuBarLabelView.swift in Sources */,
-				64F1ED9488B74EDFAD422AC3 /* MenuBarPopoverView.swift in Sources */,
-				CB15EFCFF4C599BB05472385 /* SettingsOpenLink.swift in Sources */,
-				16C217813CAFAB307A19078D /* SettingsRootView.swift in Sources */,
-				77987E6A3D3543C1A3BEC03E /* StatusItemController.swift in Sources */,
-				7120C8F53C1DAEA27BD677CE /* ThemeSettingsView.swift in Sources */,
-				27D13850CB54420DFF9828B1 /* UsageExportPanel.swift in Sources */,
+				A6AFF141D5343C44E7560DC6 /* GeneralSettingsView.swift in Sources */,
+				65630D6A580645667FAF0C2A /* IncludedPaidAboutSettings.swift in Sources */,
+				B8367C1036AD6176B57C62FB /* LayoutSettingsView.swift in Sources */,
+				F84ADD3287C0725AA8022371 /* MenuBarLabelView.swift in Sources */,
+				3533996B8F23679C6B551EC7 /* MenuBarPopoverView.swift in Sources */,
+				9C68A3842709825E49E7EE6A /* SettingsOpenLink.swift in Sources */,
+				A07164D4807101CA77C92ECC /* SettingsRootView.swift in Sources */,
+				DCD9A5BB80D0ADF3AC093E01 /* StatusItemController.swift in Sources */,
+				1D3A1A3B093D6AC5D8D9943C /* ThemeSettingsView.swift in Sources */,
+				01466355E983B5405CC8DA60 /* UsageExportPanel.swift in Sources */,
 				B4942BC54C23D27B3B0C692F /* UsageProgressBar.swift in Sources */,
-				1604FD2255FE26EE425AA689 /* UsageUIComponents.swift in Sources */,
+				742610918337CFFE1E9A2D6C /* UsageUIComponents.swift in Sources */,
 				73CB481D1F843595D66B8DA8 /* WidgetReload.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -831,13 +837,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F3631E4B9DC7F636B9062DA1 /* AIMeterWatchApp.swift in Sources */,
 				E0C7B7A420F0483495B760D0 /* AppAbout.swift in Sources */,
 				4901436BD7C1394014DDB7E0 /* AppLogo.swift in Sources */,
 				A45D263258F7647970599390 /* AppTheme.swift in Sources */,
-				757B51960C9EEA266B506BC0 /* CursorUsageWatchApp.swift in Sources */,
 				0F9BC6E82ABB0F0CB7F3E5D7 /* UsageProgressBar.swift in Sources */,
-				E5D4992DABB697AB01EE8BA0 /* WatchOverviewView.swift in Sources */,
-				AF390BCBA0E983477852CC50 /* WatchSessionBridge.swift in Sources */,
+				950FA61DBFE901089753440E /* WatchOverviewView.swift in Sources */,
+				5AD2166A95668A12033E9C17 /* WatchSessionBridge.swift in Sources */,
 				96938F49F23E259DE1477BE8 /* WidgetReload.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -846,10 +852,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C8BBC52B8CD41CAB5400FC33 /* AIMeterWidgets.swift in Sources */,
 				C1791AEF8061DB891B6CCE7C /* AppAbout.swift in Sources */,
 				05D7C74F232987CC8C9E9E2F /* AppLogo.swift in Sources */,
 				97A17BDE047421623758E64C /* AppTheme.swift in Sources */,
-				8ED19B2B9E33F6AF046E0E4C /* CursorUsageWidgets.swift in Sources */,
 				6DE7DFDD4F86B6534251D0EC /* UsageProgressBar.swift in Sources */,
 				AB451BA78F14A5B3989E75BD /* WidgetReload.swift in Sources */,
 			);
@@ -885,9 +891,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Apps/watchOS/CursorUsageWatch/CursorUsageWatch.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Apps/watchOS/AIMeterWatch/AIMeterWatch.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Apps/watchOS/CursorUsageWatch/Info.plist;
+				INFOPLIST_FILE = Apps/watchOS/AIMeterWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.watchkitapp;
 				SDKROOT = watchos;
@@ -899,7 +905,7 @@
 		2084E98C599581B951640D7C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Widgets/watchOS/CursorUsageWatchWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Widgets/watchOS/AIMeterWatchWidgets.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widgets/watchOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
@@ -919,10 +925,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Apps/iOS/CursorUsageiOS/CursorUsageiOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Apps/iOS/AIMeteriOS/AIMeteriOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Apps/iOS/CursorUsageiOS/Info.plist;
+				INFOPLIST_FILE = Apps/iOS/AIMeteriOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -970,7 +976,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 36;
+				CURRENT_PROJECT_VERSION = 37;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -992,7 +998,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 JamesWare.dev";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.3.1;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1008,10 +1014,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Apps/iOS/CursorUsageiOS/CursorUsageiOS.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Apps/iOS/AIMeteriOS/AIMeteriOS.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Apps/iOS/CursorUsageiOS/Info.plist;
+				INFOPLIST_FILE = Apps/iOS/AIMeteriOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1027,22 +1033,21 @@
 		6DDB1C98234E79B4E4936017 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Apps/macOS/AIMeter/AIMeter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
-				INFOPLIST_KEY_CFBundleIconName = AppIcon;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_LSUIElement = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Apps/macOS/AIMeter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.app;
+				PRODUCT_NAME = "AI Meter";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -1050,9 +1055,9 @@
 		814BA1D906C5A5F0B9B89EA3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Widgets/iOS/CursorUsageiOSWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Widgets/iOS/AIMeteriOSWidgets.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Widgets/CursorUsageWidgets/Info.plist;
+				INFOPLIST_FILE = Widgets/AIMeterWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1070,9 +1075,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Apps/watchOS/CursorUsageWatch/CursorUsageWatch.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Apps/watchOS/AIMeterWatch/AIMeterWatch.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Apps/watchOS/CursorUsageWatch/Info.plist;
+				INFOPLIST_FILE = Apps/watchOS/AIMeterWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.watchkitapp;
 				SDKROOT = watchos;
@@ -1084,22 +1089,21 @@
 		9A71CF22C88798E165433007 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = Apps/macOS/CursorUsageTracker/CursorUsageTracker.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Apps/macOS/AIMeter/AIMeter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
-				INFOPLIST_KEY_CFBundleIconName = AppIcon;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_LSUIElement = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Apps/macOS/AIMeter/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.app;
+				PRODUCT_NAME = "AI Meter";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -1107,9 +1111,9 @@
 		9DB444D2A673CC80B026DD53 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Widgets/iOS/CursorUsageiOSWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Widgets/iOS/AIMeteriOSWidgets.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Widgets/CursorUsageWidgets/Info.plist;
+				INFOPLIST_FILE = Widgets/AIMeterWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1126,7 +1130,7 @@
 		A5B331D0FED7C7826EC27E81 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Widgets/watchOS/CursorUsageWatchWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Widgets/watchOS/AIMeterWatchWidgets.entitlements;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widgets/watchOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
@@ -1145,13 +1149,13 @@
 		BA610E6DCDDDD217E1C08B1D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Widgets/CursorUsageWidgets/CursorUsageWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Widgets/AIMeterWidgets/AIMeterWidgets.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Widgets/CursorUsageWidgets/Info.plist;
+				INFOPLIST_FILE = Widgets/AIMeterWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1168,13 +1172,13 @@
 		F2B6AB6DAAFD0FDB5FC95AC8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = Widgets/CursorUsageWidgets/CursorUsageWidgets.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Widgets/AIMeterWidgets/AIMeterWidgets.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Widgets/CursorUsageWidgets/Info.plist;
+				INFOPLIST_FILE = Widgets/AIMeterWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
 				INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1223,7 +1227,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 36;
+				CURRENT_PROJECT_VERSION = 37;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1239,7 +1243,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 JamesWare.dev";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.3.1;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1325,7 +1329,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		618454AA413E77CE568B4AFE /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.9.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		2D973033E752AB9B14EEDD8C /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 618454AA413E77CE568B4AFE /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
 		56F0512A6C8447B78D569A0C /* AIMeterCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AIMeterCore;

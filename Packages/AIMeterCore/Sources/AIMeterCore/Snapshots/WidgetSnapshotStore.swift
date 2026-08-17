@@ -118,22 +118,42 @@ public enum WidgetSnapshotStore {
         }
     }
 
-    private static var candidateFiles: [URL] {
+    private static let supportFolderName = "AIMeter"
+    private static let legacySupportFolderName = "CursorUsageTracker"
+
+    private static func supportFile(in root: URL, folder: String) -> URL {
+        root
+            .appendingPathComponent("Library", isDirectory: true)
+            .appendingPathComponent("Application Support", isDirectory: true)
+            .appendingPathComponent(folder, isDirectory: true)
+            .appendingPathComponent(filename)
+    }
+
+    private static var writeFiles: [URL] {
         var urls: [URL] = []
         for root in groupRoots {
-            urls.append(
-                root
-                    .appendingPathComponent("Library", isDirectory: true)
-                    .appendingPathComponent("Application Support", isDirectory: true)
-                    .appendingPathComponent("CursorUsageTracker", isDirectory: true)
-                    .appendingPathComponent(filename)
-            )
+            urls.append(supportFile(in: root, folder: supportFolderName))
             urls.append(root.appendingPathComponent(filename))
         }
         if let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
             urls.append(
                 support
-                    .appendingPathComponent("CursorUsageTracker", isDirectory: true)
+                    .appendingPathComponent(supportFolderName, isDirectory: true)
+                    .appendingPathComponent(filename)
+            )
+        }
+        return urls
+    }
+
+    private static var candidateFiles: [URL] {
+        var urls = writeFiles
+        for root in groupRoots {
+            urls.append(supportFile(in: root, folder: legacySupportFolderName))
+        }
+        if let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            urls.append(
+                support
+                    .appendingPathComponent(legacySupportFolderName, isDirectory: true)
                     .appendingPathComponent(filename)
             )
         }
@@ -164,7 +184,7 @@ public enum WidgetSnapshotStore {
 
         var lastError: Error?
         var wrote = false
-        for url in candidateFiles {
+        for url in writeFiles {
             do {
                 try FileManager.default.createDirectory(
                     at: url.deletingLastPathComponent(),

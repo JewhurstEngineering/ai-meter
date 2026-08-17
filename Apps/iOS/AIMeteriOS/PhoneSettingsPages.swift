@@ -681,6 +681,9 @@ struct PhoneAboutSettings: View {
                 Text("Personal Cursor Pro / Pro+ / Ultra meter. Team Admin API is parked. Tokens stay in this iPhone’s Keychain.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                Text(AppAbout.affiliationDisclaimer)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 Link(destination: AppAbout.dashboardURL) {
                     Label("Cursor dashboard", systemImage: "globe")
                 }

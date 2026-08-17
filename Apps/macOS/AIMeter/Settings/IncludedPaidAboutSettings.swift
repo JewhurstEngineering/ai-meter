@@ -818,6 +818,11 @@ struct AboutSettingsView: View {
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
 
+                    Text(AppAbout.affiliationDisclaimer)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
                     Link(destination: AppAbout.dashboardURL) {
                         Label("Cursor dashboard", systemImage: "globe")
                     }
@@ -860,6 +865,16 @@ struct AboutSettingsView: View {
                 Text("License: \(AppAbout.licenseName)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+#if !DEBUG
+                Button {
+                    (NSApp.delegate as? AppDelegate)?.checkForUpdates(nil)
+                } label: {
+                    Label("Check for Updates…", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .padding(.top, 4)
+#endif
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
