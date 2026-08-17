@@ -12,3 +12,11 @@ xcuserdata/
 *.dSYM
 build/
 dist/
+artifacts/
+.cursor/
+docs/
+MARKETING.md
+cursor-usage-tracker-marketing.md
+*.p12
+AuthKey_*.p8
+sparkle_private_key*
