@@ -172,9 +172,7 @@ public enum WidgetSnapshotStore {
         let data = try data(from: snapshot)
         #if os(watchOS)
         writeWatchData(data)
-        return
-        #endif
-
+        #else
         for id in groupIDs {
             if let suite = UserDefaults(suiteName: id) {
                 suite.set(data, forKey: defaultsKey)
@@ -199,6 +197,7 @@ public enum WidgetSnapshotStore {
         if !wrote, let lastError {
             throw lastError
         }
+        #endif
     }
 
     public static func writeWatchLocal(_ snapshot: WidgetSnapshot) {
@@ -221,7 +220,7 @@ public enum WidgetSnapshotStore {
     public static func read() -> WidgetSnapshot? {
         #if os(watchOS)
         return readWatchLocal()
-        #endif
+        #else
         for id in groupIDs {
             if let suite = UserDefaults(suiteName: id),
                let data = suite.data(forKey: defaultsKey),
@@ -236,6 +235,7 @@ public enum WidgetSnapshotStore {
             return snap
         }
         return nil
+        #endif
     }
 
     private static func decode(_ data: Data) -> WidgetSnapshot? {

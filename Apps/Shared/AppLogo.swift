@@ -22,7 +22,7 @@ struct AppFullLogo: View {
     var color: Bool = false
 
     var body: some View {
-        Image(color ? "AppLogoFullColor" : "AppLogoFull")
+        Image(color ? "AppLogoFullBrand" : "AppLogoFull")
             .resizable()
             .interpolation(.high)
             .scaledToFit()
