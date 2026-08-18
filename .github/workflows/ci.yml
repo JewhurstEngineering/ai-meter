@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: AIMeterCore tests
+        working-directory: Packages/AIMeterCore
+        run: swift test
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Mac unit tests
+        run: |
+          xcodebuild test \
+            -project AIMeter.xcodeproj \
+            -scheme AIMeter \
+            -destination 'platform=macOS,arch=arm64' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: iOS + Watch compile
+        run: |
+          xcodebuild build \
+            -project AIMeter.xcodeproj \
+            -scheme AIMeteriOS \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: iOS Simulator smoke
+        run: |
+          DESTINATION="$(python3 Scripts/ci-iphone-destination.py)"
+          echo "Using $DESTINATION"
+          xcodebuild test \
+            -project AIMeter.xcodeproj \
+            -scheme AIMeteriOS \
+            -destination "$DESTINATION" \
+            -configuration Debug \
+            -only-testing:AIMeteriOSUITests

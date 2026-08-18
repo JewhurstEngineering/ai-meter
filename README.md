@@ -11,6 +11,7 @@ A local-first usage meter for **Cursor**, **Claude Code**, and **Codex**. Glance
 - **Apple Watch** glance + complications (sanitized snapshot only — no tokens)
 
 Current version: **1.0.0** · MIT · [LICENSE](LICENSE)
+[![CI](https://github.com/JewhurstEngineering/ai-meter/actions/workflows/ci.yml/badge.svg)](https://github.com/JewhurstEngineering/ai-meter/actions/workflows/ci.yml)
 
 ## Download
 
