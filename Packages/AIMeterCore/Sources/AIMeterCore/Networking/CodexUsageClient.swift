@@ -16,15 +16,15 @@ public actor CodexUsageClient {
 
     public func fetchSnapshot(credential: CodexOAuthCredential) async throws -> UsageSnapshot {
         do {
-            return try await fetch(credential: credential)
+            return try await fetch(credential: credential, attempt: 0)
         } catch ProviderUsageError.unauthorized {
             guard let refresh = credential.refreshToken else { throw ProviderUsageError.unauthorized }
             let refreshed = try await refreshTokens(refresh, accountID: credential.accountID)
-            return try await fetch(credential: refreshed)
+            return try await fetch(credential: refreshed, attempt: 0)
         }
     }
 
-    private func fetch(credential: CodexOAuthCredential) async throws -> UsageSnapshot {
+    private func fetch(credential: CodexOAuthCredential, attempt: Int) async throws -> UsageSnapshot {
         var request = URLRequest(url: usageURL)
         request.httpMethod = "GET"
         request.setValue("Bearer \(credential.accessToken)", forHTTPHeaderField: "Authorization")
@@ -37,6 +37,10 @@ public actor CodexUsageClient {
         guard let http = response as? HTTPURLResponse else { throw ProviderUsageError.emptyResponse }
         if http.statusCode == 401 || http.statusCode == 403 {
             throw ProviderUsageError.unauthorized
+        }
+        if http.statusCode == 429, attempt == 0 {
+            try await Task.sleep(nanoseconds: 1_500_000_000)
+            return try await fetch(credential: credential, attempt: 1)
         }
         guard (200...299).contains(http.statusCode) else {
             throw ProviderUsageError.from(httpStatus: http.statusCode)

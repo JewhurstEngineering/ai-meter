@@ -48,7 +48,8 @@ public actor ClaudeUsageClient {
             if refreshed != agent {
                 return try await fetch(token: token, attempt: 1)
             }
-            throw ProviderUsageError.from(httpStatus: 429)
+            try await Task.sleep(nanoseconds: 1_500_000_000)
+            return try await fetch(token: token, attempt: 1)
         }
         guard (200...299).contains(http.statusCode) else {
             throw ProviderUsageError.from(httpStatus: http.statusCode)

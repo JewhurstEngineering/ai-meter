@@ -213,6 +213,9 @@ struct MenuBarPopoverView: View {
                         )
                     }
                 }
+                if account.isAuthenticated, let error = account.lastError {
+                    refreshWarning(error, accountID: account.id)
+                }
             } else if account.isRefreshing {
                 ProgressView()
                     .controlSize(.small)
@@ -768,11 +771,26 @@ struct MenuBarPopoverView: View {
                 PopoverAgentsCard(account: displayed)
             }
 
-            if let error = displayed?.lastError ?? store.lastError {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .appFont(.caption)
-                    .foregroundStyle(.orange)
+            if displayed?.isAuthenticated == true, let error = displayed?.lastError {
+                refreshWarning(error, accountID: displayed?.id)
             }
+        }
+    }
+
+    private func refreshWarning(_ message: String, accountID: UUID?) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Label(message, systemImage: "exclamationmark.triangle.fill")
+                .appFont(.caption)
+                .foregroundStyle(.orange)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button("Clear") {
+                store.clearLastError(id: accountID)
+            }
+            .appFont(.caption2, weight: .semibold)
+            .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
+            .help("Hide until the next failed refresh.")
         }
     }
 

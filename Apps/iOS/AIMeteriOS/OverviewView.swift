@@ -227,12 +227,17 @@ struct OverviewView: View {
                 cloudAgentsSection(account)
             }
 
-            if account?.isAuthenticated == true, let error = account?.lastError ?? store.lastError {
+            if account?.isAuthenticated == true, let error = account?.lastError {
                 Section {
                     Label(error, systemImage: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
-                    Link(destination: AppAbout.dashboardURL) {
-                        Label("Open Cursor dashboard", systemImage: "globe")
+                    Button("Clear") {
+                        store.clearLastError(id: account?.id)
+                    }
+                    if account?.connection.provider == .cursor {
+                        Link(destination: AppAbout.dashboardURL) {
+                            Label("Open Cursor dashboard", systemImage: "globe")
+                        }
                     }
                 }
             }

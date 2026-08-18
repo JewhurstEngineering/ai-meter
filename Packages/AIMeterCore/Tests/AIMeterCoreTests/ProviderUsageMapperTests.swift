@@ -86,6 +86,12 @@ final class ProviderUsageMapperTests: XCTestCase {
             ProviderUsageError.httpStatus(429).errorDescription,
             "Too many usage checks (HTTP 429). Last numbers are kept — try again in a minute."
         )
+        XCTAssertTrue(ProviderUsageError.httpStatus(429).keepsLastNumbers)
+        XCTAssertTrue(ProviderUsageError.httpStatus(503).keepsLastNumbers)
+        XCTAssertTrue(ProviderUsageError.emptyResponse.keepsLastNumbers)
+        XCTAssertFalse(ProviderUsageError.unauthorized.keepsLastNumbers)
+        XCTAssertTrue(PersonalAPIError.httpStatus(429).keepsLastNumbers)
+        XCTAssertFalse(PersonalAPIError.unauthorized.keepsLastNumbers)
     }
 
     func testClaudeUserAgentUsesInstalledVersion() {

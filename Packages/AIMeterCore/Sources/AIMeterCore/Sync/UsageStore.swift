@@ -287,6 +287,16 @@ public final class UsageStore: ObservableObject {
         pruneWarningSnoozesUsingActive()
     }
 
+    /// Hide a refresh warning until the next failed fetch for this account.
+    public func clearLastError(id: UUID? = nil) {
+        let target = id ?? activeAccountID
+        if target == nil || target == activeAccountID {
+            lastConnectFailure = nil
+        }
+        guard let target else { return }
+        updateRuntime(id: target) { $0.lastError = nil }
+    }
+
     public func renameAccount(id: UUID, label: String) {
         guard let index = connections.firstIndex(where: { $0.id == id }) else { return }
         connections[index].label = label

@@ -14,6 +14,16 @@ public enum PersonalAPIError: Error, Sendable, Equatable {
         default: return .httpStatus(code)
         }
     }
+
+    /// Soft failures: keep the previous snapshot and skip the orange banner.
+    public var keepsLastNumbers: Bool {
+        switch self {
+        case .decodingFailed, .emptyResponse: return true
+        case .httpStatus(429): return true
+        case .httpStatus(let code) where (500...599).contains(code): return true
+        default: return false
+        }
+    }
 }
 
 extension PersonalAPIError: LocalizedError {
