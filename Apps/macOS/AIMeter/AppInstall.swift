@@ -10,8 +10,12 @@ enum AppInstall {
         applicationsURL.appendingPathComponent("AI Meter.app", isDirectory: true)
     }
 
+    static func isApplicationsPath(_ path: String) -> Bool {
+        path.hasPrefix("/Applications/")
+    }
+
     static var isRunningFromApplications: Bool {
-        Bundle.main.bundleURL.path.hasPrefix("/Applications/")
+        isApplicationsPath(Bundle.main.bundleURL.path)
     }
 
     static let bannerDismissedKey = "installToApplications.bannerDismissed"

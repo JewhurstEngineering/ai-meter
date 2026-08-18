@@ -45,6 +45,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app
         PRODUCT_NAME: AI Meter
+        PRODUCT_MODULE_NAME: AIMeter
         INFOPLIST_FILE: Apps/macOS/AIMeter/Info.plist
         GENERATE_INFOPLIST_FILE: false
         CODE_SIGN_ENTITLEMENTS: Apps/macOS/AIMeter/AIMeter.entitlements
@@ -177,14 +178,46 @@ targets:
         SKIP_INSTALL: YES
     dependencies:
       - package: AIMeterCore
+  AIMeterTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/AIMeterTests
+    dependencies:
+      - target: AIMeter
+      - package: AIMeterCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AI Meter.app/Contents/MacOS/AI Meter"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+  AIMeteriOSUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/AIMeteriOSUITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: AIMeteriOS
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: "NO"
 schemes:
   AIMeter:
     build:
       targets:
         AIMeter: all
         AIMeterWidgets: all
+        AIMeterTests: [test]
     run:
       config: Release
+    test:
+      config: Debug
+      targets:
+        - AIMeterTests
     archive:
       config: Release
   AIMeteriOS:
@@ -194,9 +227,14 @@ schemes:
         AIMeteriOSWidgets: all
         AIMeterWatch: all
         AIMeterWatchWidgets: all
+        AIMeteriOSUITests: [test]
     run:
       config: Debug
       executable: AIMeteriOS
+    test:
+      config: Debug
+      targets:
+        - AIMeteriOSUITests
     archive:
       config: Release
       revealArchiveInOrganizer: true
