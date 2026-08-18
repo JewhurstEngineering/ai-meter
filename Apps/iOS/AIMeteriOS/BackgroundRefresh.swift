@@ -3,8 +3,13 @@ import AIMeterCore
 
 enum BackgroundRefresh {
     static let identifier = "com.jamesware.aimeter.ios.refresh"
+    private static var didRegister = false
 
+    /// Must run during `App.init` / `didFinishLaunching`. SwiftUI `.task` is too late
+    /// and traps: "All launch handlers must be registered before application finishes launching".
     static func register(store: UsageStore) {
+        guard !didRegister else { return }
+        didRegister = true
         BGTaskScheduler.shared.register(forTaskWithIdentifier: identifier, using: nil) { task in
             handle(task as! BGAppRefreshTask, store: store)
         }

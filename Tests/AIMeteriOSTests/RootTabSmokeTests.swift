@@ -21,6 +21,11 @@ final class RootTabSmokeTests: XCTestCase {
         )
     }
 
+    func testBackgroundRefreshIdentifierIsDeclared() {
+        let ids = Bundle.main.object(forInfoDictionaryKey: "BGTaskSchedulerPermittedIdentifiers") as? [String]
+        XCTAssertEqual(ids, [BackgroundRefresh.identifier])
+    }
+
     func testRootTabViewLoads() {
         let store = UsageStore()
         let host = UIHostingController(
