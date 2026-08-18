@@ -38,15 +38,24 @@ jobs:
             -scheme AIMeteriOS \
             -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
+            -derivedDataPath .ci/DerivedData-ios-build \
             CODE_SIGNING_ALLOWED=NO
 
+      # In-process unit tests, not XCUITest. GitHub-hosted runners fail
+      # XCUIApplication.launch() with "Failed to get background assertion".
       - name: iOS Simulator smoke
         run: |
           DESTINATION="$(python3 Scripts/ci-iphone-destination.py)"
           echo "Using $DESTINATION"
+          UDID="${DESTINATION##*id=}"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
           xcodebuild test \
             -project AIMeter.xcodeproj \
             -scheme AIMeteriOS \
             -destination "$DESTINATION" \
             -configuration Debug \
-            -only-testing:AIMeteriOSUITests
+            -derivedDataPath .ci/DerivedData-ios-test \
+            -only-testing:AIMeteriOSTests \
+            -parallel-testing-enabled NO \
+            CODE_SIGNING_ALLOWED=NO

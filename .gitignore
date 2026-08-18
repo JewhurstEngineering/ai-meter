@@ -11,6 +11,7 @@ xcuserdata/
 *.dSYM.zip
 *.dSYM
 build/
+.ci/
 dist/
 artifacts/
 .cursor/

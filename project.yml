@@ -193,6 +193,22 @@ targets:
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AI Meter.app/Contents/MacOS/AI Meter"
         BUNDLE_LOADER: "$(TEST_HOST)"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
+  AIMeteriOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/AIMeteriOSTests
+    dependencies:
+      - target: AIMeteriOS
+      - package: AIMeterCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AIMeteriOS.app/AIMeteriOS"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: "NO"
   AIMeteriOSUITests:
     type: bundle.ui-testing
     platform: iOS
@@ -227,6 +243,7 @@ schemes:
         AIMeteriOSWidgets: all
         AIMeterWatch: all
         AIMeterWatchWidgets: all
+        AIMeteriOSTests: [test]
         AIMeteriOSUITests: [test]
     run:
       config: Debug
@@ -234,6 +251,7 @@ schemes:
     test:
       config: Debug
       targets:
+        - AIMeteriOSTests
         - AIMeteriOSUITests
     archive:
       config: Release

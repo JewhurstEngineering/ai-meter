@@ -57,6 +57,20 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3E7BCD8E26AD68537A972ED9"
+               BuildableName = "AIMeteriOSTests.xctest"
+               BlueprintName = "AIMeteriOSTests"
+               ReferencedContainer = "container:AIMeter.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "A8B9BE4F53ABA24FBDC6770F"
                BuildableName = "AIMeteriOSUITests.xctest"
                BlueprintName = "AIMeteriOSUITests"
@@ -95,6 +109,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3E7BCD8E26AD68537A972ED9"
+               BuildableName = "AIMeteriOSTests.xctest"
+               BlueprintName = "AIMeteriOSTests"
+               ReferencedContainer = "container:AIMeter.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
          <TestableReference
             skipped = "NO"
             parallelizable = "NO">

@@ -16,10 +16,15 @@ struct AIMeteriOSApp: App {
                         WidgetReload.afterWritingSnapshot()
                         PhoneWatchBridge.shared.sendLatest()
                     }
-                    PhoneWatchBridge.shared.activate()
-                    BackgroundRefresh.register(store: store)
+                    let uiTesting = ProcessInfo.processInfo.arguments.contains("--ui-testing")
+                    if !uiTesting {
+                        PhoneWatchBridge.shared.activate()
+                        BackgroundRefresh.register(store: store)
+                    }
                     await store.bootstrap()
-                    BackgroundRefresh.schedule()
+                    if !uiTesting {
+                        BackgroundRefresh.schedule()
+                    }
                 }
                 .onChange(of: scenePhase) { _, phase in
                     if phase == .active {
