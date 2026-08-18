@@ -381,6 +381,29 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(decoded?.planDisplayName, "Pro")
         XCTAssertEqual(decoded?.otherModelsPercentUsed ?? 0, 41, accuracy: 0.01)
         XCTAssertEqual(WidgetSnapshotStore.watchTransferKey, "widgetSnapshotJSON")
+        XCTAssertEqual(WidgetSnapshotStore.filename, "widget-snapshot.json")
+        XCTAssertEqual(WidgetSnapshotStore.appGroupID, "6998422DKP.com.jamesware.aimeter.shared")
+    }
+
+    func testWidgetSnapshotTempFileRoundTrip() throws {
+        let snap = UsageSnapshot(
+            membershipType: "pro",
+            planDisplayName: "Pro",
+            otherModelsPercentUsed: 22,
+            planUsedCents: 900,
+            planLimitCents: 2000
+        )
+        let widget = WidgetSnapshot(from: snap, warnings: .default)
+        let data = try WidgetSnapshotStore.data(from: widget)
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("AIMeterCore-tests-\(UUID().uuidString)", isDirectory: true)
+        let url = dir.appendingPathComponent(WidgetSnapshotStore.filename)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try data.write(to: url)
+        let loaded = WidgetSnapshotStore.snapshot(from: try Data(contentsOf: url))
+        XCTAssertEqual(loaded?.planDisplayName, "Pro")
+        XCTAssertEqual(loaded?.planUsedCents, 900)
     }
 
     func testLegacyWidgetSnapshotJSONStillDecodes() throws {
