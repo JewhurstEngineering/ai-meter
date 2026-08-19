@@ -35,7 +35,10 @@ public enum ClaudeLocalAuthReader {
 
     #if os(macOS)
     private static func fromKeychain() -> ClaudeOAuthCredential? {
-        guard let raw = KeychainStore(service: keychainService).loadFirst() else { return nil }
+        guard let raw = KeychainStore(
+            service: keychainService,
+            usesDataProtectionKeychain: false
+        ).loadFirst() else { return nil }
         return parseJSON(raw, source: "Claude Code keychain")
             ?? ClaudeOAuthCredential(accessToken: raw.trimmingCharacters(in: .whitespacesAndNewlines), source: "Claude Code keychain")
     }
