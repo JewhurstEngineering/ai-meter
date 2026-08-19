@@ -3,12 +3,12 @@ import Foundation
 // MARK: - Raw API DTOs (loose decoding)
 
 struct UsageSummaryResponse: Decodable, Sendable {
-    var billingCycleStart: String?
-    var billingCycleEnd: String?
-    var membershipType: String?
-    var autoModelSelectedDisplayMessage: String?
-    var namedModelSelectedDisplayMessage: String?
-    var individualUsage: IndividualUsage?
+    var billingCycleStart: String? = nil
+    var billingCycleEnd: String? = nil
+    var membershipType: String? = nil
+    var autoModelSelectedDisplayMessage: String? = nil
+    var namedModelSelectedDisplayMessage: String? = nil
+    var individualUsage: IndividualUsage? = nil
 
     struct IndividualUsage: Decodable, Sendable {
         var plan: PlanUsage?

@@ -47,6 +47,24 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertNil(Mirror(reflecting: stripe).children.first { $0.label == "paymentId" })
     }
 
+    func testEmptySummaryAfterPlanChangeUsesStripeMembership() throws {
+        let stripe = try JSONDecoder().decode(
+            AuthStripeResponse.self,
+            from: Data(#"{"membershipType":"pro","individualMembershipType":"pro","subscriptionStatus":"active"}"#.utf8)
+        )
+        let snap = UsageSnapshotMapper.map(
+            summary: UsageSummaryResponse(),
+            stripe: stripe,
+            aggregated: nil
+        )
+        XCTAssertEqual(snap.membershipType, "pro")
+        XCTAssertEqual(snap.planDisplayName, "Pro")
+        XCTAssertEqual(snap.subscriptionStatus, "active")
+        XCTAssertNil(snap.cursorModelsPercentUsed)
+        XCTAssertTrue(snap.windows.isEmpty)
+        XCTAssertTrue(snap.effectiveWindows.isEmpty)
+    }
+
     func testBillingCycleWindowMathMatchesAnniversaryCycle() throws {
         let start = try XCTUnwrap(isoDate("2026-08-12T18:28:08.000Z"))
         let end = try XCTUnwrap(isoDate("2026-09-12T18:28:08.000Z"))

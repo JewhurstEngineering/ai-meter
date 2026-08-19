@@ -199,7 +199,7 @@ struct MenuBarPopoverView: View {
             if let snapshot = account.snapshot {
                 let windows = visibleWindows(snapshot, toggles: toggles)
                 if windows.isEmpty {
-                    Text("No usage bars enabled for this provider.")
+                    Text("No usage on this cycle yet.")
                         .appFont(.caption2)
                         .foregroundStyle(.secondary)
                 } else {

@@ -71,7 +71,11 @@ public actor PersonalUsageClient {
         let me: AuthMeResponse = try await get("/api/auth/me", cookie: cookie)
         guard me.sub != nil || me.id != nil else { throw PersonalAPIError.unauthorized }
 
-        async let summaryTask: UsageSummaryResponse = get("/api/usage-summary", cookie: cookie)
+        async let summaryTask: UsageSummaryResponse = get(
+            "/api/usage-summary",
+            cookie: cookie,
+            emptyOnNoContent: UsageSummaryResponse()
+        )
         async let stripeTask: AuthStripeResponse = get("/api/auth/stripe", cookie: cookie)
         let summary = try await summaryTask
         let stripe = try? await stripeTask
@@ -215,11 +219,15 @@ public actor PersonalUsageClient {
 
     // MARK: - HTTP
 
-    private func get<T: Decodable>(_ path: String, cookie: String) async throws -> T {
+    private func get<T: Decodable>(
+        _ path: String,
+        cookie: String,
+        emptyOnNoContent: T? = nil
+    ) async throws -> T {
         var request = URLRequest(url: URL(string: path, relativeTo: baseURL)!.absoluteURL)
         request.httpMethod = "GET"
         request.setValue("WorkosCursorSessionToken=\(cookie)", forHTTPHeaderField: "Cookie")
-        return try await send(request)
+        return try await send(request, emptyOnNoContent: emptyOnNoContent)
     }
 
     private func post<T: Decodable>(_ path: String, cookie: String, body: [String: Any]) async throws -> T {
@@ -232,11 +240,17 @@ public actor PersonalUsageClient {
         return try await send(request)
     }
 
-    private func send<T: Decodable>(_ request: URLRequest) async throws -> T {
+    private func send<T: Decodable>(_ request: URLRequest, emptyOnNoContent: T? = nil) async throws -> T {
         let (data, response) = try await session.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw PersonalAPIError.httpStatus(-1) }
+        // 204 / empty 200: Cursor does this on a brand-new billing cycle (Ultra → Pro
+        // downgrade) until the first usage event exists. That is not a signed-out session.
+        if http.statusCode == 204 || (http.statusCode == 200 && data.isEmpty) {
+            if let emptyOnNoContent { return emptyOnNoContent }
+            throw PersonalAPIError.emptyResponse
+        }
         let classified = PersonalAPIError.from(httpStatus: http.statusCode)
-        if classified == .unauthorized || classified == .emptyResponse {
+        if classified == .unauthorized {
             throw classified
         }
         guard (200..<300).contains(http.statusCode) else {
