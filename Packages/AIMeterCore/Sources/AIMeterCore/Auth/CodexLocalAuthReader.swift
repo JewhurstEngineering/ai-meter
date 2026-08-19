@@ -64,6 +64,18 @@ public enum CodexLocalAuthReader {
         )
     }
 
+    public static func missingSessionMessage() -> String {
+        #if os(macOS)
+        let url = authFileURL
+        if !FileManager.default.fileExists(atPath: url.path) {
+            return "No Codex session found at ~/.codex/auth.json. In Terminal run `codex login`, then Reconnect."
+        }
+        return "Found ~/.codex/auth.json but it has no access_token. In Terminal run `codex login`, then Reconnect."
+        #else
+        return "Codex sign-in is only available on the Mac app."
+        #endif
+    }
+
     public static func writeRefreshedTokens(accessToken: String, refreshToken: String?, accountID: String?) throws {
         #if os(macOS)
         let url = authFileURL

@@ -7,31 +7,39 @@ public enum KeychainError: Error, Sendable {
 }
 
 public struct KeychainStore: Sendable {
+    public static let appAccessGroup = "6998422DKP.com.jamesware.aimeter.app"
+
     public let service: String
     /// Data-protection items are granted by team ID, so Sparkle updates do not
     /// re-prompt. File-based items (Claude Code, etc.) stay on the login keychain.
     public let usesDataProtectionKeychain: Bool
+    public let accessGroup: String?
 
     public init(
         service: String = "com.jamesware.aimeter.session",
-        usesDataProtectionKeychain: Bool = true
+        usesDataProtectionKeychain: Bool = true,
+        accessGroup: String? = KeychainStore.appAccessGroup
     ) {
         self.service = service
         self.usesDataProtectionKeychain = usesDataProtectionKeychain
+        self.accessGroup = accessGroup
     }
 
     public func save(token: String, account: String) throws {
         guard let data = token.data(using: .utf8) else { throw KeychainError.encodingFailed }
+        var wroteDataProtection = false
         if usesDataProtectionKeychain {
             do {
                 try add(data: data, account: account, dataProtection: true)
-                delete(account: account, dataProtection: false)
-            } catch let KeychainError.unexpectedStatus(status)
-                where status == errSecMissingEntitlement || status == errSecParam
-            {
-                try add(data: data, account: account, dataProtection: false)
+                wroteDataProtection = copy(account: account, dataProtection: true) == token
+                if wroteDataProtection {
+                    delete(account: account, dataProtection: false)
+                }
+            } catch let KeychainError.unexpectedStatus(status) where status == errSecMissingEntitlement {
+                wroteDataProtection = false
             }
-        } else {
+        }
+        if !wroteDataProtection {
             try add(data: data, account: account, dataProtection: false)
         }
     }
@@ -42,7 +50,7 @@ public struct KeychainStore: Sendable {
         }
         guard let value = copy(account: account, dataProtection: false) else { return nil }
         if usesDataProtectionKeychain {
-            try? save(token: value, account: account)
+            try? add(data: Data(value.utf8), account: account, dataProtection: true)
         }
         return value
     }
@@ -104,6 +112,9 @@ public struct KeychainStore: Sendable {
         }
         if dataProtection {
             query[kSecUseDataProtectionKeychain as String] = true
+            if let accessGroup {
+                query[kSecAttrAccessGroup as String] = accessGroup
+            }
         }
         return query
     }

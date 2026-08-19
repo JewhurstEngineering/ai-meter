@@ -487,17 +487,16 @@ struct MenuBarPopoverView: View {
     }
 
     private func reconnectDisplayed() {
-        let provider = displayed?.connection.provider ?? .cursor
+        let account = displayed
+        let provider = account?.connection.provider ?? .cursor
         switch provider {
         case .claude:
             Task {
-                do { try await store.connectClaude() }
-                catch { /* lastError is set on the store */ }
+                _ = try? await store.connectClaude(replacing: account?.id)
             }
         case .codex:
             Task {
-                do { try await store.connectCodex() }
-                catch { /* lastError is set on the store */ }
+                _ = try? await store.connectCodex(replacing: account?.id)
             }
         case .cursor:
             showReauth = true

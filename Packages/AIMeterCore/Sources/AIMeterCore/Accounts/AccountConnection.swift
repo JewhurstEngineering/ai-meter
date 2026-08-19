@@ -183,3 +183,38 @@ public struct AccountRuntime: Equatable, Identifiable, Sendable {
         !isAuthenticated
     }
 }
+
+public struct LocalConnectResult: Sendable, Equatable {
+    public var id: UUID
+    public var displayLabel: String
+    public var source: String
+    public var refreshedExisting: Bool
+    public var provider: ProviderKind
+
+    public init(
+        id: UUID,
+        displayLabel: String,
+        source: String,
+        refreshedExisting: Bool,
+        provider: ProviderKind
+    ) {
+        self.id = id
+        self.displayLabel = displayLabel
+        self.source = source
+        self.refreshedExisting = refreshedExisting
+        self.provider = provider
+    }
+
+    public var successMessage: String {
+        let name = provider.displayName
+        if refreshedExisting {
+            return "Refreshed \(name) (\(displayLabel))."
+        }
+        return "Connected \(name) (\(displayLabel))."
+    }
+}
+
+struct UpsertOutcome: Sendable, Equatable {
+    var id: UUID
+    var refreshedExisting: Bool
+}

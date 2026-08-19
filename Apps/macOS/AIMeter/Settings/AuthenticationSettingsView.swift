@@ -9,6 +9,7 @@ struct AuthenticationSettingsView: View {
     @State private var pasteToken = ""
     @State private var pasteCloudKey = ""
     @State private var statusMessage: String?
+    @State private var authAlert: AuthNotice?
     @State private var editingLabelID: UUID?
     @State private var draftLabel = ""
 
@@ -60,42 +61,14 @@ struct AuthenticationSettingsView: View {
                             showLogin = true
                         }
                         authButton("Connect from Cursor IDE", systemImage: "laptopcomputer") {
-                            Task {
-                                await store.tryAutoConnect()
-                                if store.isAuthenticated {
-                                    await store.refresh()
-                                    let email = store.accountEmail ?? "account"
-                                    let source = store.lastLocalConnectSource ?? "local Cursor"
-                                    statusMessage = "Connected \(email) via \(source)."
-                                } else {
-                                    statusMessage = store.lastError ?? "No local Cursor session found."
-                                }
-                            }
+                            Task { await connectFromCursorIDE() }
                         }
                         authButton("Add Claude Code", systemImage: "brain") {
-                            Task {
-                                do {
-                                    try await store.connectClaude()
-                                    statusMessage = "Connected Claude."
-                                } catch {
-                                    statusMessage = store.lastError ?? error.localizedDescription
-                                }
-                            }
+                            Task { await connectLocal(.claude) }
                         }
                         authButton("Add Codex", systemImage: "chevron.left.forwardslash.chevron.right") {
-                            Task {
-                                do {
-                                    try await store.connectCodex()
-                                    statusMessage = "Connected Codex."
-                                } catch {
-                                    statusMessage = store.lastError ?? error.localizedDescription
-                                }
-                            }
+                            Task { await connectLocal(.codex) }
                         }
-                        authButton("Re-authenticate", systemImage: "arrow.triangle.2.circlepath") {
-                            Task { await reauthenticateActive() }
-                        }
-                        .disabled(store.activeAccountID == nil)
                         authButton("Sign Out", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
                             store.signOut()
                             statusMessage = "Signed out."
@@ -103,9 +76,10 @@ struct AuthenticationSettingsView: View {
                         .disabled(store.connections.isEmpty)
                     }
 
-                    Text("Cursor can sign in in-app. Claude and Codex reuse the CLI login on this Mac — there is no browser OAuth in AI Meter. Claude: click Always Allow on the Keychain prompt. Codex: run `codex login` in Terminal, then Add Codex.")
+                    Text("Cursor can sign in in-app. Claude and Codex sign in from Terminal (`claude` / `codex login`), then Add or Reconnect. A Keychain prompt only appears if this Mac already has that app’s item and AI Meter is not yet allowed to read it. Reconnect is on each account below.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 SettingsPanel(
@@ -247,6 +221,13 @@ struct AuthenticationSettingsView: View {
             .padding(12)
         }
         .background(Color(nsColor: .windowBackgroundColor))
+        .alert(item: $authAlert) { notice in
+            Alert(
+                title: Text(notice.title),
+                message: Text(notice.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
         .sheet(isPresented: $showLogin) {
             VStack(spacing: 0) {
                 HStack {
@@ -269,9 +250,15 @@ struct AuthenticationSettingsView: View {
                     Task {
                         do {
                             try await store.saveSessionToken(token, replacing: replacing)
-                            statusMessage = replacing == nil ? "Signed in." : "Session updated."
+                            presentNotice(
+                                title: replacing == nil ? "Signed in" : "Session updated",
+                                message: replacing == nil ? "Signed in." : "Session updated."
+                            )
                         } catch {
-                            statusMessage = "Login failed: \(error.localizedDescription)"
+                            presentNotice(
+                                title: "Login failed",
+                                message: error.localizedDescription
+                            )
                         }
                     }
                 } onCancel: {
@@ -310,6 +297,12 @@ struct AuthenticationSettingsView: View {
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 }
+                if let error = account.lastError, !account.isAuthenticated {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             if isActive {
                 Text("Active")
@@ -320,6 +313,10 @@ struct AuthenticationSettingsView: View {
                     .foregroundStyle(Color.accentColor)
             }
             Spacer(minLength: 0)
+            Button("Reconnect") {
+                Task { await reconnect(account) }
+            }
+            .controlSize(.small)
             if !isActive {
                 Button("Set active") {
                     store.setActive(id: account.id)
@@ -346,27 +343,56 @@ struct AuthenticationSettingsView: View {
         )
     }
 
-    private func reauthenticateActive() async {
-        guard let account = store.activeAccount else { return }
+    private func connectFromCursorIDE() async {
+        await store.tryAutoConnect()
+        if store.isAuthenticated {
+            await store.refresh()
+            let email = store.accountEmail ?? "account"
+            let source = store.lastLocalConnectSource ?? "local Cursor"
+            presentNotice(title: "Connected", message: "Connected \(email) via \(source).")
+        } else {
+            presentNotice(
+                title: "Couldn’t connect",
+                message: store.lastError ?? "No local Cursor session found."
+            )
+        }
+    }
+
+    private func connectLocal(_ provider: ProviderKind, replacing: UUID? = nil) async {
+        do {
+            let result: LocalConnectResult
+            switch provider {
+            case .claude:
+                result = try await store.connectClaude(replacing: replacing)
+            case .codex:
+                result = try await store.connectCodex(replacing: replacing)
+            case .cursor:
+                return
+            }
+            presentNotice(title: result.refreshedExisting ? "Refreshed" : "Connected", message: result.successMessage)
+        } catch {
+            presentNotice(
+                title: "Couldn’t connect \(provider.displayName)",
+                message: store.lastError ?? error.localizedDescription
+            )
+        }
+    }
+
+    private func reconnect(_ account: AccountRuntime) async {
         switch account.connection.provider {
         case .cursor:
             reauthAccountID = account.id
             showLogin = true
         case .claude:
-            do {
-                try await store.connectClaude()
-                statusMessage = "Claude session refreshed."
-            } catch {
-                statusMessage = store.lastError ?? error.localizedDescription
-            }
+            await connectLocal(.claude, replacing: account.id)
         case .codex:
-            do {
-                try await store.connectCodex()
-                statusMessage = "Codex session refreshed."
-            } catch {
-                statusMessage = store.lastError ?? error.localizedDescription
-            }
+            await connectLocal(.codex, replacing: account.id)
         }
+    }
+
+    private func presentNotice(title: String, message: String) {
+        statusMessage = message
+        authAlert = AuthNotice(title: title, message: message)
     }
 
     private func authButton(
@@ -384,6 +410,12 @@ struct AuthenticationSettingsView: View {
         .buttonStyle(.bordered)
         .controlSize(.regular)
     }
+}
+
+struct AuthNotice: Identifiable {
+    let id = UUID()
+    var title: String
+    var message: String
 }
 
 struct LoginWebView: NSViewRepresentable {

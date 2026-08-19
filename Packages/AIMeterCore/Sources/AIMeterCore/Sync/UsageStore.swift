@@ -140,26 +140,26 @@ public final class UsageStore: ObservableObject {
         #endif
     }
 
-    public func connectClaude() async throws {
-        try await connectClaude(setErrorOnFailure: true)
+    public func connectClaude(replacing: UUID? = nil) async throws -> LocalConnectResult {
+        let outcome = try await connectClaude(setErrorOnFailure: true, replacing: replacing)
         await refresh()
         startAutoRefresh()
+        return connectResult(outcome, source: lastLocalConnectSource ?? "Claude Code")
     }
 
-    public func connectCodex() async throws {
-        try await connectCodex(setErrorOnFailure: true)
+    public func connectCodex(replacing: UUID? = nil) async throws -> LocalConnectResult {
+        let outcome = try await connectCodex(setErrorOnFailure: true, replacing: replacing)
         await refresh()
         startAutoRefresh()
+        return connectResult(outcome, source: lastLocalConnectSource ?? "Codex")
     }
 
     @discardableResult
-    private func connectClaude(setErrorOnFailure: Bool) async throws -> UUID? {
+    private func connectClaude(setErrorOnFailure: Bool, replacing: UUID? = nil) async throws -> UpsertOutcome {
         #if os(macOS)
         guard let cred = ClaudeLocalAuthReader.preferredCredential() else {
             if setErrorOnFailure {
-                setActiveError(
-                    "No local Claude Code session found. Sign in with Claude Code (`claude` in Terminal), click Always Allow on the Keychain prompt, then try Add Claude Code again."
-                )
+                setConnectError(ClaudeLocalAuthReader.missingSessionMessage(), accountID: replacing)
             }
             throw ProviderUsageError.missingCredentials
         }
@@ -171,19 +171,21 @@ public final class UsageStore: ObservableObject {
                 email: nil,
                 expiresAt: cred.expiresAt
             )
-            let id = try upsertAccount(
+            let outcome = try upsertAccount(
                 token: token,
                 email: nil,
+                replacing: replacing,
                 provider: .claude,
                 defaultLabel: snap.planDisplayName
             )
             lastLocalConnectSource = cred.source
             lastConnectFailure = nil
-            return id
+            return outcome
         } catch {
             if setErrorOnFailure {
-                setActiveError(
-                    "Claude connect failed. Click Always Allow on the Keychain prompt, or sign in with Claude Code first (`claude` in Terminal), then try again."
+                setConnectError(
+                    "Claude connect failed (\(error.localizedDescription)). Sign in with Claude Code (`claude` in Terminal), then Reconnect this account.",
+                    accountID: replacing
                 )
             }
             throw error
@@ -194,13 +196,11 @@ public final class UsageStore: ObservableObject {
     }
 
     @discardableResult
-    private func connectCodex(setErrorOnFailure: Bool) async throws -> UUID? {
+    private func connectCodex(setErrorOnFailure: Bool, replacing: UUID? = nil) async throws -> UpsertOutcome {
         #if os(macOS)
         guard let cred = CodexLocalAuthReader.preferredCredential() else {
             if setErrorOnFailure {
-                setActiveError(
-                    "No local Codex session found. In Terminal run `codex login`, then click Add Codex."
-                )
+                setConnectError(CodexLocalAuthReader.missingSessionMessage(), accountID: replacing)
             }
             throw ProviderUsageError.missingCredentials
         }
@@ -212,19 +212,21 @@ public final class UsageStore: ObservableObject {
                 accountID: cred.accountID,
                 email: cred.email
             )
-            let id = try upsertAccount(
+            let outcome = try upsertAccount(
                 token: token,
                 email: cred.email,
+                replacing: replacing,
                 provider: .codex,
                 defaultLabel: snap.planDisplayName
             )
             lastLocalConnectSource = cred.source
             lastConnectFailure = nil
-            return id
+            return outcome
         } catch {
             if setErrorOnFailure {
-                setActiveError(
-                    "Codex connect failed. Your ~/.codex/auth.json login is stale. In Terminal run `codex login`, then click Add Codex again."
+                setConnectError(
+                    "Codex connect failed (\(error.localizedDescription)). In Terminal run `codex login`, then Reconnect this account.",
+                    accountID: replacing
                 )
             }
             throw error
@@ -349,7 +351,6 @@ public final class UsageStore: ObservableObject {
                 await refreshCloudAgents(id: id)
             }
         } catch let error where isUnauthorized(error) {
-            keychain.delete(account: connection.keychainAccount)
             updateRuntime(id: id) { $0.markSessionExpired() }
             await UsageNotificationService.notifySessionExpiredIfNeeded(
                 preferences: preferences,
@@ -522,7 +523,7 @@ public final class UsageStore: ObservableObject {
         replacing: UUID? = nil,
         provider: ProviderKind = .cursor,
         defaultLabel: String? = nil
-    ) throws -> UUID {
+    ) throws -> UpsertOutcome {
         lastConnectFailure = nil
         if let replacing, let index = connections.firstIndex(where: { $0.id == replacing }) {
             try keychain.save(token: token, account: replacing.uuidString)
@@ -539,7 +540,7 @@ public final class UsageStore: ObservableObject {
             rebuildRuntimesFromKeychain()
             persistRegistry()
             UsageNotificationService.clearSessionExpiredDedupe(accountID: replacing)
-            return replacing
+            return UpsertOutcome(id: replacing, refreshedExisting: true)
         }
 
         if let email, let existing = connections.first(where: {
@@ -553,7 +554,7 @@ public final class UsageStore: ObservableObject {
             rebuildRuntimesFromKeychain()
             persistRegistry()
             UsageNotificationService.clearSessionExpiredDedupe(accountID: existing.id)
-            return existing.id
+            return UpsertOutcome(id: existing.id, refreshedExisting: true)
         }
 
         if email == nil, let existing = connections.first(where: { $0.provider == provider && $0.email == nil }) {
@@ -562,7 +563,7 @@ public final class UsageStore: ObservableObject {
             rebuildRuntimesFromKeychain()
             persistRegistry()
             UsageNotificationService.clearSessionExpiredDedupe(accountID: existing.id)
-            return existing.id
+            return UpsertOutcome(id: existing.id, refreshedExisting: true)
         }
 
         let id = UUID()
@@ -587,7 +588,7 @@ public final class UsageStore: ObservableObject {
         rebuildRuntimesFromKeychain()
         persistRegistry()
         UsageNotificationService.clearSessionExpiredDedupe(accountID: id)
-        return id
+        return UpsertOutcome(id: id, refreshedExisting: false)
     }
 
     private func isUnauthorized(_ error: Error) -> Bool {
@@ -652,11 +653,30 @@ public final class UsageStore: ObservableObject {
         }
     }
 
-    private func setActiveError(_ message: String) {
-        if let id = activeAccountID {
+    private func setConnectError(_ message: String, accountID: UUID?) {
+        lastConnectFailure = message
+        if let accountID {
+            updateRuntime(id: accountID) { $0.lastError = message }
+        } else if let id = activeAccountID {
             updateRuntime(id: id) { $0.lastError = message }
         }
-        lastConnectFailure = message
+    }
+
+    private func setActiveError(_ message: String) {
+        setConnectError(message, accountID: activeAccountID)
+    }
+
+    private func connectResult(_ outcome: UpsertOutcome, source: String) -> LocalConnectResult {
+        let label = connections.first(where: { $0.id == outcome.id })?.displayLabel
+            ?? ProviderKind.cursor.displayName
+        let provider = connections.first(where: { $0.id == outcome.id })?.provider ?? .cursor
+        return LocalConnectResult(
+            id: outcome.id,
+            displayLabel: label,
+            source: source,
+            refreshedExisting: outcome.refreshedExisting,
+            provider: provider
+        )
     }
 
     private func writeWidgetSnapshot() {

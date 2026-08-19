@@ -14,5 +14,7 @@
 	<array>
 		<string>6998422DKP.com.jamesware.aimeter.app</string>
 	</array>
+	<key>com.apple.application-identifier</key>
+	<string>6998422DKP.com.jamesware.aimeter.app</string>
 </dict>
 </plist>

@@ -35,23 +35,48 @@ public enum ClaudeLocalAuthReader {
 
     #if os(macOS)
     private static func fromKeychain() -> ClaudeOAuthCredential? {
-        guard let raw = KeychainStore(
+        let login = KeychainStore(
             service: keychainService,
-            usesDataProtectionKeychain: false
-        ).loadFirst() else { return nil }
-        return parseJSON(raw, source: "Claude Code keychain")
-            ?? ClaudeOAuthCredential(accessToken: raw.trimmingCharacters(in: .whitespacesAndNewlines), source: "Claude Code keychain")
+            usesDataProtectionKeychain: false,
+            accessGroup: nil
+        )
+        let dataProtection = KeychainStore(
+            service: keychainService,
+            usesDataProtectionKeychain: true,
+            accessGroup: nil
+        )
+        if let raw = login.loadFirst() ?? dataProtection.loadFirst() {
+            return parseJSON(raw, source: "Claude Code keychain")
+                ?? ClaudeOAuthCredential(accessToken: raw.trimmingCharacters(in: .whitespacesAndNewlines), source: "Claude Code keychain")
+        }
+        return nil
+    }
+
+    private static var credentialsFileURL: URL {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".claude/.credentials.json")
     }
 
     private static func fromCredentialsFile() -> ClaudeOAuthCredential? {
-        let url = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent(".claude/.credentials.json")
+        let url = credentialsFileURL
         guard let data = try? Data(contentsOf: url),
               let text = String(data: data, encoding: .utf8)
         else { return nil }
         return parseJSON(text, source: "~/.claude/.credentials.json")
     }
     #endif
+
+    public static func missingSessionMessage() -> String {
+        #if os(macOS)
+        let fileExists = FileManager.default.fileExists(atPath: credentialsFileURL.path)
+        if fileExists {
+            return "Found ~/.claude/.credentials.json but it has no access token. Sign in with Claude Code (`claude` in Terminal), then Reconnect."
+        }
+        return "No Claude Code session found (no Keychain item “Claude Code-credentials”, and no ~/.claude/.credentials.json). Sign in with Claude Code (`claude` in Terminal), then Reconnect. A Keychain prompt only appears if that item already exists."
+        #else
+        return "Claude Code sign-in is only available on the Mac app."
+        #endif
+    }
 
     public static func parseJSON(_ raw: String, source: String) -> ClaudeOAuthCredential? {
         guard let data = raw.data(using: .utf8),

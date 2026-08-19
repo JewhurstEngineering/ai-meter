@@ -23,12 +23,13 @@ final class KeychainStoreTests: XCTestCase {
         XCTAssertEqual(store.load(account: account), "secret-token")
     }
 
-    func testMigratesLegacyLoginKeychainItem() throws {
+    func testLoadDoesNotDeleteLegacyCopy() throws {
         let legacy = KeychainStore(service: service, usesDataProtectionKeychain: false)
         try legacy.save(token: "legacy-token", account: account)
 
         let modern = KeychainStore(service: service, usesDataProtectionKeychain: true)
         XCTAssertEqual(modern.load(account: account), "legacy-token")
+        XCTAssertEqual(legacy.load(account: account), "legacy-token")
     }
 
     func testDeleteRemovesItem() throws {
@@ -36,5 +37,31 @@ final class KeychainStoreTests: XCTestCase {
         try store.save(token: "gone", account: account)
         store.delete(account: account)
         XCTAssertNil(store.load(account: account))
+    }
+}
+
+final class LocalConnectResultTests: XCTestCase {
+    func testSuccessMessageDistinguishesRefresh() {
+        let added = LocalConnectResult(
+            id: UUID(),
+            displayLabel: "Pro",
+            source: "~/.codex/auth.json",
+            refreshedExisting: false,
+            provider: .codex
+        )
+        XCTAssertEqual(added.successMessage, "Connected Codex (Pro).")
+        let refreshed = LocalConnectResult(
+            id: added.id,
+            displayLabel: "Pro",
+            source: added.source,
+            refreshedExisting: true,
+            provider: .codex
+        )
+        XCTAssertEqual(refreshed.successMessage, "Refreshed Codex (Pro).")
+    }
+
+    func testMissingSessionCopyNamesPaths() {
+        XCTAssertTrue(CodexLocalAuthReader.missingSessionMessage().contains("codex login"))
+        XCTAssertTrue(ClaudeLocalAuthReader.missingSessionMessage().contains("claude"))
     }
 }
