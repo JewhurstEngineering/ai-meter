@@ -18,6 +18,7 @@ struct MenuBarPopoverView: View {
     @State private var topChromeHeight: CGFloat = 70
     @State private var bottomChromeHeight: CGFloat = 44
     @State private var showReauth = false
+    @State private var reconnectBusy = false
     @State private var installBusy = false
     @State private var installCopied = false
     @State private var installError: String?
@@ -275,13 +276,28 @@ struct MenuBarPopoverView: View {
             .appFont(.caption, weight: .semibold)
             .foregroundStyle(.orange)
             .fixedSize(horizontal: false, vertical: true)
+            if let provider = displayed?.connection.provider {
+                Text(provider.reconnectInstructions)
+                    .appFont(.caption2)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Button {
                 reconnectDisplayed()
             } label: {
-                Label("Sign in again", systemImage: "arrow.triangle.2.circlepath")
+                if reconnectBusy, let provider = displayed?.connection.provider {
+                    HStack(spacing: 6) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text(provider.reconnectProgressTitle)
+                    }
+                } else {
+                    Label("Sign in again", systemImage: "arrow.triangle.2.circlepath")
+                }
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
+            .disabled(reconnectBusy)
         }
         .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -383,7 +399,11 @@ struct MenuBarPopoverView: View {
                 showReauth = false
                 let replacing = displayed?.id ?? store.activeAccountID
                 Task {
-                    try? await store.saveSessionToken(token, replacing: replacing)
+                    do {
+                        try await store.saveSessionToken(token, replacing: replacing)
+                    } catch {
+                        store.setLastError(error.localizedDescription, forAccount: replacing)
+                    }
                 }
             } onCancel: {
                 showReauth = false
@@ -491,11 +511,15 @@ struct MenuBarPopoverView: View {
         let provider = account?.connection.provider ?? .cursor
         switch provider {
         case .claude:
+            reconnectBusy = true
             Task {
+                defer { reconnectBusy = false }
                 _ = try? await store.connectClaude(replacing: account?.id)
             }
         case .codex:
+            reconnectBusy = true
             Task {
+                defer { reconnectBusy = false }
                 _ = try? await store.connectCodex(replacing: account?.id)
             }
         case .cursor:

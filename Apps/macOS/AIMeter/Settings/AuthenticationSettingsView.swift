@@ -12,6 +12,7 @@ struct AuthenticationSettingsView: View {
     @State private var authAlert: AuthNotice?
     @State private var editingLabelID: UUID?
     @State private var draftLabel = ""
+    @State private var reconnectingAccountID: UUID?
 
     var body: some View {
         ScrollView {
@@ -41,12 +42,6 @@ struct AuthenticationSettingsView: View {
                                 .lineLimit(1)
                         }
                         Spacer(minLength: 0)
-                        if let statusMessage {
-                            Text(statusMessage)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
                     }
 
                     LazyVGrid(
@@ -80,6 +75,13 @@ struct AuthenticationSettingsView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+
+                    if let statusMessage {
+                        Label(statusMessage, systemImage: "info.circle")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
 
                 SettingsPanel(
@@ -303,6 +305,12 @@ struct AuthenticationSettingsView: View {
                         .foregroundStyle(.orange)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if !account.isAuthenticated {
+                    Text(account.connection.provider.reconnectInstructions)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             if isActive {
                 Text("Active")
@@ -313,10 +321,19 @@ struct AuthenticationSettingsView: View {
                     .foregroundStyle(Color.accentColor)
             }
             Spacer(minLength: 0)
-            Button("Reconnect") {
+            Button {
                 Task { await reconnect(account) }
+            } label: {
+                if reconnectingAccountID == account.id {
+                    ProgressView()
+                        .controlSize(.small)
+                        .help(account.connection.provider.reconnectProgressTitle)
+                } else {
+                    Text("Reconnect")
+                }
             }
             .controlSize(.small)
+            .disabled(reconnectingAccountID != nil)
             if !isActive {
                 Button("Set active") {
                     store.setActive(id: account.id)
@@ -359,6 +376,8 @@ struct AuthenticationSettingsView: View {
     }
 
     private func connectLocal(_ provider: ProviderKind, replacing: UUID? = nil) async {
+        reconnectingAccountID = replacing
+        defer { reconnectingAccountID = nil }
         do {
             let result: LocalConnectResult
             switch provider {

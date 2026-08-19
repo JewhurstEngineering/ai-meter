@@ -41,7 +41,11 @@ struct OverviewView: View {
                         showReauth = false
                         let replacing = store.activeAccountID
                         Task {
-                            try? await store.saveSessionToken(token, replacing: replacing)
+                            do {
+                                try await store.saveSessionToken(token, replacing: replacing)
+                            } catch {
+                                store.setLastError(error.localizedDescription, forAccount: replacing)
+                            }
                         }
                     }
                     .ignoresSafeArea()

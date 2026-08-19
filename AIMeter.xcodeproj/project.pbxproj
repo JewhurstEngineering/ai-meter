@@ -66,6 +66,7 @@
 		A07164D4807101CA77C92ECC /* SettingsRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E83DCA27C6CECE3F3FC7B9 /* SettingsRootView.swift */; };
 		A45D263258F7647970599390 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
 		A5BB7CDADE20B97B02C180C6 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 948C31689433DBE76F95DB0D /* AppTheme.swift */; };
+		A5C84B16778CF546791635F7 /* ProviderReconnectCopy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3463ADE20432805B029101C7 /* ProviderReconnectCopy.swift */; };
 		A625F48C46CAA83E153BE546 /* LaunchSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CB3E728C0A6E62D26723E5 /* LaunchSmokeTests.swift */; };
 		A6AFF141D5343C44E7560DC6 /* GeneralSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CED586AFE92A28214C6B06 /* GeneralSettingsView.swift */; };
 		AB451BA78F14A5B3989E75BD /* WidgetReload.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CCE324BE60CC26E8D0D6 /* WidgetReload.swift */; };
@@ -208,6 +209,7 @@
 		2DD9C953D1E0BF3360E1D666 /* AIMeterWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterWatchApp.swift; sourceTree = "<group>"; };
 		2FAC1BC5C800FC7D1773FA65 /* RootTabSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabSmokeTests.swift; sourceTree = "<group>"; };
 		341E4F22889BCB4B3DC7ECC1 /* AIMeterWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AIMeterWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3463ADE20432805B029101C7 /* ProviderReconnectCopy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProviderReconnectCopy.swift; sourceTree = "<group>"; };
 		354D045F087E27160D7F8123 /* PhoneSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSettingsView.swift; sourceTree = "<group>"; };
 		3556BD63C6FD41405C06E8D4 /* WatchSessionBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionBridge.swift; sourceTree = "<group>"; };
 		3A27C1B6423A4ED2041174DE /* AppActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActivation.swift; sourceTree = "<group>"; };
@@ -543,6 +545,7 @@
 				3A27C1B6423A4ED2041174DE /* AppActivation.swift */,
 				C80C34FDEF0972576972DAEF /* AppInstall.swift */,
 				A9DCE6A36F621C08C9C8C7EC /* Info.plist */,
+				3463ADE20432805B029101C7 /* ProviderReconnectCopy.swift */,
 				767FDFADCE92928E5093F315 /* StatusItemController.swift */,
 				803A59935476DF447FF46A66 /* UsageExportPanel.swift */,
 				7F3B35D8E1DC85C2B0C135C3 /* Settings */,
@@ -974,6 +977,7 @@
 				B8367C1036AD6176B57C62FB /* LayoutSettingsView.swift in Sources */,
 				F84ADD3287C0725AA8022371 /* MenuBarLabelView.swift in Sources */,
 				3533996B8F23679C6B551EC7 /* MenuBarPopoverView.swift in Sources */,
+				A5C84B16778CF546791635F7 /* ProviderReconnectCopy.swift in Sources */,
 				9C68A3842709825E49E7EE6A /* SettingsOpenLink.swift in Sources */,
 				A07164D4807101CA77C92ECC /* SettingsRootView.swift in Sources */,
 				DCD9A5BB80D0ADF3AC093E01 /* StatusItemController.swift in Sources */,
