@@ -10,12 +10,12 @@ A local-first usage meter for **Cursor**, **Claude Code**, and **Codex**. Glance
 - **iPhone** app + Home Screen widgets (Cursor snapshot in this version)
 - **Apple Watch** glance + complications (sanitized snapshot only — no tokens)
 
-Current version: **1.0.4** · MIT · [LICENSE](LICENSE)
+Current version: **1.0.5** · MIT · [LICENSE](LICENSE)
 [![CI](https://github.com/JewhurstEngineering/ai-meter/actions/workflows/ci.yml/badge.svg)](https://github.com/JewhurstEngineering/ai-meter/actions/workflows/ci.yml)
 
 ## Download
 
-Download the latest signed and notarized Mac build from [GitHub Releases](https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.4.zip).
+Download the latest signed and notarized Mac build from [GitHub Releases](https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.5.zip).
 
 1. Unzip and open **AI Meter**.
 2. Click **Install to Applications** in Settings → About if you launched it from Downloads.
