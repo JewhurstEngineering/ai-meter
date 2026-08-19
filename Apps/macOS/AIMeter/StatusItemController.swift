@@ -135,7 +135,7 @@ final class StatusItemController: NSObject {
     }
 
     private func layoutSignature(store: UsageStore) -> String {
-        let ids = store.connections.map(\.id.uuidString).joined(separator: ",")
+        let ids = store.visibleConnections.map(\.id.uuidString).joined(separator: ",")
         return "\(store.preferences.menuBarAccountMode.rawValue)|\(ids)"
     }
 
@@ -151,10 +151,10 @@ final class StatusItemController: NSObject {
         case .activeOnly, .combined:
             desired = [.single]
         case .separateItems:
-            if store.connections.isEmpty {
+            if store.visibleConnections.isEmpty {
                 desired = [.single]
             } else {
-                desired = store.connections.map { .account($0.id) }
+                desired = store.visibleConnections.map { .account($0.id) }
             }
         }
 

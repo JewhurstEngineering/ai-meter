@@ -6,9 +6,9 @@ struct PhoneAccountPager<Page: View>: View {
     @ViewBuilder var page: (AccountRuntime?) -> Page
 
     var body: some View {
-        if store.accounts.count > 1 {
+        if store.visibleAccounts.count > 1 {
             TabView(selection: activeBinding) {
-                ForEach(store.accounts) { account in
+                ForEach(store.visibleAccounts) { account in
                     page(account)
                         .tag(account.id)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -22,7 +22,7 @@ struct PhoneAccountPager<Page: View>: View {
 
     private var activeBinding: Binding<UUID> {
         Binding(
-            get: { store.activeAccountID ?? store.connections.first?.id ?? UUID() },
+            get: { store.activeAccountID ?? store.visibleConnections.first?.id ?? UUID() },
             set: { store.setActive(id: $0) }
         )
     }
@@ -32,7 +32,7 @@ struct PhoneAccountSwitcherChrome: View {
     @EnvironmentObject private var store: UsageStore
 
     var body: some View {
-        if store.accounts.count > 1 {
+        if store.visibleAccounts.count > 1 {
             HStack(spacing: 8) {
                 chevron("chevron.left", label: "Previous account", step: -1)
                 Spacer(minLength: 0)
@@ -41,7 +41,7 @@ struct PhoneAccountSwitcherChrome: View {
                 chevron("chevron.right", label: "Next account", step: 1)
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel("Account \(currentIndex) of \(store.accounts.count). Swipe or tap arrows to switch accounts.")
+            .accessibilityLabel("Account \(currentIndex) of \(store.visibleAccounts.count). Swipe or tap arrows to switch accounts.")
         }
     }
 
@@ -60,7 +60,7 @@ struct PhoneAccountSwitcherChrome: View {
 
     private var dots: some View {
         HStack(spacing: 6) {
-            ForEach(store.accounts) { item in
+            ForEach(store.visibleAccounts) { item in
                 Circle()
                     .fill(item.id == store.activeAccountID ? Color.primary : Color.primary.opacity(0.25))
                     .frame(width: 7, height: 7)
@@ -71,13 +71,13 @@ struct PhoneAccountSwitcherChrome: View {
 
     private var currentIndex: Int {
         guard let id = store.activeAccountID,
-              let index = store.accounts.firstIndex(where: { $0.id == id })
+              let index = store.visibleAccounts.firstIndex(where: { $0.id == id })
         else { return 1 }
         return index + 1
     }
 
     private func advance(by delta: Int) {
-        let accounts = store.accounts
+        let accounts = store.visibleAccounts
         guard !accounts.isEmpty else { return }
         let current = store.activeAccountID.flatMap { id in
             accounts.firstIndex(where: { $0.id == id })

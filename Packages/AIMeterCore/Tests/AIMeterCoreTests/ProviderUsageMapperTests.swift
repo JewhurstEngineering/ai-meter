@@ -52,6 +52,41 @@ final class ProviderUsageMapperTests: XCTestCase {
         let connection = try decoder.decode(AccountConnection.self, from: json)
         XCTAssertEqual(connection.provider, .cursor)
         XCTAssertEqual(connection.displayLabel, "a")
+        XCTAssertFalse(connection.isHidden)
+        XCTAssertFalse(connection.isPaused)
+    }
+
+    func testNormalizeActiveSkipsHiddenAccounts() {
+        let hidden = AccountConnection(id: UUID(), email: "a@b.com", isHidden: true)
+        let visible = AccountConnection(id: UUID(), email: "b@b.com")
+        let registry = AccountRegistry(connections: [hidden, visible], activeAccountID: hidden.id)
+        XCTAssertEqual(registry.activeAccountID, visible.id)
+
+        let onlyHidden = AccountRegistry(connections: [hidden], activeAccountID: hidden.id)
+        XCTAssertNil(onlyHidden.activeAccountID)
+    }
+
+    func testVisibleAndMonitoredAccountCounts() {
+        let hidden = AccountConnection(isHidden: true)
+        let paused = AccountConnection(isPaused: true)
+        let live = AccountConnection()
+        let connections = [hidden, paused, live]
+        XCTAssertEqual(connections.filter { !$0.isHidden }.map(\.id), [paused.id, live.id])
+        XCTAssertEqual(connections.filter { !$0.isPaused }.map(\.id), [hidden.id, live.id])
+    }
+
+    func testPausedAccountSkipsNotifications() throws {
+        var prefs = try JSONDecoder().decode(DisplayPreferences.self, from: Data("{}".utf8))
+        prefs.notificationsEnabled = true
+        XCTAssertTrue(UsageNotificationService.allowsNotifications(preferences: prefs, connection: AccountConnection()))
+        XCTAssertFalse(
+            UsageNotificationService.allowsNotifications(
+                preferences: prefs,
+                connection: AccountConnection(isPaused: true)
+            )
+        )
+        prefs.notificationsEnabled = false
+        XCTAssertFalse(UsageNotificationService.allowsNotifications(preferences: prefs, connection: AccountConnection()))
     }
 
     func testUnlabeledConnectionUsesProviderName() {

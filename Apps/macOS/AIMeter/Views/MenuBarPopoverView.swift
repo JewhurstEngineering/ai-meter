@@ -42,14 +42,17 @@ struct MenuBarPopoverView: View {
         }
         if showingAll { return nil }
         if case .account(let id) = pane {
-            return store.account(id) ?? store.activeAccount
+            if let account = store.account(id), !account.connection.isHidden {
+                return account
+            }
+            return store.activeAccount
         }
         return store.activeAccount
     }
 
     private var showAccountTabs: Bool {
         focusedAccountID == nil
-            && store.connections.count > 1
+            && store.visibleAccounts.count > 1
             && store.preferences.menuBarAccountMode != .separateItems
     }
 
@@ -128,7 +131,7 @@ struct MenuBarPopoverView: View {
         .onAppear {
             if let focusedAccountID {
                 pane = .account(focusedAccountID)
-            } else if store.connections.count > 1 {
+            } else if store.visibleAccounts.count > 1 {
                 pane = .all
             } else if let id = store.activeAccountID {
                 pane = .account(id)
@@ -136,7 +139,7 @@ struct MenuBarPopoverView: View {
             store.refreshLocalActivity()
         }
         .onChange(of: store.activeAccountID) { _, newValue in
-            if focusedAccountID == nil, pane == .all, store.connections.count < 2, let newValue {
+            if focusedAccountID == nil, pane == .all, store.visibleAccounts.count < 2, let newValue {
                 pane = .account(newValue)
             }
         }
@@ -159,8 +162,15 @@ struct MenuBarPopoverView: View {
             if !AppInstall.isRunningFromApplications, !installBannerDismissed {
                 installBanner
             }
-            ForEach(store.accounts) { account in
-                allAccountCard(account, toggles: t)
+            if store.visibleAccounts.isEmpty {
+                Text("Hidden accounts are in Settings → Accounts.")
+                    .appFont(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                ForEach(store.visibleAccounts) { account in
+                    allAccountCard(account, toggles: t)
+                }
             }
         }
         .padding(.horizontal, 14)
@@ -224,6 +234,25 @@ struct MenuBarPopoverView: View {
                 Text(account.lastError ?? "No usage data yet.")
                     .appFont(.caption)
                     .foregroundStyle(.secondary)
+            }
+            HStack(spacing: 6) {
+                if account.connection.isPaused {
+                    Text("Paused")
+                        .appFont(.caption2, weight: .bold)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.orange.opacity(0.15)))
+                        .foregroundStyle(.orange)
+                }
+                Spacer(minLength: 0)
+                Button("Hide") {
+                    hideAccount(account.id)
+                }
+                .controlSize(.small)
+                Button(account.connection.isPaused ? "Resume" : "Pause alerts") {
+                    store.setAccountPaused(id: account.id, paused: !account.connection.isPaused)
+                }
+                .controlSize(.small)
             }
         }
         .padding(10)
@@ -417,7 +446,7 @@ struct MenuBarPopoverView: View {
             tabChip("All", selected: pane == .all, systemImage: "square.grid.2x2") {
                 pane = .all
             }
-            ForEach(store.accounts) { account in
+            ForEach(store.visibleAccounts) { account in
                 let selected = {
                     if case .account(let id) = pane { return id == account.id }
                     return false
@@ -461,7 +490,7 @@ struct MenuBarPopoverView: View {
                 if showingAll {
                     Text("All accounts")
                         .appFont(.headline)
-                    Text(store.accounts.map(\.connection.provider.displayName).joined(separator: " · "))
+                    Text(store.visibleAccounts.map(\.connection.provider.displayName).joined(separator: " · "))
                         .appFont(.caption)
                         .foregroundStyle(.secondary)
                 } else {
@@ -501,8 +530,18 @@ struct MenuBarPopoverView: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
-            .disabled(showingAll ? store.isRefreshing : (displayed?.isRefreshing == true || displayed?.isAuthenticated != true))
+            .disabled(showingAll ? store.isRefreshing : (displayed?.isRefreshing == true || displayed?.isAuthenticated != true || displayed?.connection.isPaused == true))
             .help("Refresh")
+        }
+    }
+
+    private func hideAccount(_ id: UUID) {
+        store.setAccountHidden(id: id, hidden: true)
+        let remaining = store.visibleAccounts
+        if remaining.isEmpty {
+            pane = .all
+        } else if case .account(let paneID) = pane, paneID == id {
+            pane = remaining.count > 1 ? .all : .account(remaining[0].id)
         }
     }
 

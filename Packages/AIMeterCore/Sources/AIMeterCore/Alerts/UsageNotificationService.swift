@@ -42,15 +42,25 @@ public enum UsageNotificationService {
         "\(sessionExpiredFiredKey).\(accountID.uuidString)"
     }
 
+    public static func allowsNotifications(
+        preferences: DisplayPreferences,
+        connection: AccountConnection? = nil
+    ) -> Bool {
+        guard preferences.notificationsEnabled else { return false }
+        guard connection?.isPaused != true else { return false }
+        return true
+    }
+
     @MainActor
     public static func evaluate(
         snapshot: UsageSnapshot,
         preferences: DisplayPreferences,
         accountEmail: String? = nil,
         accountID: UUID? = nil,
+        connection: AccountConnection? = nil,
         defaults: UserDefaults = .standard
     ) async {
-        guard preferences.notificationsEnabled else { return }
+        guard allowsNotifications(preferences: preferences, connection: connection) else { return }
 
         let authorized = await requestAuthorizationIfNeeded()
         guard authorized else { return }
@@ -118,9 +128,10 @@ public enum UsageNotificationService {
         preferences: DisplayPreferences,
         accountEmail: String?,
         accountID: UUID? = nil,
+        connection: AccountConnection? = nil,
         defaults: UserDefaults = .standard
     ) async {
-        guard preferences.notificationsEnabled else { return }
+        guard allowsNotifications(preferences: preferences, connection: connection) else { return }
         guard preferences.notifyOnSessionExpired else { return }
         let firedKey = accountID.map { sessionExpiredKey($0) } ?? sessionExpiredFiredKey
         if defaults.bool(forKey: firedKey) { return }

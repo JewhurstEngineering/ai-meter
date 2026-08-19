@@ -116,7 +116,7 @@ struct AuthenticationSettingsView: View {
                     systemImage: "person.2",
                     subtitle: store.connections.isEmpty
                         ? "No saved sessions yet."
-                        : "\(store.connections.count) saved. Active drives the widget and the default menu bar.",
+                        : "\(store.connections.count) saved. Hide drops an account from the popover; Pause stops refresh and alerts. Active drives the widget.",
                     compact: true
                 ) {
                     if store.connections.isEmpty {
@@ -273,91 +273,116 @@ struct AuthenticationSettingsView: View {
 
     private func accountRow(_ account: AccountRuntime) -> some View {
         let isActive = account.id == store.activeAccountID
-        return HStack(spacing: 10) {
-            Circle()
-                .fill(account.isAuthenticated ? Color.green : Color.orange.opacity(0.85))
-                .frame(width: 7, height: 7)
-            VStack(alignment: .leading, spacing: 2) {
-                if editingLabelID == account.id {
-                    TextField("Label", text: $draftLabel)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(maxWidth: 180)
-                        .onSubmit {
-                            store.renameAccount(id: account.id, label: draftLabel)
-                            editingLabelID = nil
-                        }
-                } else {
-                    Text(account.connection.displayLabel)
-                        .font(.caption.weight(.semibold))
-                }
-                Text(account.connection.provider.displayName)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                if let email = account.connection.email {
-                    Text(email)
+        let hidden = account.connection.isHidden
+        let paused = account.connection.isPaused
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Circle()
+                    .fill(account.isAuthenticated ? Color.green : Color.orange.opacity(0.85))
+                    .frame(width: 7, height: 7)
+                VStack(alignment: .leading, spacing: 2) {
+                    if editingLabelID == account.id {
+                        TextField("Label", text: $draftLabel)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(maxWidth: 180)
+                            .onSubmit {
+                                store.renameAccount(id: account.id, label: draftLabel)
+                                editingLabelID = nil
+                            }
+                    } else {
+                        Text(account.connection.displayLabel)
+                            .font(.caption.weight(.semibold))
+                    }
+                    Text(account.connection.provider.displayName)
                         .font(.caption2)
                         .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
+                    if let email = account.connection.email {
+                        Text(email)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
+                    if let error = account.lastError, !account.isAuthenticated {
+                        Text(error)
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    if !account.isAuthenticated {
+                        Text(account.connection.provider.reconnectInstructions)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
-                if let error = account.lastError, !account.isAuthenticated {
-                    Text(error)
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                        .fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 0)
+                if isActive {
+                    accountBadge("Active", tint: Color.accentColor)
                 }
-                if !account.isAuthenticated {
-                    Text(account.connection.provider.reconnectInstructions)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                if hidden {
+                    accountBadge("Hidden", tint: .secondary)
                 }
-            }
-            if isActive {
-                Text("Active")
-                    .font(.caption2.weight(.bold))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Capsule().fill(Color.accentColor.opacity(0.15)))
-                    .foregroundStyle(Color.accentColor)
-            }
-            Spacer(minLength: 0)
-            Button {
-                Task { await reconnect(account) }
-            } label: {
-                if reconnectingAccountID == account.id {
-                    ProgressView()
-                        .controlSize(.small)
-                        .help(account.connection.provider.reconnectProgressTitle)
-                } else {
-                    Text("Reconnect")
+                if paused {
+                    accountBadge("Paused", tint: .orange)
                 }
             }
-            .controlSize(.small)
-            .disabled(reconnectingAccountID != nil)
-            if !isActive {
-                Button("Set active") {
-                    store.setActive(id: account.id)
+            HStack(spacing: 6) {
+                Button {
+                    Task { await reconnect(account) }
+                } label: {
+                    if reconnectingAccountID == account.id {
+                        ProgressView()
+                            .controlSize(.small)
+                            .help(account.connection.provider.reconnectProgressTitle)
+                    } else {
+                        Text("Reconnect")
+                    }
+                }
+                .controlSize(.small)
+                .disabled(reconnectingAccountID != nil)
+                Button(hidden ? "Show" : "Hide") {
+                    store.setAccountHidden(id: account.id, hidden: !hidden)
+                }
+                .controlSize(.small)
+                Button(paused ? "Resume" : "Pause alerts") {
+                    store.setAccountPaused(id: account.id, paused: !paused)
+                }
+                .controlSize(.small)
+                if !isActive, !hidden {
+                    Button("Set active") {
+                        store.setActive(id: account.id)
+                    }
+                    .controlSize(.small)
+                }
+                Button("Rename") {
+                    editingLabelID = account.id
+                    draftLabel = account.connection.label.isEmpty
+                        ? account.connection.displayLabel
+                        : account.connection.label
+                }
+                .controlSize(.small)
+                Button("Sign out", role: .destructive) {
+                    store.signOut(id: account.id)
+                    statusMessage = "Signed out \(account.connection.displayLabel)."
                 }
                 .controlSize(.small)
             }
-            Button("Rename") {
-                editingLabelID = account.id
-                draftLabel = account.connection.label.isEmpty
-                    ? account.connection.displayLabel
-                    : account.connection.label
-            }
-            .controlSize(.small)
-            Button("Sign out", role: .destructive) {
-                store.signOut(id: account.id)
-                statusMessage = "Signed out \(account.connection.displayLabel)."
-            }
-            .controlSize(.small)
         }
         .padding(8)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(Color.primary.opacity(isActive ? 0.06 : 0.03))
         )
+        .opacity(hidden ? 0.72 : 1)
+    }
+
+    private func accountBadge(_ title: String, tint: Color) -> some View {
+        Text(title)
+            .font(.caption2.weight(.bold))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(tint.opacity(0.15)))
+            .foregroundStyle(tint)
     }
 
     private func connectFromCursorIDE() async {

@@ -64,13 +64,17 @@ struct PhoneGeneralSettings: View {
             }
 
             if store.preferences.notificationsEnabled {
-                Section("Include in alert") {
+                Section {
                     Toggle("Pool / amount", isOn: contentBinding(\.includePoolPercent))
                     Toggle("Plan name", isOn: contentBinding(\.includePlanName))
                     Toggle("Spend ($)", isOn: contentBinding(\.includeSpend))
                     Toggle("Days left", isOn: contentBinding(\.includeDaysRemaining))
                     Toggle("Sound", isOn: contentBinding(\.playSound))
                     Toggle("Session expired", isOn: sessionExpiredBinding)
+                } header: {
+                    Text("Include in alert")
+                } footer: {
+                    Text("Pause alerts on an account in Accounts to stop banners for that session.")
                 }
             }
         }

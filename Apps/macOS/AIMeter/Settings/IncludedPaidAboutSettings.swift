@@ -446,7 +446,7 @@ struct SettingsAccountPicker: View {
     @EnvironmentObject private var store: UsageStore
 
     var body: some View {
-        if store.accounts.count > 1 {
+        if store.visibleAccounts.count > 1 {
             SettingsPanel(
                 title: "Account",
                 systemImage: "person.crop.circle",
@@ -454,10 +454,10 @@ struct SettingsAccountPicker: View {
                 compact: true
             ) {
                 Picker("Account", selection: Binding(
-                    get: { store.activeAccountID ?? store.connections.first?.id ?? UUID() },
+                    get: { store.activeAccountID ?? store.visibleConnections.first?.id ?? UUID() },
                     set: { store.setActive(id: $0) }
                 )) {
-                    ForEach(store.accounts) { item in
+                    ForEach(store.visibleAccounts) { item in
                         Text(item.connection.displayLabel).tag(item.id)
                     }
                 }

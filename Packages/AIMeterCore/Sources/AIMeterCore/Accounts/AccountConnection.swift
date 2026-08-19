@@ -7,19 +7,27 @@ public struct AccountConnection: Codable, Sendable, Equatable, Identifiable {
     public var label: String
     public var createdAt: Date
     public var provider: ProviderKind
+    /// Hidden accounts stay signed in but leave the popover, tabs, and menu bar.
+    public var isHidden: Bool
+    /// Paused accounts keep their last snapshot and skip refresh plus system alerts.
+    public var isPaused: Bool
 
     public init(
         id: UUID = UUID(),
         email: String? = nil,
         label: String = "",
         createdAt: Date = .now,
-        provider: ProviderKind = .cursor
+        provider: ProviderKind = .cursor,
+        isHidden: Bool = false,
+        isPaused: Bool = false
     ) {
         self.id = id
         self.email = email
         self.label = label
         self.createdAt = createdAt
         self.provider = provider
+        self.isHidden = isHidden
+        self.isPaused = isPaused
     }
 
     public init(from decoder: Decoder) throws {
@@ -29,6 +37,8 @@ public struct AccountConnection: Codable, Sendable, Equatable, Identifiable {
         label = try c.decodeIfPresent(String.self, forKey: .label) ?? ""
         createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? .now
         provider = try c.decodeIfPresent(ProviderKind.self, forKey: .provider) ?? .cursor
+        isHidden = try c.decodeIfPresent(Bool.self, forKey: .isHidden) ?? false
+        isPaused = try c.decodeIfPresent(Bool.self, forKey: .isPaused) ?? false
     }
 
     public var displayLabel: String {
@@ -67,10 +77,13 @@ public struct AccountRegistry: Codable, Sendable, Equatable {
     }
 
     public mutating func normalizeActive() {
-        if let activeAccountID, connections.contains(where: { $0.id == activeAccountID }) {
+        if let activeAccountID,
+           let current = connections.first(where: { $0.id == activeAccountID }),
+           !current.isHidden
+        {
             return
         }
-        self.activeAccountID = connections.first?.id
+        self.activeAccountID = connections.first(where: { !$0.isHidden })?.id
     }
 
     public func connection(id: UUID) -> AccountConnection? {

@@ -189,7 +189,7 @@ struct GeneralSettingsView: View {
                             .font(.caption)
                         }
 
-                        Text("Session expired fires once until you sign in again (not on manual Sign out).")
+                        Text("Session expired fires once until you sign in again (not on manual Sign out). Pause alerts on an account in Accounts to stop banners for that session.")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 

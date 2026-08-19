@@ -64,13 +64,25 @@ public final class UsageStore: ObservableObject {
         connections.compactMap { runtimes[$0.id] }
     }
 
+    public var visibleAccounts: [AccountRuntime] {
+        accounts.filter { !$0.connection.isHidden }
+    }
+
+    public var visibleConnections: [AccountConnection] {
+        connections.filter { !$0.isHidden }
+    }
+
+    public var monitoredIDs: [UUID] {
+        connections.filter { !$0.isPaused }.map(\.id)
+    }
+
     public func account(_ id: UUID) -> AccountRuntime? { runtimes[id] }
 
     public var menuBarPresentation: MenuBarPresentation {
         switch preferences.menuBarAccountMode {
         case .combined:
             return MenuBarFormatter.formatCombined(
-                entries: accounts.map {
+                entries: visibleAccounts.map {
                     (
                         label: $0.connection.menuBarLabel,
                         snapshot: $0.snapshot,
@@ -297,10 +309,32 @@ public final class UsageStore: ObservableObject {
 
     public func setActive(id: UUID) {
         guard connections.contains(where: { $0.id == id }) else { return }
+        if let index = connections.firstIndex(where: { $0.id == id }), connections[index].isHidden {
+            connections[index].isHidden = false
+            if var runtime = runtimes[id] {
+                runtime.connection.isHidden = false
+                runtimes[id] = runtime
+            }
+        }
         activeAccountID = id
         persistRegistry()
         writeWidgetSnapshot()
         pruneWarningSnoozesUsingActive()
+    }
+
+    public func setAccountHidden(id: UUID, hidden: Bool) {
+        updateConnection(id: id) { $0.isHidden = hidden }
+        persistRegistry()
+        writeWidgetSnapshot()
+    }
+
+    public func setAccountPaused(id: UUID, paused: Bool) {
+        updateConnection(id: id) { $0.isPaused = paused }
+        persistRegistry()
+        startAutoRefresh()
+        if !paused {
+            Task { await refreshAccount(id) }
+        }
     }
 
     /// Surface an error on a specific account from a call site that has already
@@ -331,7 +365,7 @@ public final class UsageStore: ObservableObject {
 
     public func refresh() async {
         refreshLocalActivity()
-        let ids = connections.map(\.id)
+        let ids = monitoredIDs
         guard !ids.isEmpty else { return }
         isRefreshing = true
         defer { isRefreshing = false }
@@ -344,6 +378,7 @@ public final class UsageStore: ObservableObject {
 
     public func refreshAccount(_ id: UUID) async {
         guard let connection = connections.first(where: { $0.id == id }) else { return }
+        guard !connection.isPaused else { return }
         guard let token = keychain.load(account: connection.keychainAccount) else {
             markUnauthenticated(
                 id: id,
@@ -365,7 +400,8 @@ public final class UsageStore: ObservableObject {
                 snapshot: snap,
                 preferences: preferences,
                 accountEmail: connection.email ?? connection.displayLabel,
-                accountID: id
+                accountID: id,
+                connection: connection
             )
             if connection.provider == .cursor {
                 await refreshCloudAgents(id: id)
@@ -375,7 +411,8 @@ public final class UsageStore: ObservableObject {
             await UsageNotificationService.notifySessionExpiredIfNeeded(
                 preferences: preferences,
                 accountEmail: connection.email ?? connection.displayLabel,
-                accountID: id
+                accountID: id,
+                connection: connection
             )
         } catch {
             updateRuntime(id: id) {
@@ -481,7 +518,10 @@ public final class UsageStore: ObservableObject {
 
     public func startAutoRefresh() {
         refreshTask?.cancel()
-        guard !connections.isEmpty else { return }
+        guard connections.contains(where: { !$0.isPaused }) else {
+            refreshTask = nil
+            return
+        }
         let minutes = max(1, preferences.refreshIntervalMinutes)
         refreshTask = Task { [weak self] in
             while !Task.isCancelled {
@@ -656,8 +696,18 @@ public final class UsageStore: ObservableObject {
     private func persistRegistry() {
         var registry = AccountRegistry(connections: connections, activeAccountID: activeAccountID)
         registry.normalizeActive()
+        connections = registry.connections
         activeAccountID = registry.activeAccountID
         AccountRegistryStore.save(registry)
+    }
+
+    private func updateConnection(id: UUID, mutate: (inout AccountConnection) -> Void) {
+        guard let index = connections.firstIndex(where: { $0.id == id }) else { return }
+        mutate(&connections[index])
+        if var runtime = runtimes[id] {
+            runtime.connection = connections[index]
+            runtimes[id] = runtime
+        }
     }
 
     private func updateRuntime(id: UUID, mutate: (inout AccountRuntime) -> Void) {

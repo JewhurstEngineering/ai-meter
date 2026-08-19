@@ -185,6 +185,8 @@ struct AccountsView: View {
 
     private func accountRow(_ account: AccountRuntime) -> some View {
         let isActive = account.id == store.activeAccountID
+        let hidden = account.connection.isHidden
+        let paused = account.connection.isPaused
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Circle()
@@ -208,6 +210,22 @@ struct AccountsView: View {
                         .background(Capsule().fill(Color.accentColor.opacity(0.15)))
                         .foregroundStyle(Color.accentColor)
                 }
+                if hidden {
+                    Text("Hidden")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.secondary.opacity(0.15)))
+                        .foregroundStyle(.secondary)
+                }
+                if paused {
+                    Text("Paused")
+                        .font(.caption2.weight(.bold))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Capsule().fill(Color.orange.opacity(0.15)))
+                        .foregroundStyle(.orange)
+                }
             }
             if let email = account.connection.email {
                 Text(email)
@@ -215,8 +233,14 @@ struct AccountsView: View {
                     .foregroundStyle(.secondary)
             }
             HStack {
-                if !isActive {
+                if !isActive, !hidden {
                     Button("Set active") { store.setActive(id: account.id) }
+                }
+                Button(hidden ? "Show" : "Hide") {
+                    store.setAccountHidden(id: account.id, hidden: !hidden)
+                }
+                Button(paused ? "Resume" : "Pause alerts") {
+                    store.setAccountPaused(id: account.id, paused: !paused)
                 }
                 Button("Rename") {
                     editingLabelID = account.id
@@ -232,5 +256,6 @@ struct AccountsView: View {
             .font(.caption)
         }
         .padding(.vertical, 4)
+        .opacity(hidden ? 0.72 : 1)
     }
 }
