@@ -10,10 +10,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = UsageStore()
     private let statusItem = StatusItemController()
 #if !DEBUG
-    let updaterController = SPUStandardUpdaterController(
-        startingUpdater: true,
+    /// Started in `applicationDidFinishLaunching` so `self` can be the user-driver
+    /// delegate (Sparkle holds that reference weakly).
+    private(set) lazy var updaterController = SPUStandardUpdaterController(
+        startingUpdater: false,
         updaterDelegate: nil,
-        userDriverDelegate: nil
+        userDriverDelegate: self
     )
 #endif
 
@@ -23,6 +25,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         AppInstall.registerEmbeddedWidget()
         installAppMenu()
         statusItem.start(store: store)
+#if !DEBUG
+        updaterController.startUpdater()
+#endif
     }
 
     nonisolated func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -36,7 +41,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 #if !DEBUG
     @objc func checkForUpdates(_ sender: Any?) {
+        presentSparkleUI()
         updaterController.checkForUpdates(sender)
+    }
+
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        if menuItem.action == #selector(checkForUpdates(_:)) {
+            return updaterController.updater.canCheckForUpdates
+        }
+        return true
+    }
+
+    /// Menu bar extras hide Sparkle windows unless the app is a regular, active app.
+    func presentSparkleUI() {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
     }
 #endif
 
@@ -61,6 +80,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         about.target = self
         appMenu.addItem(about)
 #if !DEBUG
+        // Target AppDelegate (not the updater controller) so we can activate
+        // the menu bar extra before Sparkle shows its checking window.
+        // `validateMenuItem` still consults `canCheckForUpdates`.
         let checkForUpdates = NSMenuItem(
             title: "Check for Updates…",
             action: #selector(checkForUpdates(_:)),
@@ -88,6 +110,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+#if !DEBUG
+extension AppDelegate: SPUStandardUserDriverDelegate {
+    func standardUserDriverWillHandleShowingUpdate(
+        _ handleShowingUpdate: Bool,
+        forUpdate update: SUAppcastItem,
+        state: SPUUserUpdateState
+    ) {
+        presentSparkleUI()
+    }
+
+    func standardUserDriverWillShowModalAlert() {
+        presentSparkleUI()
+    }
+
+    func standardUserDriverWillFinishUpdateSession() {
+        NSApp.setActivationPolicy(.accessory)
+    }
+}
+#endif
+
 @main
 struct AIMeterApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
@@ -98,6 +140,11 @@ struct AIMeterApp: App {
         Settings {
             SettingsRootView()
                 .environmentObject(appDelegate.store)
+#if !DEBUG
+                .environment(\.checkForUpdates, CheckForUpdatesAction {
+                    appDelegate.checkForUpdates(nil)
+                })
+#endif
                 .onAppear {
                     AppActivation.scheduleSettingsFocus()
                 }

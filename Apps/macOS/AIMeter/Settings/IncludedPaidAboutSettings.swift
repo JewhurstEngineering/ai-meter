@@ -701,6 +701,9 @@ private struct PaidStatCard: View {
 
 struct AboutSettingsView: View {
     @Environment(\.appTheme) private var theme
+#if !DEBUG
+    @Environment(\.checkForUpdates) private var checkForUpdates
+#endif
     private var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.2.8"
     }
@@ -867,7 +870,7 @@ struct AboutSettingsView: View {
                     .foregroundStyle(.secondary)
 #if !DEBUG
                 Button {
-                    (NSApp.delegate as? AppDelegate)?.checkForUpdates(nil)
+                    checkForUpdates()
                 } label: {
                     Label("Check for Updates…", systemImage: "arrow.triangle.2.circlepath")
                 }

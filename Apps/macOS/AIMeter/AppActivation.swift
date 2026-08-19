@@ -1,4 +1,25 @@
 import AppKit
+import SwiftUI
+
+/// Injected from `AIMeterApp` so About can invoke Sparkle without casting `NSApp.delegate`.
+struct CheckForUpdatesAction {
+    var handler: () -> Void = {}
+
+    func callAsFunction() {
+        handler()
+    }
+}
+
+private struct CheckForUpdatesActionKey: EnvironmentKey {
+    static let defaultValue = CheckForUpdatesAction()
+}
+
+extension EnvironmentValues {
+    var checkForUpdates: CheckForUpdatesAction {
+        get { self[CheckForUpdatesActionKey.self] }
+        set { self[CheckForUpdatesActionKey.self] = newValue }
+    }
+}
 
 enum AppActivation {
     /// Menu bar (LSUIElement) apps often open Settings behind other apps unless activated.
