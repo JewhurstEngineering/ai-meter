@@ -27,6 +27,19 @@ public enum CodexLocalAuthReader {
     public static var authFileURL: URL {
         FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex/auth.json")
     }
+
+    public static var cliURL: URL? {
+        let home = FileManager.default.homeDirectoryForCurrentUser
+        let candidates = [
+            home.appendingPathComponent(".local/bin/codex"),
+            URL(fileURLWithPath: "/opt/homebrew/bin/codex"),
+            URL(fileURLWithPath: "/usr/local/bin/codex"),
+            URL(fileURLWithPath: "/usr/bin/codex"),
+        ]
+        return candidates.first {
+            FileManager.default.isExecutableFile(atPath: $0.path)
+        }
+    }
     #endif
 
     public static func preferredCredential() -> CodexOAuthCredential? {
@@ -68,9 +81,20 @@ public enum CodexLocalAuthReader {
         #if os(macOS)
         let url = authFileURL
         if !FileManager.default.fileExists(atPath: url.path) {
-            return "No Codex session found at ~/.codex/auth.json. In Terminal run `codex login`, then Reconnect."
+            return "No Codex session found at ~/.codex/auth.json. \(loginInstructions)"
         }
-        return "Found ~/.codex/auth.json but it has no access_token. In Terminal run `codex login`, then Reconnect."
+        return "Found ~/.codex/auth.json but it has no access_token. \(loginInstructions)"
+        #else
+        return "Codex sign-in is only available on the Mac app."
+        #endif
+    }
+
+    public static var loginInstructions: String {
+        #if os(macOS)
+        if cliURL == nil {
+            return "The `codex` command is not installed. In Terminal run `brew install --cask codex` (or `npm install -g @openai/codex`), then `codex login`, then Reconnect."
+        }
+        return "In Terminal run `codex login`, then Reconnect."
         #else
         return "Codex sign-in is only available on the Mac app."
         #endif

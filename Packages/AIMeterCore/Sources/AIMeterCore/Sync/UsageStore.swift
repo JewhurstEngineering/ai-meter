@@ -117,11 +117,12 @@ public final class UsageStore: ObservableObject {
             if let credential = CursorLocalAuthReader.preferredCredential() {
                 do {
                     let me = try await client.validate(sessionToken: credential.token)
-                    _ = try upsertAccount(
+                    let outcome = try upsertAccount(
                         token: credential.token,
                         email: me.email ?? credential.cachedEmail,
                         provider: .cursor
                     )
+                    markConnected(id: outcome.id)
                     lastLocalConnectSource = credential.source.rawValue
                     lastConnectFailure = nil
                 } catch {
@@ -142,14 +143,12 @@ public final class UsageStore: ObservableObject {
 
     public func connectClaude(replacing: UUID? = nil) async throws -> LocalConnectResult {
         let outcome = try await connectClaude(setErrorOnFailure: true, replacing: replacing)
-        await refresh()
         startAutoRefresh()
         return connectResult(outcome, source: lastLocalConnectSource ?? "Claude Code")
     }
 
     public func connectCodex(replacing: UUID? = nil) async throws -> LocalConnectResult {
         let outcome = try await connectCodex(setErrorOnFailure: true, replacing: replacing)
-        await refresh()
         startAutoRefresh()
         return connectResult(outcome, source: lastLocalConnectSource ?? "Codex")
     }
@@ -157,9 +156,13 @@ public final class UsageStore: ObservableObject {
     @discardableResult
     private func connectClaude(setErrorOnFailure: Bool, replacing: UUID? = nil) async throws -> UpsertOutcome {
         #if os(macOS)
-        guard let cred = ClaudeLocalAuthReader.preferredCredential() else {
+        let lookup = ClaudeLocalAuthReader.credentialLookup()
+        guard let cred = lookup.credential else {
             if setErrorOnFailure {
-                setConnectError(ClaudeLocalAuthReader.missingSessionMessage(), accountID: replacing)
+                setConnectError(
+                    lookup.failureMessage ?? ClaudeLocalAuthReader.missingSessionMessage(),
+                    accountID: replacing
+                )
             }
             throw ProviderUsageError.missingCredentials
         }
@@ -178,6 +181,7 @@ public final class UsageStore: ObservableObject {
                 provider: .claude,
                 defaultLabel: snap.planDisplayName
             )
+            markConnected(id: outcome.id, snapshot: snap)
             lastLocalConnectSource = cred.source
             lastConnectFailure = nil
             return outcome
@@ -219,13 +223,14 @@ public final class UsageStore: ObservableObject {
                 provider: .codex,
                 defaultLabel: snap.planDisplayName
             )
+            markConnected(id: outcome.id, snapshot: snap)
             lastLocalConnectSource = cred.source
             lastConnectFailure = nil
             return outcome
         } catch {
             if setErrorOnFailure {
                 setConnectError(
-                    "Codex connect failed (\(error.localizedDescription)). In Terminal run `codex login`, then Reconnect this account.",
+                    "Codex connect failed (\(error.localizedDescription)). \(CodexLocalAuthReader.loginInstructions)",
                     accountID: replacing
                 )
             }
@@ -238,8 +243,17 @@ public final class UsageStore: ObservableObject {
 
     public func saveSessionToken(_ token: String, replacing id: UUID? = nil) async throws {
         let me = try await client.validate(sessionToken: token)
-        _ = try upsertAccount(token: token, email: me.email, replacing: id, provider: .cursor)
-        await refresh()
+        let outcome = try upsertAccount(
+            token: token,
+            email: me.email,
+            replacing: id,
+            provider: .cursor
+        )
+        // `/api/auth/me` already proved this session is valid. Update the row
+        // before any longer usage refresh so closing the login sheet cannot
+        // leave a successful sign-in looking expired.
+        markConnected(id: outcome.id)
+        await refreshAccount(outcome.id)
         startAutoRefresh()
     }
 
@@ -287,6 +301,12 @@ public final class UsageStore: ObservableObject {
         persistRegistry()
         writeWidgetSnapshot()
         pruneWarningSnoozesUsingActive()
+    }
+
+    /// Surface an error on a specific account from a call site that has already
+    /// dismissed its sheet (e.g. the popover reauthSheet for Cursor).
+    public func setLastError(_ message: String, forAccount id: UUID?) {
+        setConnectError(message, accountID: id)
     }
 
     /// Hide a refresh warning until the next failed fetch for this account.
@@ -644,6 +664,17 @@ public final class UsageStore: ObservableObject {
         guard var runtime = runtimes[id] else { return }
         mutate(&runtime)
         runtimes[id] = runtime
+    }
+
+    private func markConnected(id: UUID, snapshot: UsageSnapshot? = nil) {
+        updateRuntime(id: id) {
+            if let snapshot {
+                $0.snapshot = snapshot
+            }
+            $0.lastError = nil
+            $0.isAuthenticated = true
+        }
+        UsageNotificationService.clearSessionExpiredDedupe(accountID: id)
     }
 
     private func markUnauthenticated(id: UUID, error: String) {

@@ -23,6 +23,24 @@ final class KeychainStoreTests: XCTestCase {
         XCTAssertEqual(store.load(account: account), "secret-token")
     }
 
+    func testDefaultStoreWritesLoginKeychain() throws {
+        let store = KeychainStore(service: service)
+        try store.save(token: "login-token", account: account)
+        let loginOnly = KeychainStore(
+            service: service,
+            usesDataProtectionKeychain: false,
+            recoversFromDataProtectionKeychain: false
+        )
+        XCTAssertEqual(loginOnly.load(account: account), "login-token")
+    }
+
+    func testUpdatingTokenDoesNotDeleteBeforeReplacement() throws {
+        let store = KeychainStore(service: service)
+        try store.save(token: "first-token", account: account)
+        try store.save(token: "replacement-token", account: account)
+        XCTAssertEqual(store.load(account: account), "replacement-token")
+    }
+
     func testLoadDoesNotDeleteLegacyCopy() throws {
         let legacy = KeychainStore(service: service, usesDataProtectionKeychain: false)
         try legacy.save(token: "legacy-token", account: account)
@@ -60,8 +78,100 @@ final class LocalConnectResultTests: XCTestCase {
         XCTAssertEqual(refreshed.successMessage, "Refreshed Codex (Pro).")
     }
 
-    func testMissingSessionCopyNamesPaths() {
-        XCTAssertTrue(CodexLocalAuthReader.missingSessionMessage().contains("codex login"))
-        XCTAssertTrue(ClaudeLocalAuthReader.missingSessionMessage().contains("claude"))
+    func testLoginInstructionsNameProviderCommands() {
+        XCTAssertTrue(CodexLocalAuthReader.loginInstructions.contains("codex login"))
+        XCTAssertTrue(ClaudeLocalAuthReader.loginInstructions.contains("claude"))
+    }
+}
+
+final class ClaudeLocalAuthReaderTests: XCTestCase {
+
+    // MARK: - date() numeric formats
+
+    func testDateParsesUnixSeconds() {
+        let ts = 1_750_000_000.0
+        let json = "{\"accessToken\":\"tok\",\"expiresAt\":\(ts)}"
+        let cred = ClaudeLocalAuthReader.parseJSON(json, source: "test")
+        XCTAssertNotNil(cred?.expiresAt)
+        XCTAssertEqual(cred?.expiresAt?.timeIntervalSince1970 ?? 0, ts, accuracy: 1)
+    }
+
+    func testDateParsesUnixMilliseconds() {
+        let ms = 1_750_000_000_000.0
+        let expectedSec = ms / 1000
+        let json = "{\"accessToken\":\"tok\",\"expiresAt\":\(ms)}"
+        let cred = ClaudeLocalAuthReader.parseJSON(json, source: "test")
+        XCTAssertNotNil(cred?.expiresAt)
+        XCTAssertEqual(cred?.expiresAt?.timeIntervalSince1970 ?? 0, expectedSec, accuracy: 1)
+    }
+
+    // MARK: - date() ISO 8601 (regression for Bug B)
+    // Before the fix, these returned nil, making needsRefresh always false
+    // so stale Claude tokens were never refreshed proactively.
+
+    func testDateParsesISO8601WithoutFractionalSeconds() {
+        let json = "{\"accessToken\":\"tok\",\"expiresAt\":\"2026-08-19T15:00:00Z\"}"
+        let cred = ClaudeLocalAuthReader.parseJSON(json, source: "test")
+        XCTAssertNotNil(cred?.expiresAt, "ISO 8601 expiresAt must be parsed so needsRefresh works")
+        let formatter = ISO8601DateFormatter()
+        let expected = formatter.date(from: "2026-08-19T15:00:00Z")
+        XCTAssertEqual(cred?.expiresAt, expected)
+    }
+
+    func testDateParsesISO8601WithFractionalSeconds() {
+        let json = "{\"accessToken\":\"tok\",\"expiresAt\":\"2026-08-19T15:00:00.000Z\"}"
+        let cred = ClaudeLocalAuthReader.parseJSON(json, source: "test")
+        XCTAssertNotNil(cred?.expiresAt, "ISO 8601 with milliseconds must be parsed")
+    }
+
+    func testDateStringNumericFallbackStillWorks() {
+        let ts = 1_750_000_000.0
+        let json = "{\"accessToken\":\"tok\",\"expiresAt\":\"\(Int(ts))\"}"
+        let cred = ClaudeLocalAuthReader.parseJSON(json, source: "test")
+        XCTAssertNotNil(cred?.expiresAt)
+        XCTAssertEqual(cred?.expiresAt?.timeIntervalSince1970 ?? 0, ts, accuracy: 1)
+    }
+
+    // MARK: - needsRefresh
+
+    func testNeedsRefreshFalseWhenExpiresAtNil() {
+        let cred = ClaudeOAuthCredential(accessToken: "tok", source: "test")
+        XCTAssertFalse(cred.needsRefresh, "nil expiresAt must not trigger refresh")
+    }
+
+    func testNeedsRefreshTrueWhenExpiredInPast() {
+        let past = Date().addingTimeInterval(-300)
+        let cred = ClaudeOAuthCredential(accessToken: "tok", expiresAt: past, source: "test")
+        XCTAssertTrue(cred.needsRefresh)
+    }
+
+    func testNeedsRefreshTrueWithin120Seconds() {
+        let soon = Date().addingTimeInterval(60)
+        let cred = ClaudeOAuthCredential(accessToken: "tok", expiresAt: soon, source: "test")
+        XCTAssertTrue(cred.needsRefresh, "tokens expiring in <120 s must trigger proactive refresh")
+    }
+
+    func testNeedsRefreshFalseWhenFarFuture() {
+        let future = Date().addingTimeInterval(3600)
+        let cred = ClaudeOAuthCredential(accessToken: "tok", expiresAt: future, source: "test")
+        XCTAssertFalse(cred.needsRefresh)
+    }
+
+    // MARK: - nested claudeAiOauth key with ISO 8601
+
+    func testParseJSONHandlesNestedKeyWithISO8601Expiry() {
+        let json = """
+        {
+            "claudeAiOauth": {
+                "accessToken": "nested_tok",
+                "refreshToken": "rt",
+                "expiresAt": "2026-08-19T15:00:00Z"
+            }
+        }
+        """
+        let cred = ClaudeLocalAuthReader.parseJSON(json, source: "test")
+        XCTAssertEqual(cred?.accessToken, "nested_tok")
+        XCTAssertEqual(cred?.refreshToken, "rt")
+        XCTAssertNotNil(cred?.expiresAt, "Nested ISO 8601 expiresAt must parse")
     }
 }

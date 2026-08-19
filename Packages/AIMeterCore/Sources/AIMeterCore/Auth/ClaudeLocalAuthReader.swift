@@ -22,34 +22,76 @@ public struct ClaudeOAuthCredential: Sendable, Equatable {
     }
 }
 
+public struct ClaudeCredentialLookup: Sendable {
+    public var credential: ClaudeOAuthCredential?
+    public var failureMessage: String?
+
+    public init(credential: ClaudeOAuthCredential?, failureMessage: String?) {
+        self.credential = credential
+        self.failureMessage = failureMessage
+    }
+}
+
 public enum ClaudeLocalAuthReader {
     public static let keychainService = "Claude Code-credentials"
+    public static let loginInstructions = "Run `claude` in Terminal, enter `/login`, wait for “Login successful,” then Reconnect."
 
     public static func preferredCredential() -> ClaudeOAuthCredential? {
+        credentialLookup().credential
+    }
+
+    public static func credentialLookup() -> ClaudeCredentialLookup {
         #if os(macOS)
-        if let cred = fromKeychain() { return cred }
-        if let cred = fromCredentialsFile() { return cred }
+        let keychain = keychainLookup()
+        if let credential = keychain.credential {
+            return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
+        }
+        if let credential = fromCredentialsFile() {
+            return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
+        }
+        let fileExists = FileManager.default.fileExists(atPath: credentialsFileURL.path)
+        if keychain.status == errSecAuthFailed
+            || keychain.status == errSecInteractionNotAllowed
+            || keychain.status == errSecUserCanceled
+        {
+            return ClaudeCredentialLookup(
+                credential: nil,
+                failureMessage: "AI Meter could not read “Claude Code-credentials” from Keychain (status \(keychain.status)). In Keychain Access, allow AI Meter to read that item, or run `claude`, enter `/login`, and try Reconnect again."
+            )
+        }
+        if fileExists {
+            return ClaudeCredentialLookup(
+                credential: nil,
+                failureMessage: "Found ~/.claude/.credentials.json but it has no usable access token. \(loginInstructions)"
+            )
+        }
+        return ClaudeCredentialLookup(
+            credential: nil,
+            failureMessage: "No Claude Code session was found in Keychain or ~/.claude/.credentials.json. \(loginInstructions) A Keychain prompt appears only when an unread credential item exists."
+        )
+        #else
+        return ClaudeCredentialLookup(
+            credential: nil,
+            failureMessage: "Claude Code sign-in is only available on the Mac app."
+        )
         #endif
-        return nil
     }
 
     #if os(macOS)
-    private static func fromKeychain() -> ClaudeOAuthCredential? {
+    private static func keychainLookup() -> (credential: ClaudeOAuthCredential?, status: OSStatus) {
         let login = KeychainStore(
             service: keychainService,
             usesDataProtectionKeychain: false,
-            accessGroup: nil
+            accessGroup: nil,
+            recoversFromDataProtectionKeychain: false
         )
-        let dataProtection = KeychainStore(
-            service: keychainService,
-            usesDataProtectionKeychain: true,
-            accessGroup: nil
-        )
-        if let raw = login.loadFirst() ?? dataProtection.loadFirst() {
-            return parseJSON(raw, source: "Claude Code keychain")
-                ?? ClaudeOAuthCredential(accessToken: raw.trimmingCharacters(in: .whitespacesAndNewlines), source: "Claude Code keychain")
+        let lookup = login.loadFirstLookup()
+        if let raw = lookup.value {
+            let credential = parseJSON(raw, source: "Claude Code keychain")
+                ?? raw.nonEmptyCredential(source: "Claude Code keychain")
+            return (credential, lookup.status)
         }
-        return nil
+        return (nil, lookup.status)
     }
 
     private static var credentialsFileURL: URL {
@@ -67,15 +109,7 @@ public enum ClaudeLocalAuthReader {
     #endif
 
     public static func missingSessionMessage() -> String {
-        #if os(macOS)
-        let fileExists = FileManager.default.fileExists(atPath: credentialsFileURL.path)
-        if fileExists {
-            return "Found ~/.claude/.credentials.json but it has no access token. Sign in with Claude Code (`claude` in Terminal), then Reconnect."
-        }
-        return "No Claude Code session found (no Keychain item “Claude Code-credentials”, and no ~/.claude/.credentials.json). Sign in with Claude Code (`claude` in Terminal), then Reconnect. A Keychain prompt only appears if that item already exists."
-        #else
-        return "Claude Code sign-in is only available on the Mac app."
-        #endif
+        credentialLookup().failureMessage ?? "No Claude Code session found."
     }
 
     public static func parseJSON(_ raw: String, source: String) -> ClaudeOAuthCredential? {
@@ -104,9 +138,25 @@ public enum ClaudeLocalAuthReader {
             let v = Double(n)
             return Date(timeIntervalSince1970: v > 10_000_000_000 ? v / 1000 : v)
         }
-        if let s = value as? String, let n = Double(s) {
-            return Date(timeIntervalSince1970: n > 10_000_000_000 ? n / 1000 : n)
+        if let s = value as? String {
+            if let n = Double(s) {
+                return Date(timeIntervalSince1970: n > 10_000_000_000 ? n / 1000 : n)
+            }
+            // Newer Claude Code versions write ISO 8601 (e.g. "2026-08-19T15:00:00Z").
+            let iso = ISO8601DateFormatter()
+            iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            if let d = iso.date(from: s) { return d }
+            iso.formatOptions = [.withInternetDateTime]
+            return iso.date(from: s)
         }
         return nil
+    }
+}
+
+private extension String {
+    func nonEmptyCredential(source: String) -> ClaudeOAuthCredential? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return nil }
+        return ClaudeOAuthCredential(accessToken: value, source: source)
     }
 }
