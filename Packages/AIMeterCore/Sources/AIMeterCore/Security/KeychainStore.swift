@@ -6,75 +6,117 @@ public enum KeychainError: Error, Sendable {
     case encodingFailed
 }
 
+public struct KeychainLookup: Sendable {
+    public var value: String?
+    public var status: OSStatus
+
+    public init(value: String?, status: OSStatus) {
+        self.value = value
+        self.status = status
+    }
+}
+
+extension KeychainError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .unexpectedStatus(let status):
+            let detail = SecCopyErrorMessageString(status, nil) as String?
+            return "Keychain failed (\(status)): \(detail ?? "Unknown error")"
+        case .encodingFailed:
+            return "The session could not be encoded for Keychain."
+        }
+    }
+}
+
 public struct KeychainStore: Sendable {
     public static let appAccessGroup = "6998422DKP.com.jamesware.aimeter.app"
 
     public let service: String
-    /// Data-protection items are granted by team ID, so Sparkle updates do not
-    /// re-prompt. File-based items (Claude Code, etc.) stay on the login keychain.
+    /// Foreign CLI items stay in the login keychain. AI Meter also writes new
+    /// items there; its stable designated requirement survives signed updates.
     public let usesDataProtectionKeychain: Bool
     public let accessGroup: String?
+    public let recoversFromDataProtectionKeychain: Bool
 
     public init(
         service: String = "com.jamesware.aimeter.session",
-        usesDataProtectionKeychain: Bool = true,
-        accessGroup: String? = KeychainStore.appAccessGroup
+        usesDataProtectionKeychain: Bool = false,
+        accessGroup: String? = KeychainStore.appAccessGroup,
+        recoversFromDataProtectionKeychain: Bool = true
     ) {
         self.service = service
         self.usesDataProtectionKeychain = usesDataProtectionKeychain
         self.accessGroup = accessGroup
+        self.recoversFromDataProtectionKeychain = recoversFromDataProtectionKeychain
     }
 
     public func save(token: String, account: String) throws {
         guard let data = token.data(using: .utf8) else { throw KeychainError.encodingFailed }
-        var wroteDataProtection = false
         if usesDataProtectionKeychain {
-            do {
-                try add(data: data, account: account, dataProtection: true)
-                wroteDataProtection = copy(account: account, dataProtection: true) == token
-                if wroteDataProtection {
-                    delete(account: account, dataProtection: false)
-                }
-            } catch let KeychainError.unexpectedStatus(status) where status == errSecMissingEntitlement {
-                wroteDataProtection = false
-            }
-        }
-        if !wroteDataProtection {
-            try add(data: data, account: account, dataProtection: false)
+            try upsert(data: data, account: account, dataProtection: true)
+        } else {
+            try upsert(data: data, account: account, dataProtection: false)
         }
     }
 
     public func load(account: String) -> String? {
-        if usesDataProtectionKeychain, let value = copy(account: account, dataProtection: true) {
+        let primaryIsDataProtection = usesDataProtectionKeychain
+        if let value = copy(account: account, dataProtection: primaryIsDataProtection) {
             return value
         }
-        guard let value = copy(account: account, dataProtection: false) else { return nil }
-        if usesDataProtectionKeychain {
-            try? add(data: Data(value.utf8), account: account, dataProtection: true)
+        guard recoversFromDataProtectionKeychain else { return nil }
+        let fallbackIsDataProtection = !primaryIsDataProtection
+        guard let value = copy(account: account, dataProtection: fallbackIsDataProtection) else {
+            return nil
         }
+        // Copy forward without deleting the fallback. A failed migration must
+        // never turn a readable session into a signed-out account.
+        try? upsert(
+            data: Data(value.utf8),
+            account: account,
+            dataProtection: primaryIsDataProtection
+        )
         return value
     }
 
     /// First password item for this service (Claude Code stores JSON under an opaque account).
     public func loadFirst() -> String? {
-        if usesDataProtectionKeychain, let value = copyFirst(dataProtection: true) {
-            return value
+        loadFirstLookup().value
+    }
+
+    public func loadFirstLookup() -> KeychainLookup {
+        let primary = copyFirstLookup(dataProtection: usesDataProtectionKeychain)
+        if primary.status == errSecSuccess || !recoversFromDataProtectionKeychain {
+            return primary
         }
-        return copyFirst(dataProtection: false)
+        let fallback = copyFirstLookup(dataProtection: !usesDataProtectionKeychain)
+        return fallback.status == errSecSuccess ? fallback : primary
     }
 
     public func delete(account: String) {
-        delete(account: account, dataProtection: true)
-        delete(account: account, dataProtection: false)
+        delete(account: account, dataProtection: usesDataProtectionKeychain)
+        if recoversFromDataProtectionKeychain {
+            delete(account: account, dataProtection: !usesDataProtectionKeychain)
+        }
     }
 
-    private func add(data: Data, account: String, dataProtection: Bool) throws {
-        delete(account: account, dataProtection: dataProtection)
-        var query = baseQuery(account: account, dataProtection: dataProtection)
-        query[kSecValueData as String] = data
-        query[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        let status = SecItemAdd(query as CFDictionary, nil)
-        guard status == errSecSuccess else { throw KeychainError.unexpectedStatus(status) }
+    private func upsert(data: Data, account: String, dataProtection: Bool) throws {
+        let query = baseQuery(account: account, dataProtection: dataProtection)
+        let attributes: [String: Any] = [
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+        ]
+        let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        if updateStatus == errSecSuccess { return }
+        guard updateStatus == errSecItemNotFound else {
+            throw KeychainError.unexpectedStatus(updateStatus)
+        }
+        var add = query
+        attributes.forEach { add[$0.key] = $0.value }
+        let addStatus = SecItemAdd(add as CFDictionary, nil)
+        guard addStatus == errSecSuccess else {
+            throw KeychainError.unexpectedStatus(addStatus)
+        }
     }
 
     private func copy(account: String, dataProtection: Bool) -> String? {
@@ -87,14 +129,21 @@ public struct KeychainStore: Sendable {
         return String(data: data, encoding: .utf8)
     }
 
-    private func copyFirst(dataProtection: Bool) -> String? {
+    private func copyFirstLookup(dataProtection: Bool) -> KeychainLookup {
         var query = baseQuery(account: nil, dataProtection: dataProtection)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        guard status == errSecSuccess, let data = item as? Data else { return nil }
-        return String(data: data, encoding: .utf8)
+        guard status == errSecSuccess else {
+            return KeychainLookup(value: nil, status: status)
+        }
+        guard let data = item as? Data,
+              let value = String(data: data, encoding: .utf8)
+        else {
+            return KeychainLookup(value: nil, status: errSecDecode)
+        }
+        return KeychainLookup(value: value, status: errSecSuccess)
     }
 
     private func delete(account: String, dataProtection: Bool) {
