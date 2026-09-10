@@ -5,8 +5,6 @@ public actor ClaudeUsageClient {
 
     private let session: URLSession
     private let usageURL = URL(string: "https://api.anthropic.com/api/oauth/usage")!
-    private let tokenURL = URL(string: "https://console.anthropic.com/v1/oauth/token")!
-    private let clientID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
     private var cachedUserAgent: String?
 
     public init(session: URLSession = .shared) {
@@ -17,16 +15,7 @@ public actor ClaudeUsageClient {
     }
 
     public func fetchSnapshot(credential: ClaudeOAuthCredential) async throws -> UsageSnapshot {
-        var token = credential.accessToken
-        if credential.needsRefresh, let refresh = credential.refreshToken {
-            token = try await refreshAccessToken(refresh)
-        }
-        do {
-            return try await fetch(token: token, attempt: 0)
-        } catch ProviderUsageError.unauthorized where credential.refreshToken != nil {
-            let refreshed = try await refreshAccessToken(credential.refreshToken!)
-            return try await fetch(token: refreshed, attempt: 0)
-        }
+        try await fetch(token: credential.accessToken, attempt: 0)
     }
 
     private func fetch(token: String, attempt: Int) async throws -> UsageSnapshot {
@@ -63,26 +52,5 @@ public actor ClaudeUsageClient {
         let value = ClaudeCodeVersion.userAgent()
         cachedUserAgent = value
         return value
-    }
-
-    private func refreshAccessToken(_ refreshToken: String) async throws -> String {
-        var request = URLRequest(url: tokenURL)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: [
-            "grant_type": "refresh_token",
-            "refresh_token": refreshToken,
-            "client_id": clientID,
-        ])
-        let (data, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else {
-            throw ProviderUsageError.refreshFailed
-        }
-        guard let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let access = obj["access_token"] as? String
-        else {
-            throw ProviderUsageError.refreshFailed
-        }
-        return access
     }
 }

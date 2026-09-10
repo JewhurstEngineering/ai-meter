@@ -168,7 +168,7 @@ public final class UsageStore: ObservableObject {
     @discardableResult
     private func connectClaude(setErrorOnFailure: Bool, replacing: UUID? = nil) async throws -> UpsertOutcome {
         #if os(macOS)
-        let lookup = ClaudeLocalAuthReader.credentialLookup()
+        let lookup = ClaudeLocalAuthReader.credentialLookup(allowInteraction: true)
         guard let cred = lookup.credential else {
             if setErrorOnFailure {
                 setConnectError(
@@ -429,8 +429,11 @@ public final class UsageStore: ObservableObject {
             var cred = claudeCredential(fromStored: token)
             #if os(macOS)
             // Claude Code rotates OAuth tokens in its own keychain. A frozen copy
-            // from "Add Claude" goes stale overnight; always prefer the live session.
-            if let live = ClaudeLocalAuthReader.preferredCredential() {
+            // goes stale; copy the live session only when the stored access token
+            // is near expiry, and never prompt from a refresh timer.
+            if cred.needsRefresh,
+               let live = ClaudeLocalAuthReader.preferredCredential(allowInteraction: false)
+            {
                 cred = live
                 let json = storedTokenJSON(
                     access: live.accessToken,

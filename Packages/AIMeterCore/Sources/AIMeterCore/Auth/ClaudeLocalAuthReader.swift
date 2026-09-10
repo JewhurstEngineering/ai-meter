@@ -32,31 +32,61 @@ public struct ClaudeCredentialLookup: Sendable {
     }
 }
 
+public enum ClaudeLiveCredentialStep: Equatable, Sendable {
+    case silentKeychain
+    case credentialsFile
+    case interactiveKeychain
+}
+
 public enum ClaudeLocalAuthReader {
     public static let keychainService = "Claude Code-credentials"
     public static let loginInstructions = "Run `claude` in Terminal, enter `/login`, wait for “Login successful,” then Reconnect."
 
-    public static func preferredCredential() -> ClaudeOAuthCredential? {
-        credentialLookup().credential
+    /// Silent Keychain first (usually current on macOS), then the credentials file.
+    /// Interactive Keychain is last and only when the caller asked to prompt.
+    public static func liveLookupSteps(allowInteraction: Bool) -> [ClaudeLiveCredentialStep] {
+        var steps: [ClaudeLiveCredentialStep] = [.silentKeychain, .credentialsFile]
+        if allowInteraction {
+            steps.append(.interactiveKeychain)
+        }
+        return steps
     }
 
-    public static func credentialLookup() -> ClaudeCredentialLookup {
+    public static func preferredCredential(allowInteraction: Bool = true) -> ClaudeOAuthCredential? {
+        credentialLookup(allowInteraction: allowInteraction).credential
+    }
+
+    public static func credentialLookup(allowInteraction: Bool = true) -> ClaudeCredentialLookup {
         #if os(macOS)
-        let keychain = keychainLookup()
-        if let credential = keychain.credential {
-            return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
-        }
-        if let credential = fromCredentialsFile() {
-            return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
+        var keychainStatus: OSStatus = errSecItemNotFound
+        for step in liveLookupSteps(allowInteraction: allowInteraction) {
+            switch step {
+            case .silentKeychain:
+                let keychain = keychainLookup(allowInteraction: false)
+                keychainStatus = keychain.status
+                if let credential = keychain.credential {
+                    return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
+                }
+            case .credentialsFile:
+                if let credential = fromCredentialsFile() {
+                    return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
+                }
+            case .interactiveKeychain:
+                let keychain = keychainLookup(allowInteraction: true)
+                keychainStatus = keychain.status
+                if let credential = keychain.credential {
+                    return ClaudeCredentialLookup(credential: credential, failureMessage: nil)
+                }
+            }
         }
         let fileExists = FileManager.default.fileExists(atPath: credentialsFileURL.path)
-        if keychain.status == errSecAuthFailed
-            || keychain.status == errSecInteractionNotAllowed
-            || keychain.status == errSecUserCanceled
+        if keychainStatus == errSecAuthFailed
+            || keychainStatus == errSecInteractionNotAllowed
+            || keychainStatus == errSecUserCanceled
         {
             return ClaudeCredentialLookup(
                 credential: nil,
-                failureMessage: "AI Meter could not read “Claude Code-credentials” from Keychain (status \(keychain.status)). In Keychain Access, allow AI Meter to read that item, or run `claude`, enter `/login`, and try Reconnect again."
+                failureMessage: "AI Meter could not read “Claude Code-credentials” from Keychain (status \(keychainStatus)). In Keychain Access, allow AI Meter to read that item, or run `claude`, enter `/login`, and try Reconnect again."
             )
         }
         if fileExists {
@@ -67,7 +97,7 @@ public enum ClaudeLocalAuthReader {
         }
         return ClaudeCredentialLookup(
             credential: nil,
-            failureMessage: "No Claude Code session was found in Keychain or ~/.claude/.credentials.json. \(loginInstructions) A Keychain prompt appears only when an unread credential item exists."
+            failureMessage: "No Claude Code session was found in Keychain or ~/.claude/.credentials.json. \(loginInstructions) Add or Reconnect may ask Keychain once; background refresh will not."
         )
         #else
         return ClaudeCredentialLookup(
@@ -78,14 +108,14 @@ public enum ClaudeLocalAuthReader {
     }
 
     #if os(macOS)
-    private static func keychainLookup() -> (credential: ClaudeOAuthCredential?, status: OSStatus) {
+    private static func keychainLookup(allowInteraction: Bool) -> (credential: ClaudeOAuthCredential?, status: OSStatus) {
         let login = KeychainStore(
             service: keychainService,
             usesDataProtectionKeychain: false,
             accessGroup: nil,
             recoversFromDataProtectionKeychain: false
         )
-        let lookup = login.loadFirstLookup()
+        let lookup = login.loadFirstLookup(allowInteraction: allowInteraction)
         if let raw = lookup.value {
             let credential = parseJSON(raw, source: "Claude Code keychain")
                 ?? raw.nonEmptyCredential(source: "Claude Code keychain")
@@ -109,7 +139,7 @@ public enum ClaudeLocalAuthReader {
     #endif
 
     public static func missingSessionMessage() -> String {
-        credentialLookup().failureMessage ?? "No Claude Code session found."
+        credentialLookup(allowInteraction: false).failureMessage ?? "No Claude Code session found."
     }
 
     public static func parseJSON(_ raw: String, source: String) -> ClaudeOAuthCredential? {

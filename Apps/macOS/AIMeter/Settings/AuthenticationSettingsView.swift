@@ -71,7 +71,7 @@ struct AuthenticationSettingsView: View {
                         .disabled(store.connections.isEmpty)
                     }
 
-                    Text("Cursor can sign in in-app. Claude and Codex sign in from Terminal (`claude` / `codex login`), then Add or Reconnect. A Keychain prompt only appears if this Mac already has that app’s item and AI Meter is not yet allowed to read it. Reconnect is on each account below.")
+                    Text("Cursor can sign in in-app. Claude and Codex sign in from Terminal (`claude` / `codex login`), then Add or Reconnect. Add or Reconnect Claude may ask for Keychain once; background refresh will not. Reconnect is on each account below.")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)

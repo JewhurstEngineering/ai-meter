@@ -1,4 +1,6 @@
 import XCTest
+import LocalAuthentication
+import Security
 @testable import AIMeterCore
 
 final class KeychainStoreTests: XCTestCase {
@@ -55,6 +57,38 @@ final class KeychainStoreTests: XCTestCase {
         try store.save(token: "gone", account: account)
         store.delete(account: account)
         XCTAssertNil(store.load(account: account))
+    }
+
+    func testSilentLookupDisablesAuthenticationUI() {
+        let store = KeychainStore(
+            service: service,
+            usesDataProtectionKeychain: false,
+            recoversFromDataProtectionKeychain: false
+        )
+        let query = store.copyMatchingQuery(
+            account: nil,
+            dataProtection: false,
+            allowInteraction: false
+        )
+        let context = query[kSecUseAuthenticationContext as String] as? LAContext
+        XCTAssertNotNil(context)
+        XCTAssertEqual(context?.interactionNotAllowed, true)
+        XCTAssertNil(query[kSecUseAuthenticationUI as String])
+    }
+
+    func testInteractiveLookupDoesNotDisableAuthenticationUI() {
+        let store = KeychainStore(
+            service: service,
+            usesDataProtectionKeychain: false,
+            recoversFromDataProtectionKeychain: false
+        )
+        let query = store.copyMatchingQuery(
+            account: nil,
+            dataProtection: false,
+            allowInteraction: true
+        )
+        XCTAssertNil(query[kSecUseAuthenticationContext as String])
+        XCTAssertNil(query[kSecUseAuthenticationUI as String])
     }
 }
 
@@ -173,5 +207,19 @@ final class ClaudeLocalAuthReaderTests: XCTestCase {
         XCTAssertEqual(cred?.accessToken, "nested_tok")
         XCTAssertEqual(cred?.refreshToken, "rt")
         XCTAssertNotNil(cred?.expiresAt, "Nested ISO 8601 expiresAt must parse")
+    }
+
+    func testSilentLookupSkipsInteractiveKeychain() {
+        XCTAssertEqual(
+            ClaudeLocalAuthReader.liveLookupSteps(allowInteraction: false),
+            [.silentKeychain, .credentialsFile]
+        )
+    }
+
+    func testInteractiveLookupPromptsOnlyAfterSilentAndFile() {
+        XCTAssertEqual(
+            ClaudeLocalAuthReader.liveLookupSteps(allowInteraction: true),
+            [.silentKeychain, .credentialsFile, .interactiveKeychain]
+        )
     }
 }

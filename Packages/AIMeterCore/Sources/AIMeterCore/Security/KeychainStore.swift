@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 import Security
 
 public enum KeychainError: Error, Sendable {
@@ -80,17 +81,41 @@ public struct KeychainStore: Sendable {
     }
 
     /// First password item for this service (Claude Code stores JSON under an opaque account).
-    public func loadFirst() -> String? {
-        loadFirstLookup().value
+    public func loadFirst(allowInteraction: Bool = true) -> String? {
+        loadFirstLookup(allowInteraction: allowInteraction).value
     }
 
-    public func loadFirstLookup() -> KeychainLookup {
-        let primary = copyFirstLookup(dataProtection: usesDataProtectionKeychain)
+    public func loadFirstLookup(allowInteraction: Bool = true) -> KeychainLookup {
+        let primary = copyFirstLookup(
+            dataProtection: usesDataProtectionKeychain,
+            allowInteraction: allowInteraction
+        )
         if primary.status == errSecSuccess || !recoversFromDataProtectionKeychain {
             return primary
         }
-        let fallback = copyFirstLookup(dataProtection: !usesDataProtectionKeychain)
+        let fallback = copyFirstLookup(
+            dataProtection: !usesDataProtectionKeychain,
+            allowInteraction: allowInteraction
+        )
         return fallback.status == errSecSuccess ? fallback : primary
+    }
+
+    /// Matching query for a generic-password copy. `allowInteraction: false`
+    /// fails closed (no Keychain password sheet) via `LAContext.interactionNotAllowed`.
+    func copyMatchingQuery(
+        account: String?,
+        dataProtection: Bool,
+        allowInteraction: Bool = true
+    ) -> [String: Any] {
+        var query = baseQuery(account: account, dataProtection: dataProtection)
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        if !allowInteraction {
+            let context = LAContext()
+            context.interactionNotAllowed = true
+            query[kSecUseAuthenticationContext as String] = context
+        }
+        return query
     }
 
     public func delete(account: String) {
@@ -120,19 +145,19 @@ public struct KeychainStore: Sendable {
     }
 
     private func copy(account: String, dataProtection: Bool) -> String? {
-        var query = baseQuery(account: account, dataProtection: dataProtection)
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        let query = copyMatchingQuery(account: account, dataProtection: dataProtection)
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         guard status == errSecSuccess, let data = item as? Data else { return nil }
         return String(data: data, encoding: .utf8)
     }
 
-    private func copyFirstLookup(dataProtection: Bool) -> KeychainLookup {
-        var query = baseQuery(account: nil, dataProtection: dataProtection)
-        query[kSecReturnData as String] = true
-        query[kSecMatchLimit as String] = kSecMatchLimitOne
+    private func copyFirstLookup(dataProtection: Bool, allowInteraction: Bool) -> KeychainLookup {
+        let query = copyMatchingQuery(
+            account: nil,
+            dataProtection: dataProtection,
+            allowInteraction: allowInteraction
+        )
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
         guard status == errSecSuccess else {
