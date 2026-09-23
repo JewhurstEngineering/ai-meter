@@ -247,6 +247,11 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         effectiveWindows.compactMap(\.resetsAt).min()
     }
 
+    /// Grok Bot weekly allowance, when this Cursor plan includes one.
+    public var grokBotPercentUsed: Double? {
+        effectiveWindows.first { $0.role == .grokBot }?.percentUsed
+    }
+
     public var isCursor: Bool { provider == .cursor }
 
     private static func cycleUSD(_ cents: Double) -> String {
@@ -462,6 +467,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         case totalIncluded
         case session
         case weekly
+        case grokBot
 
         public var title: String {
             switch self {
@@ -471,6 +477,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
             case .onDemandAndLimits: return "On-demand & limits"
             case .session: return "Session"
             case .weekly: return "Weekly"
+            case .grokBot: return "Grok Bot"
             }
         }
 
@@ -482,6 +489,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
             case .onDemandAndLimits: return "Spend"
             case .session: return "Session"
             case .weekly: return "Weekly"
+            case .grokBot: return "Grok"
             }
         }
     }
@@ -532,6 +540,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         case .totalIncluded: return "\(Int(warnings.totalIncludedPercent.rounded()))%"
         case .session: return "\(Int(warnings.sessionPercent.rounded()))%"
         case .weekly: return "\(Int(warnings.weeklyPercent.rounded()))%"
+        case .grokBot: return "\(Int(warnings.grokBotPercent.rounded()))%"
         case .onDemandAndLimits:
             if isOnDemandUnlimited,
                let used = onDemandUsedCents,
@@ -563,6 +572,9 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         case .weekly:
             guard let p = windowPercent(role: .weekly) else { return nil }
             return (p >= warnings.weeklyPercent, "\(Int(p.rounded()))%")
+        case .grokBot:
+            guard let p = grokBotPercentUsed else { return nil }
+            return (p >= warnings.grokBotPercent, "\(Int(p.rounded()))%")
         case .onDemandAndLimits:
             if isOnDemandUnlimited {
                 if let used = onDemandUsedCents, used >= warnings.onDemandUnlimitedAlertCents {

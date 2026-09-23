@@ -78,6 +78,7 @@ public enum UsageNotificationService {
             (.totalIncluded, channels.totalIncluded, "Total included"),
             (.session, channels.session, "Session"),
             (.weekly, channels.weekly, "Weekly"),
+            (.grokBot, channels.grokBot, "Grok Bot"),
         ]
 
         for (channel, enabled, label) in watches {
@@ -115,6 +116,8 @@ public enum UsageNotificationService {
             return "\(Int(warnings.sessionPercent))%"
         case .weekly:
             return "\(Int(warnings.weeklyPercent))%"
+        case .grokBot:
+            return "\(Int(warnings.grokBotPercent))%"
         case .onDemandAndLimits:
             if snapshot.isOnDemandUnlimited {
                 return MenuBarFormatter.usd(warnings.onDemandUnlimitedAlertCents)

@@ -658,7 +658,7 @@ struct MenuBarPopoverView: View {
                 alertList(hits)
             }
 
-            if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent || t.sessionPercent || t.weeklyPercent {
+            if t.cursorModelsPercent || t.otherModelsPercent || t.totalPercent || t.sessionPercent || t.weeklyPercent || t.grokBotPercent {
                 Text(snapshot.provider == .cursor ? "Included usage" : "Usage windows")
                     .appFont(.caption, weight: .semibold)
                     .foregroundStyle(.secondary)
@@ -867,6 +867,7 @@ struct MenuBarPopoverView: View {
             case .totalIncluded: return toggles.totalPercent
             case .session: return toggles.sessionPercent
             case .weekly: return toggles.weeklyPercent
+            case .grokBot: return toggles.grokBotPercent
             case .extra: return true
             }
         }
@@ -876,6 +877,11 @@ struct MenuBarPopoverView: View {
         switch window.role {
         case .cursorModels: return "First-party included pool"
         case .otherModels: return "API / third-party included pool"
+        case .grokBot:
+            if let reset = window.resetsAt {
+                return "Weekly · resets \(MenuBarFormatter.relative(reset))"
+            }
+            return "Weekly included allowance"
         case .session, .weekly, .extra:
             if let reset = window.resetsAt {
                 return "Resets \(MenuBarFormatter.relative(reset))"
@@ -893,6 +899,7 @@ struct MenuBarPopoverView: View {
         case .totalIncluded: return "chart.pie.fill"
         case .session: return "clock"
         case .weekly: return "calendar"
+        case .grokBot: return "message.fill"
         case .extra: return "square.grid.2x2"
         }
     }

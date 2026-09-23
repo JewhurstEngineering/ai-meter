@@ -43,6 +43,9 @@ struct WatchOverviewView: View {
 
                 metric("Cursor", value: percent(snap.cursorModelsPercentUsed))
                 metric("Total", value: percent(snap.totalPercentUsed))
+                if let grok = snap.grokBotPercentUsed {
+                    metric("Grok Bot", value: percent(grok))
+                }
 
                 if let used = snap.planUsedCents, let limit = snap.planLimitCents {
                     metric("Spend", value: "\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit))")

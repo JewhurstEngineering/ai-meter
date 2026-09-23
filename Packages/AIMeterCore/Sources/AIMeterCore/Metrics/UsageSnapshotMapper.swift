@@ -24,6 +24,7 @@ public enum UsageSnapshotMapper {
         aggregated: AggregatedUsageResponse?,
         cycleHistory: [UsageSnapshot.BillingCycleSpend] = [],
         dailySpend: [UsageSnapshot.DailySpend] = [],
+        sand: SandUsageStatus? = nil,
         fetchedAt: Date = .now
     ) -> UsageSnapshot {
         let membership = summary.membershipType
@@ -99,7 +100,8 @@ public enum UsageSnapshotMapper {
                 cursorPct: cursorPct,
                 otherPct: otherPct,
                 totalPct: plan?.totalPercentUsed,
-                cycleEnd: parseDate(summary.billingCycleEnd)
+                cycleEnd: parseDate(summary.billingCycleEnd),
+                sand: sand
             ),
             spend: SpendMeter(
                 title: "On-demand",
@@ -115,7 +117,8 @@ public enum UsageSnapshotMapper {
         cursorPct: Double?,
         otherPct: Double?,
         totalPct: Double?,
-        cycleEnd: Date?
+        cycleEnd: Date?,
+        sand: SandUsageStatus?
     ) -> [QuotaWindow] {
         var windows: [QuotaWindow] = []
         if let cursorPct {
@@ -146,6 +149,16 @@ public enum UsageSnapshotMapper {
                 resetsAt: cycleEnd,
                 kind: .billingCycle,
                 role: .totalIncluded
+            ))
+        }
+        if let included = sand?.includedWindow {
+            windows.append(.init(
+                id: "grok_bot",
+                title: "Grok Bot",
+                percentUsed: included.percent,
+                resetsAt: included.resetsAt,
+                kind: .rolling,
+                role: .grokBot
             ))
         }
         return windows

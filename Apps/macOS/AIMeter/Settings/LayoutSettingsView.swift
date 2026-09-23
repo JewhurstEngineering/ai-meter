@@ -146,6 +146,12 @@ struct LayoutSettingsView: View {
                 providers: [.claude, .codex],
                 isOn: binding(\.weeklyPercent)
             )
+            MetricToggleRow(
+                title: "Grok Bot %",
+                systemImage: "message.fill",
+                providers: [.cursor],
+                isOn: binding(\.grokBotPercent)
+            )
             MetricToggleRow(title: "Subscription $", systemImage: "dollarsign.circle", isOn: binding(\.planSpend))
             MetricToggleRow(title: "Bonus", systemImage: "gift", isOn: binding(\.bonus))
             MetricToggleRow(title: "On-demand", systemImage: "creditcard", isOn: binding(\.onDemand))
@@ -376,6 +382,10 @@ private struct PopoverPreviewCard: View {
                     let p = snapshot?.effectiveWindows.first { $0.role == .weekly }?.percentUsed ?? 22
                     previewPool(title: "7-day", icon: "calendar", percent: p)
                 }
+                if t.grokBotPercent {
+                    let p = snapshot?.grokBotPercentUsed ?? 18
+                    previewPool(title: "Grok Bot", icon: "message.fill", percent: p)
+                }
 
                 if t.planSpend, let used = snapshot?.planUsedCents, let limit = snapshot?.planLimitCents {
                     Label("\(MenuBarFormatter.usd(used)) / \(MenuBarFormatter.usd(limit)) base", systemImage: "dollarsign.circle")
@@ -472,7 +482,7 @@ private struct PopoverPreviewCard: View {
                     }
                 }
 
-                if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent
+                if !t.cursorModelsPercent && !t.otherModelsPercent && !t.totalPercent && !t.grokBotPercent
                     && !t.planSpend && !t.bonus && !t.onDemand && !t.daysRemaining && !t.burnRateEstimate
                     && !t.modelsThisPeriod && !t.cycleChart
                     && !t.thisMacActivity && !t.localRecentChats && !t.cloudAgents

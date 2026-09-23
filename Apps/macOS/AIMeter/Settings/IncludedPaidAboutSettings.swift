@@ -130,6 +130,16 @@ struct IncludedUsageSettingsView: View {
                         compact: true
                     )
                 }
+                if let p = snapshot.grokBotPercentUsed {
+                    IncludedPoolCard(
+                        title: "Grok Bot",
+                        systemImage: "message.fill",
+                        percent: p,
+                        caption: "Weekly allowance",
+                        accent: theme.spend,
+                        compact: true
+                    )
+                }
             }
 
             if let bonus = snapshot.bonusCents, bonus > 0 {

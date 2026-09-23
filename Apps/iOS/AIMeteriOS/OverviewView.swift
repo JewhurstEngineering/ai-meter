@@ -128,7 +128,9 @@ struct OverviewView: View {
                 }
             }
 
-            if layout.cursorModelsPercent || layout.otherModelsPercent || layout.totalPercent {
+            if layout.cursorModelsPercent || layout.otherModelsPercent || layout.totalPercent
+                || (layout.grokBotPercent && snapshot.grokBotPercentUsed != nil)
+            {
                 Section("Included usage") {
                     if layout.cursorModelsPercent {
                         poolRow("Cursor Models", systemImage: "sparkles", percent: snapshot.cursorModelsPercentUsed)
@@ -138,6 +140,9 @@ struct OverviewView: View {
                     }
                     if layout.totalPercent {
                         poolRow("Total included", systemImage: "chart.pie.fill", percent: snapshot.totalPercentUsed)
+                    }
+                    if layout.grokBotPercent, let grok = snapshot.grokBotPercentUsed {
+                        poolRow("Grok Bot", systemImage: "message.fill", percent: grok)
                     }
                 }
             }

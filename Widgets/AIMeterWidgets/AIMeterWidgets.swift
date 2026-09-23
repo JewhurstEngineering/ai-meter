@@ -7,6 +7,7 @@ enum WidgetMetric: String, AppEnum {
     case otherModels
     case cursorModels
     case total
+    case grokBot
     case onDemand
     case spend
     case daysLeft
@@ -17,6 +18,7 @@ enum WidgetMetric: String, AppEnum {
         .cursorModels: "Cursor Models",
         .otherModels: "Other Models",
         .total: "Total",
+        .grokBot: "Grok Bot",
         .onDemand: "On-demand",
         .spend: "Plan spend",
         .daysLeft: "Days remaining",
@@ -112,7 +114,7 @@ struct RotateUsageWidgetIntent: WidgetConfigurationIntent, UsageMetricIntent {
 
 enum UsageTimeline {
     static let rotateInterval: TimeInterval = 15 * 60
-    static let rotateCycle: [WidgetMetric] = [.cursorModels, .otherModels, .total, .onDemand]
+    static let rotateCycle: [WidgetMetric] = [.cursorModels, .otherModels, .total, .grokBot, .onDemand]
 
     static func placeholder() -> Entry {
         Entry(date: .now, snapshot: nil, metric: .otherModels)
@@ -167,6 +169,7 @@ private enum WidgetPalette {
     static let cursor = Color(red: 0.22, green: 0.48, blue: 0.86)
     static let other = Color(red: 0.55, green: 0.35, blue: 0.82)
     static let total = Color(red: 0.20, green: 0.55, blue: 0.58)
+    static let grok = Color(red: 0.85, green: 0.45, blue: 0.15)
 }
 
 struct AIMeterWidgetEntryView: View {
@@ -214,6 +217,9 @@ struct AIMeterWidgetEntryView: View {
                 poolRow("Cursor Models", percent: snap.cursorModelsPercentUsed, color: WidgetPalette.cursor, highlight: entry.metric == .cursorModels)
                 poolRow("Other Models", percent: snap.otherModelsPercentUsed, color: WidgetPalette.other, highlight: entry.metric == .otherModels)
                 poolRow("Total", percent: snap.totalPercentUsed, color: WidgetPalette.total, highlight: entry.metric == .total)
+                if snap.grokBotPercentUsed != nil || entry.metric == .grokBot {
+                    poolRow("Grok Bot", percent: snap.grokBotPercentUsed, color: WidgetPalette.grok, highlight: entry.metric == .grokBot)
+                }
                 mediumFooter(snap)
             } else {
                 emptyLabel
@@ -230,6 +236,9 @@ struct AIMeterWidgetEntryView: View {
                 poolRow("Cursor Models", percent: snap.cursorModelsPercentUsed, color: WidgetPalette.cursor, highlight: entry.metric == .cursorModels)
                 poolRow("Other Models", percent: snap.otherModelsPercentUsed, color: WidgetPalette.other, highlight: entry.metric == .otherModels)
                 poolRow("Total", percent: snap.totalPercentUsed, color: WidgetPalette.total, highlight: entry.metric == .total)
+                if snap.grokBotPercentUsed != nil || entry.metric == .grokBot {
+                    poolRow("Grok Bot", percent: snap.grokBotPercentUsed, color: WidgetPalette.grok, highlight: entry.metric == .grokBot)
+                }
 
                 Divider().padding(.vertical, 2)
 
@@ -398,6 +407,8 @@ struct AIMeterWidgetEntryView: View {
             return percent(snap.cursorModelsPercentUsed)
         case .total:
             return percent(snap.totalPercentUsed)
+        case .grokBot:
+            return percent(snap.grokBotPercentUsed)
         case .onDemand, .rotate:
             return onDemandHero(snap)
         case .spend:
@@ -412,6 +423,7 @@ struct AIMeterWidgetEntryView: View {
         case .otherModels: return "Other Models"
         case .cursorModels: return "Cursor Models"
         case .total: return "Total included"
+        case .grokBot: return "Grok Bot"
         case .onDemand, .rotate:
             return onDemandCaption(entry.snapshot)
         case .spend:
@@ -544,7 +556,7 @@ struct RotateUsageWidget: Widget {
             AIMeterWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Rotate")
-        .description("Cycles Cursor, Other, Total, and On-demand every 15 minutes.")
+        .description("Cycles Cursor, Other, Total, Grok Bot, and On-demand every 15 minutes.")
         .supportedFamilies([.systemSmall])
     }
 }

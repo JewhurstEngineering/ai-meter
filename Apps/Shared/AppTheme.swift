@@ -38,7 +38,7 @@ struct ThemePalette: Equatable {
         case .cursorModels, .session: return cursorModels
         case .otherModels, .weekly: return otherModels
         case .totalIncluded: return total
-        case .extra: return spend
+        case .grokBot, .extra: return spend
         }
     }
 
@@ -49,6 +49,7 @@ struct ThemePalette: Equatable {
         case "Total included", "Total Included", "Total": return .totalIncluded
         case "5-hour", "Session": return .session
         case "7-day", "Weekly": return .weekly
+        case "Grok Bot": return .grokBot
         default: return .extra
         }
     }

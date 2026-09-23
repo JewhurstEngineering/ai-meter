@@ -85,6 +85,13 @@ struct GeneralSettingsView: View {
                             percent: warningBinding(\.weeklyPercent),
                             providers: [.claude, .codex]
                         )
+                        warningCard(
+                            title: "Grok Bot",
+                            systemImage: "message.fill",
+                            tint: theme.spend,
+                            percent: warningBinding(\.grokBotPercent),
+                            providers: [.cursor]
+                        )
                     }
 
                     Text(
@@ -162,6 +169,13 @@ struct GeneralSettingsView: View {
                                 tint: theme.otherModels,
                                 isOn: channelBinding(\.weekly),
                                 providers: [.claude, .codex]
+                            )
+                            channelToggle(
+                                "Grok Bot",
+                                detail: "\(Int(store.preferences.menuBarWarnings.grokBotPercent))%",
+                                tint: theme.spend,
+                                isOn: channelBinding(\.grokBot),
+                                providers: [.cursor]
                             )
                         }
 
@@ -411,7 +425,8 @@ struct GeneralSettingsView: View {
                     w.onDemandAndLimitsPercent,
                     w.totalIncludedPercent,
                     w.sessionPercent,
-                    w.weeklyPercent
+                    w.weeklyPercent,
+                    w.grokBotPercent
                 )
                 store.applyPreferences(prefs)
             }

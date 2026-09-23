@@ -51,7 +51,7 @@ enum ProgressBarPattern {
         case .cursorModels, .session: return .stripes
         case .otherModels, .weekly: return .dots
         case .totalIncluded: return .hatch
-        case .extra: return .dashes
+        case .grokBot, .extra: return .dashes
         }
     }
 

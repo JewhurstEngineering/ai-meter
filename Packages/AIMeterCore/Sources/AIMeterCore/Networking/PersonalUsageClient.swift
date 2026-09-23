@@ -77,8 +77,10 @@ public actor PersonalUsageClient {
             emptyOnNoContent: UsageSummaryResponse()
         )
         async let stripeTask: AuthStripeResponse = get("/api/auth/stripe", cookie: cookie)
+        async let sandTask: SandUsageStatus? = fetchSand(cookie: cookie)
         let summary = try await summaryTask
         let stripe = try? await stripeTask
+        let sand = await sandTask
 
         var aggregated: AggregatedUsageResponse?
         var previousCycles: [UsageSnapshot.BillingCycleSpend] = []
@@ -122,8 +124,23 @@ public actor PersonalUsageClient {
             stripe: stripe,
             aggregated: aggregated,
             cycleHistory: history,
-            dailySpend: dailySpend
+            dailySpend: dailySpend,
+            sand: sand
         )
+    }
+
+    /// Grok Bot's weekly allowance. Missing or changed responses stay off the meter
+    /// and do not fail the rest of the Cursor snapshot.
+    private func fetchSand(cookie: String) async -> SandUsageStatus? {
+        do {
+            return try await post(
+                "/api/dashboard/get-sand-usage-status",
+                cookie: cookie,
+                body: [:]
+            )
+        } catch {
+            return nil
+        }
     }
 
     private func fillDailySpend(

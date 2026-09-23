@@ -47,6 +47,61 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertNil(Mirror(reflecting: stripe).children.first { $0.label == "paymentId" })
     }
 
+    func testMapsGrokBotWeeklyAllowance() throws {
+        let sand = try JSONDecoder().decode(
+            SandUsageStatus.self,
+            from: Data(
+                """
+                {
+                  "usagePercent": 42.4,
+                  "hasNonZeroIncludedLimit": true,
+                  "includedLimitZero": false,
+                  "usesPooledEnterpriseAllowance": false,
+                  "nextResetTimestampUtc": "2026-09-28T00:00:00.000Z",
+                  "grokPlanLabel": "Grok Bot Plan"
+                }
+                """.utf8
+            )
+        )
+        let snap = UsageSnapshotMapper.map(
+            summary: UsageSummaryResponse(),
+            stripe: nil,
+            aggregated: nil,
+            sand: sand
+        )
+        let window = try XCTUnwrap(snap.windows.first { $0.role == .grokBot })
+        XCTAssertEqual(window.title, "Grok Bot")
+        XCTAssertEqual(window.percentUsed, 42.4, accuracy: 0.001)
+        XCTAssertEqual(window.kind, .rolling)
+        XCTAssertEqual(snap.grokBotPercentUsed ?? 0, 42.4, accuracy: 0.001)
+        XCTAssertEqual(window.resetsAt, try XCTUnwrap(isoDate("2026-09-28T00:00:00.000Z")))
+    }
+
+    func testGrokBotAllowanceRules() throws {
+        let cases = [
+            #"{"usagePercent":0,"hasNonZeroIncludedLimit":false,"includedLimitZero":true}"#,
+            #"{"usagePercent":12,"usesPooledEnterpriseAllowance":true,"hasNonZeroIncludedLimit":true}"#,
+            #"{"hasNonZeroIncludedLimit":true}"#,
+            #"{"usagePercent":"18","hasNonZeroIncludedLimit":true,"nextResetTimestamp":1780000000000}"#,
+        ]
+        for (index, json) in cases.enumerated() {
+            let sand = try JSONDecoder().decode(SandUsageStatus.self, from: Data(json.utf8))
+            let snap = UsageSnapshotMapper.map(
+                summary: UsageSummaryResponse(),
+                stripe: nil,
+                aggregated: nil,
+                sand: sand
+            )
+            if index == 3 {
+                let window = try XCTUnwrap(snap.windows.first { $0.role == .grokBot })
+                XCTAssertEqual(window.percentUsed, 18, accuracy: 0.001)
+                XCTAssertEqual(window.resetsAt, Date(timeIntervalSince1970: 1_780_000_000))
+            } else {
+                XCTAssertNil(snap.grokBotPercentUsed, json)
+            }
+        }
+    }
+
     func testEmptySummaryAfterPlanChangeUsesStripeMembership() throws {
         let stripe = try JSONDecoder().decode(
             AuthStripeResponse.self,

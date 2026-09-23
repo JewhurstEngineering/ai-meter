@@ -19,6 +19,9 @@ public enum UsageExport {
         if let p = snapshot.totalPercentUsed {
             lines.append(csvRow("summary", "total_included_percent", formatPercent(p)))
         }
+        if let p = snapshot.grokBotPercentUsed {
+            lines.append(csvRow("summary", "grok_bot_percent", formatPercent(p)))
+        }
         if let used = snapshot.planUsedCents {
             lines.append(csvRow("summary", "plan_used_cents", "\(used)"))
         }
@@ -105,6 +108,7 @@ public enum UsageExport {
         var cursorModelsPercent: Double?
         var otherModelsPercent: Double?
         var totalIncludedPercent: Double?
+        var grokBotPercent: Double?
         var planUsedCents: Int?
         var planLimitCents: Int?
         var onDemandEnabled: Bool
@@ -136,6 +140,7 @@ public enum UsageExport {
             cursorModelsPercent = snapshot.cursorModelsPercentUsed
             otherModelsPercent = snapshot.otherModelsPercentUsed
             totalIncludedPercent = snapshot.totalPercentUsed
+            grokBotPercent = snapshot.grokBotPercentUsed
             planUsedCents = snapshot.planUsedCents
             planLimitCents = snapshot.planLimitCents
             onDemandEnabled = snapshot.onDemandEnabled

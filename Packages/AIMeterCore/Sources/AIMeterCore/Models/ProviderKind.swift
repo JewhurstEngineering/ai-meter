@@ -36,6 +36,7 @@ public enum QuotaWindowRole: String, Codable, Sendable {
     case cursorModels
     case otherModels
     case totalIncluded
+    case grokBot
     case extra
 }
 
@@ -68,6 +69,7 @@ public struct QuotaWindow: Codable, Sendable, Equatable, Identifiable {
         case .cursorModels: return .cursorModels
         case .otherModels: return .otherModels
         case .totalIncluded: return .totalIncluded
+        case .grokBot: return .grokBot
         case .session: return .session
         case .weekly: return .weekly
         case .extra: return nil

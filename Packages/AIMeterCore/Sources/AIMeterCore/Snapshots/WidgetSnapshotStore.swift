@@ -7,6 +7,7 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
     public var cursorModelsPercentUsed: Double?
     public var otherModelsPercentUsed: Double?
     public var totalPercentUsed: Double?
+    public var grokBotPercentUsed: Double? = nil
     public var planUsedCents: Int?
     public var planLimitCents: Int?
     public var onDemandEnabled: Bool
@@ -44,6 +45,7 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
         cursorModelsPercentUsed = snapshot.cursorModelsPercentUsed
         otherModelsPercentUsed = snapshot.otherModelsPercentUsed
         totalPercentUsed = snapshot.totalPercentUsed
+        grokBotPercentUsed = snapshot.grokBotPercentUsed
         planUsedCents = snapshot.planUsedCents
         planLimitCents = snapshot.planLimitCents
         onDemandEnabled = snapshot.onDemandEnabled

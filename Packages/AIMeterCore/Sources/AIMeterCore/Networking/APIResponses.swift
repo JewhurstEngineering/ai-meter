@@ -132,3 +132,84 @@ struct HardLimitResponse: Decodable, Sendable {
     var hardLimit: Int?
     var perUserMonthlyLimitDollars: Int?
 }
+
+/// Cursor dashboard `POST /api/dashboard/get-sand-usage-status`.
+/// "Sand" is Grok Bot's weekly allowance, separate from the billing-cycle pools.
+struct SandUsageStatus: Decodable, Sendable {
+    var usagePercent: Double?
+    var hasNonZeroIncludedLimit: Bool?
+    var includedLimitZero: Bool?
+    var usesPooledEnterpriseAllowance: Bool?
+    var nextReset: Date?
+    var grokPlanLabel: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case usagePercent
+        case hasNonZeroIncludedLimit
+        case includedLimitZero
+        case usesPooledEnterpriseAllowance
+        case nextResetTimestampUtc
+        case nextResetTimestamp
+        case grokPlanLabel
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        usagePercent = Self.flexibleDouble(c, .usagePercent)
+        hasNonZeroIncludedLimit = Self.flexibleBool(c, .hasNonZeroIncludedLimit)
+        includedLimitZero = Self.flexibleBool(c, .includedLimitZero)
+        usesPooledEnterpriseAllowance = Self.flexibleBool(c, .usesPooledEnterpriseAllowance)
+        grokPlanLabel = try? c.decodeIfPresent(String.self, forKey: .grokPlanLabel)
+        nextReset = Self.flexibleDate(c, .nextResetTimestampUtc) ?? Self.flexibleDate(c, .nextResetTimestamp)
+    }
+
+    /// A personal meter only exists when the plan includes an allowance and reports a percent used.
+    var includedWindow: (percent: Double, resetsAt: Date?)? {
+        guard usesPooledEnterpriseAllowance != true,
+              includedLimitZero != true,
+              hasNonZeroIncludedLimit == true,
+              let usagePercent
+        else { return nil }
+        return (min(100, max(0, usagePercent)), nextReset)
+    }
+
+    private static func flexibleDouble(
+        _ c: KeyedDecodingContainer<CodingKeys>,
+        _ key: CodingKeys
+    ) -> Double? {
+        if let value = try? c.decodeIfPresent(Double.self, forKey: key) { return value }
+        if let value = try? c.decodeIfPresent(Int.self, forKey: key) { return Double(value) }
+        if let value = try? c.decodeIfPresent(String.self, forKey: key) { return Double(value) }
+        return nil
+    }
+
+    private static func flexibleBool(
+        _ c: KeyedDecodingContainer<CodingKeys>,
+        _ key: CodingKeys
+    ) -> Bool? {
+        if let value = try? c.decodeIfPresent(Bool.self, forKey: key) { return value }
+        return nil
+    }
+
+    private static func flexibleDate(
+        _ c: KeyedDecodingContainer<CodingKeys>,
+        _ key: CodingKeys
+    ) -> Date? {
+        if let text = try? c.decodeIfPresent(String.self, forKey: key) {
+            return UsageSnapshotMapper.parseDate(text)
+        }
+        let millis: Double?
+        if let value = try? c.decodeIfPresent(Double.self, forKey: key) {
+            millis = value
+        } else if let value = try? c.decodeIfPresent(Int.self, forKey: key) {
+            millis = Double(value)
+        } else {
+            millis = nil
+        }
+        guard let millis, millis > 0 else { return nil }
+        if millis > 1_000_000_000_000 {
+            return Date(timeIntervalSince1970: millis / 1000)
+        }
+        return Date(timeIntervalSince1970: millis)
+    }
+}

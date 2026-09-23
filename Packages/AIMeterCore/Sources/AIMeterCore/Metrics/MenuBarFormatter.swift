@@ -123,6 +123,7 @@ public enum MenuBarFormatter {
             (.cursorModels, toggles.cursorModelsPercent),
             (.session, toggles.sessionPercent),
             (.totalIncluded, toggles.totalPercent),
+            (.grokBot, toggles.grokBotPercent),
         ]
         for (role, enabled) in order where enabled {
             if let window = windows.first(where: { $0.role == role }) { return window }
@@ -158,6 +159,7 @@ public enum MenuBarFormatter {
             appendWindow(.totalIncluded, enabled: toggles.totalPercent, kind: .total)
             appendWindow(.session, enabled: toggles.sessionPercent, kind: .session)
             appendWindow(.weekly, enabled: toggles.weeklyPercent, kind: .weekly)
+            appendWindow(.grokBot, enabled: toggles.grokBotPercent, kind: .grokBot)
             for extra in windows where extra.role == .extra {
                 segments.append(segment(style: style, kind: .extra, text: labeled(style, kind: .extra, value: "\(extra.title) \(pct(extra.percentUsed))")))
             }
@@ -212,7 +214,7 @@ public enum MenuBarFormatter {
     }
 
     private enum Kind {
-        case cursorModels, otherModels, total, session, weekly, extra, spend, bonus, onDemand, credits, days, pace
+        case cursorModels, otherModels, total, session, weekly, grokBot, extra, spend, bonus, onDemand, credits, days, pace
     }
 
     private static func kind(for role: QuotaWindowRole) -> Kind {
@@ -222,6 +224,7 @@ public enum MenuBarFormatter {
         case .totalIncluded: return .total
         case .session: return .session
         case .weekly: return .weekly
+        case .grokBot: return .grokBot
         case .extra: return .extra
         }
     }
@@ -242,6 +245,7 @@ public enum MenuBarFormatter {
             case .total: return "Total \(value)"
             case .session: return "Session \(value)"
             case .weekly: return "Weekly \(value)"
+            case .grokBot: return "Grok \(value)"
             case .extra: return value
             case .onDemand: return "On-demand \(value)"
             case .credits: return "Credits \(value)"
@@ -259,6 +263,7 @@ public enum MenuBarFormatter {
         case (.icons, .total): icon = "chart.pie"
         case (.icons, .session): icon = "clock"
         case (.icons, .weekly): icon = "calendar"
+        case (.icons, .grokBot): icon = "message.fill"
         case (.icons, .extra): icon = "square.grid.2x2"
         case (.icons, .spend): icon = "dollarsign.circle"
         case (.icons, .bonus): icon = "gift"

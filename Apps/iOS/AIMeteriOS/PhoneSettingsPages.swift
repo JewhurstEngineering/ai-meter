@@ -38,6 +38,7 @@ struct PhoneGeneralSettings: View {
                     warningSlider("On-demand & limits", tint: theme.spend, percent: warningBinding(\.onDemandAndLimitsPercent))
                 }
                 warningSlider("Total included", tint: theme.total, percent: warningBinding(\.totalIncludedPercent))
+                warningSlider("Grok Bot", tint: theme.spend, percent: warningBinding(\.grokBotPercent))
             } header: {
                 Text("Alert levels")
             } footer: {
@@ -58,6 +59,7 @@ struct PhoneGeneralSettings: View {
                     Toggle("Other Models", isOn: channelBinding(\.otherModels))
                     Toggle("On-demand & limits", isOn: channelBinding(\.onDemandAndLimits))
                     Toggle("Total included", isOn: channelBinding(\.totalIncluded))
+                    Toggle("Grok Bot", isOn: channelBinding(\.grokBot))
                 }
             } header: {
                 Text("Notify for")
@@ -128,7 +130,8 @@ struct PhoneGeneralSettings: View {
                         w.cursorModelsPercent,
                         w.otherModelsPercent,
                         w.onDemandAndLimitsPercent,
-                        w.totalIncludedPercent
+                        w.totalIncludedPercent,
+                        w.grokBotPercent
                     )
                 }
             }
@@ -189,6 +192,7 @@ struct PhoneLayoutSettings: View {
                 Toggle("Cursor Models %", isOn: popoverBinding(\.cursorModelsPercent))
                 Toggle("Other Models %", isOn: popoverBinding(\.otherModelsPercent))
                 Toggle("Total included %", isOn: popoverBinding(\.totalPercent))
+                Toggle("Grok Bot %", isOn: popoverBinding(\.grokBotPercent))
                 Toggle("Subscription $", isOn: popoverBinding(\.planSpend))
                 Toggle("Bonus", isOn: popoverBinding(\.bonus))
                 Toggle("On-demand", isOn: popoverBinding(\.onDemand))
@@ -468,6 +472,9 @@ struct PhoneIncludedSettings: View {
                     }
                     if let p = snapshot.totalPercentUsed {
                         pool("Total included", "chart.pie.fill", p)
+                    }
+                    if let p = snapshot.grokBotPercentUsed {
+                        pool("Grok Bot", "message.fill", p)
                     }
                     if let bonus = snapshot.bonusCents, bonus > 0 {
                         LabeledContent("Bonus credit") {

@@ -263,6 +263,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var totalIncludedPercent: Double
         public var sessionPercent: Double
         public var weeklyPercent: Double
+        public var grokBotPercent: Double
         /// When on-demand is unlimited (no cap), warn at this spend amount (USD cents).
         public var onDemandUnlimitedAlertCents: Int
 
@@ -273,6 +274,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalIncludedPercent: 95,
             sessionPercent: 95,
             weeklyPercent: 95,
+            grokBotPercent: 95,
             onDemandUnlimitedAlertCents: 5_000
         )
 
@@ -287,6 +289,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalIncludedPercent: Double = 95,
             sessionPercent: Double = 95,
             weeklyPercent: Double = 95,
+            grokBotPercent: Double = 95,
             onDemandUnlimitedAlertCents: Int = 5_000
         ) {
             self.cursorModelsPercent = Self.clampPercent(cursorModelsPercent)
@@ -295,6 +298,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             self.totalIncludedPercent = Self.clampPercent(totalIncludedPercent)
             self.sessionPercent = Self.clampPercent(sessionPercent)
             self.weeklyPercent = Self.clampPercent(weeklyPercent)
+            self.grokBotPercent = Self.clampPercent(grokBotPercent)
             self.onDemandUnlimitedAlertCents = Self.clampCents(onDemandUnlimitedAlertCents)
         }
 
@@ -317,6 +321,9 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             )
             weeklyPercent = Self.clampPercent(
                 try c.decodeIfPresent(Double.self, forKey: .weeklyPercent) ?? 95
+            )
+            grokBotPercent = Self.clampPercent(
+                try c.decodeIfPresent(Double.self, forKey: .grokBotPercent) ?? 95
             )
             onDemandUnlimitedAlertCents = Self.clampCents(
                 try c.decodeIfPresent(Int.self, forKey: .onDemandUnlimitedAlertCents) ?? 5_000
@@ -353,6 +360,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var totalIncluded: Bool
         public var session: Bool
         public var weekly: Bool
+        public var grokBot: Bool
 
         public static let `default` = NotificationChannels(
             cursorModels: true,
@@ -360,7 +368,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             onDemandAndLimits: true,
             totalIncluded: false,
             session: true,
-            weekly: true
+            weekly: true,
+            grokBot: true
         )
 
         public init(
@@ -369,7 +378,8 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             onDemandAndLimits: Bool,
             totalIncluded: Bool,
             session: Bool = true,
-            weekly: Bool = true
+            weekly: Bool = true,
+            grokBot: Bool = true
         ) {
             self.cursorModels = cursorModels
             self.otherModels = otherModels
@@ -377,6 +387,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             self.totalIncluded = totalIncluded
             self.session = session
             self.weekly = weekly
+            self.grokBot = grokBot
         }
 
         public init(from decoder: Decoder) throws {
@@ -387,6 +398,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalIncluded = try c.decodeIfPresent(Bool.self, forKey: .totalIncluded) ?? false
             session = try c.decodeIfPresent(Bool.self, forKey: .session) ?? true
             weekly = try c.decodeIfPresent(Bool.self, forKey: .weekly) ?? true
+            grokBot = try c.decodeIfPresent(Bool.self, forKey: .grokBot) ?? true
         }
     }
 
@@ -435,6 +447,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
         public var totalPercent: Bool
         public var sessionPercent: Bool
         public var weeklyPercent: Bool
+        public var grokBotPercent: Bool
         public var planSpend: Bool
         public var bonus: Bool
         public var onDemand: Bool
@@ -457,6 +470,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalPercent: false,
             sessionPercent: true,
             weeklyPercent: true,
+            grokBotPercent: true,
             planSpend: false,
             bonus: false,
             onDemand: false,
@@ -475,6 +489,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalPercent: true,
             sessionPercent: true,
             weeklyPercent: true,
+            grokBotPercent: true,
             planSpend: true,
             bonus: true,
             onDemand: true,
@@ -493,6 +508,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalPercent: Bool,
             sessionPercent: Bool = true,
             weeklyPercent: Bool = true,
+            grokBotPercent: Bool = true,
             planSpend: Bool,
             bonus: Bool,
             onDemand: Bool,
@@ -509,6 +525,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             self.totalPercent = totalPercent
             self.sessionPercent = sessionPercent
             self.weeklyPercent = weeklyPercent
+            self.grokBotPercent = grokBotPercent
             self.planSpend = planSpend
             self.bonus = bonus
             self.onDemand = onDemand
@@ -528,6 +545,7 @@ public struct DisplayPreferences: Codable, Sendable, Equatable {
             totalPercent = try c.decodeIfPresent(Bool.self, forKey: .totalPercent) ?? false
             sessionPercent = try c.decodeIfPresent(Bool.self, forKey: .sessionPercent) ?? true
             weeklyPercent = try c.decodeIfPresent(Bool.self, forKey: .weeklyPercent) ?? true
+            grokBotPercent = try c.decodeIfPresent(Bool.self, forKey: .grokBotPercent) ?? true
             planSpend = try c.decodeIfPresent(Bool.self, forKey: .planSpend) ?? false
             bonus = try c.decodeIfPresent(Bool.self, forKey: .bonus) ?? false
             onDemand = try c.decodeIfPresent(Bool.self, forKey: .onDemand) ?? false
