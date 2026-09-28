@@ -16,7 +16,7 @@ struct AppLogo: View {
     }
 }
 
-/// Name-only “AI Meter” wordmark (black in light, white in dark).
+/// “AI Usage Meter” wordmark (black in light, white in dark).
 struct AppNameLogo: View {
     var height: CGFloat = 18
 

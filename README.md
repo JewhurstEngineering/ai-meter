@@ -3,7 +3,7 @@
 Built by Jewhurst Engineering.
 
 <p align="center">
-  <img src="images/aimeter-logo.png" width="360" alt="AI Meter">
+  <img src="images/aimeter-logo.png" width="360" alt="AI Usage Meter">
 </p>
 
 A local-first usage meter for **Cursor**, **Claude Code**, and **Codex**. Glance at included pools, rolling windows, spend, and on-demand without opening each dashboard.
