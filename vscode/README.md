@@ -1,10 +1,10 @@
-# JamesWare AI Meter
+# AI Meter
 
 A Cursor / VS Code extension that shows AI usage in the status bar.
 
 > See your Cursor AI usage, spend, and reset date without leaving your editor.
 
-This is the editor client of JamesWare AI Meter. The macOS, iPhone, and Watch apps live at the root of this repo. The extension is its own TypeScript project under `vscode/` and does not import the Swift package. Install the VSIX on its own. It is not inside the Mac download.
+This is the editor client of AI Meter, built by Jewhurst Engineering. The macOS, iPhone, and Watch apps live at the root of this repo. The extension is its own TypeScript project under `vscode/` and does not import the Swift package. Install the VSIX on its own. It is not inside the Mac download.
 
 ## What it shows
 
@@ -14,7 +14,7 @@ This is the editor client of JamesWare AI Meter. The macOS, iPhone, and Watch ap
 - Billing-cycle reset date
 - Configurable warning / critical thresholds
 
-Usage snapshots stay on this machine. No JamesWare account is required.
+Usage snapshots stay on this machine. No account is required.
 
 ## Install (local)
 
@@ -52,7 +52,7 @@ If that fails, **AI Meter: Paste Token** is the escape hatch. Tokens stay in Sec
 
 Local-first. The extension reads billing/usage metadata only. It does not inspect source code, prompts, or chats.
 
-JamesWare AI Meter is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anysphere or Cursor.
+AI Meter is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anysphere or Cursor.
 
 ## License
 

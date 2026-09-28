@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Meter — Cursor, Claude, and Codex in the menu bar</title>
   <meta name="description" content="A local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.">
+  <meta name="author" content="Jewhurst Engineering">
   <link rel="canonical" href="https://aiusagemeter.app/">
   <meta name="theme-color" content="#060a08">
   <meta property="og:type" content="website">
@@ -29,6 +30,11 @@
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "AI Meter",
+    "author": {
+      "@type": "Organization",
+      "name": "Jewhurst Engineering",
+      "url": "https://github.com/JewhurstEngineering"
+    },
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "macOS 14 or later",
     "softwareVersion": "1.0.8",
@@ -171,7 +177,6 @@
             <label class="choice"><input type="radio" name="settings" value="paid"> Paid usage</label>
             <label class="choice"><input type="radio" name="settings" value="authentication"> Authentication</label>
             <label class="choice"><input type="radio" name="settings" value="accessibility"> Accessibility</label>
-            <label class="choice"><input type="radio" name="settings" value="about"> About</label>
           </div>
           <div class="stage">
             <figure data-page="general">
@@ -201,10 +206,6 @@
             <figure data-page="accessibility">
               <img src="assets/aimeter-settings-accessibility.png" width="1936" height="1366" alt="Accessibility settings for interface size, text size, and color-vision palettes including deuteranopia, protanopia, tritanopia, and monochrome." loading="lazy">
               <figcaption>Larger type without zooming the whole window, and palettes that stay distinct if color is not enough.</figcaption>
-            </figure>
-            <figure data-page="about">
-              <img src="assets/aimeter-settings-about.png" width="1936" height="1366" alt="About settings with Install to Applications, desktop widget presets, and a note that session tokens stay in Keychain." loading="lazy">
-              <figcaption>Install to Applications lives here, along with the desktop widget presets.</figcaption>
             </figure>
           </div>
         </fieldset>
@@ -281,7 +282,8 @@
     </section>
 
     <section class="wrap download" id="download" aria-labelledby="download-title">
-      <img class="lockup" src="assets/lockup.png" width="1200" height="400" alt="JamesWare AI Meter">
+      <img class="lockup" src="assets/lockup.png" width="1400" height="441" alt="AI Meter">
+      <p class="fine">Built by Jewhurst Engineering.</p>
       <h2 id="download-title">Put it in the menu bar.</h2>
       <ol class="steps steps-inline">
         <li>Unzip and open AI Meter.</li>
@@ -299,13 +301,13 @@
 
   <footer class="site-footer">
     <div class="wrap footer-bar">
-      <p>AI Meter is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.</p>
+      <p>Built by Jewhurst Engineering. AI Meter is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.</p>
       <p class="footer-links">
         <a href="https://github.com/JewhurstEngineering/ai-meter">GitHub</a>
         <a href="https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE">MIT license</a>
-        <a href="https://jamesware.dev">JamesWare.dev</a>
+        <a href="https://github.com/JewhurstEngineering">Jewhurst Engineering</a>
       </p>
-      <p class="fine">Copyright © 2026 JamesWare.dev</p>
+      <p class="fine">Copyright © 2026 Jewhurst Engineering</p>
     </div>
   </footer>
 </body>

@@ -37,8 +37,8 @@ struct SettingsRootView: View {
         )
         .background(SettingsResizeUnlock())
         .overlay(alignment: .bottom) {
-            AppFullLogo(height: 96)
-                .frame(maxWidth: 300)
+            AppNameLogo(height: 36)
+                .frame(maxWidth: 220)
                 .padding(.bottom, 24)
                 .opacity(0.10)
                 .allowsHitTesting(false)

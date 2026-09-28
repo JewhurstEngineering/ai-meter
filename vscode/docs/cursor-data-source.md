@@ -1,6 +1,6 @@
 # Cursor data source
 
-Verified against JamesWare AI Meter (`AIMeterCore` `PersonalUsageClient`) on 19 August 2026. These are **undocumented personal dashboard endpoints**. They work for individual Cursor sessions today; they can change without notice.
+Verified against AI Meter (`AIMeterCore` `PersonalUsageClient`) on 19 August 2026. These are **undocumented personal dashboard endpoints**. They work for individual Cursor sessions today; they can change without notice.
 
 Do not invent additional URLs. Re-check this file before changing `CursorApiClient`.
 

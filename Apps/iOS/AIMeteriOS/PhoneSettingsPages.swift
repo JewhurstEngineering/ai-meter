@@ -670,11 +670,14 @@ struct PhoneAboutSettings: View {
     var body: some View {
         List {
             Section {
-                AppFullLogo(height: 92, color: true)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 4, trailing: 20))
+                HStack(spacing: 12) {
+                    AppLogo(size: 64)
+                    AppNameLogo(height: 28)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 8, leading: 20, bottom: 4, trailing: 20))
             }
             Section {
                 LabeledContent("Version", value: version)

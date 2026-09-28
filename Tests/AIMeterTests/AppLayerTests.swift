@@ -24,9 +24,12 @@ final class SparklePlistTests: XCTestCase {
 final class AppAboutTests: XCTestCase {
     func testProductCopy() {
         XCTAssertEqual(AppAbout.productName, "AI Meter")
-        XCTAssertEqual(AppAbout.productLegalName, "JamesWare AI Meter")
+        XCTAssertEqual(AppAbout.productLegalName, "AI Meter")
+        XCTAssertEqual(AppAbout.organization, "Jewhurst Engineering")
+        XCTAssertEqual(AppAbout.makerAttribution, "Built by Jewhurst Engineering")
         XCTAssertEqual(AppAbout.licenseName, "MIT")
         XCTAssertTrue(AppAbout.copyrightLine.contains(AppAbout.copyrightHolder))
+        XCTAssertFalse(AppAbout.affiliationDisclaimer.localizedCaseInsensitiveContains("jamesware"))
     }
 
     func testPublicURLs() {

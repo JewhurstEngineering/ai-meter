@@ -1,7 +1,9 @@
-# JamesWare AI Meter
+# AI Meter
+
+Built by Jewhurst Engineering.
 
 <p align="center">
-  <img src="images/jamesware-aimeter-logo-full.png" width="360" alt="JamesWare AI Meter">
+  <img src="images/aimeter-logo.png" width="360" alt="AI Meter">
 </p>
 
 A local-first usage meter for **Cursor**, **Claude Code**, and **Codex**. Glance at included pools, rolling windows, spend, and on-demand without opening each dashboard.
@@ -56,10 +58,6 @@ The Cursor / VS Code extension is a separate install. Source is in [`vscode/`](v
 <p align="center">
   <img src="images/aimeter-settings-authentication.png" alt="Authentication settings" width="380">
   <img src="images/aimeter-settings-accessibility.png" alt="Accessibility settings" width="380">
-</p>
-
-<p align="center">
-  <img src="images/aimeter-settings-about.png" alt="About settings" width="760">
 </p>
 
 ## What it does
@@ -122,7 +120,7 @@ That needs a Developer ID Application certificate, a local `notarytool` profile 
 
 ## Project status
 
-JamesWare AI Meter is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.
+AI Meter is an independent open-source project and is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.
 
 ## License
 

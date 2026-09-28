@@ -136,7 +136,7 @@ export function copySummary(snapshot: UsageSnapshot, now = new Date()): string {
     `On-Demand: ${formatUsdFromCents(snapshot.onDemandUsedCents)}`,
     `Reset: ${reset}`,
     "",
-    "via JamesWare AI Meter",
+    "via AI Meter",
   ];
   return lines.join("\n");
 }

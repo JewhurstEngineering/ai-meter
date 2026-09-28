@@ -869,7 +869,7 @@ struct AboutSettingsView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                Text(AppAbout.organization)
+                Text(AppAbout.makerAttribution)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text(AppAbout.copyrightLine)

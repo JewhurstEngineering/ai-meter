@@ -1,6 +1,8 @@
 {
   "name": "ai-meter",
-  "displayName": "JamesWare AI Meter",
+  "displayName": "AI Meter",
+  "author": "Jewhurst Engineering",
+  "homepage": "https://aiusagemeter.app",
   "description": "See your Cursor AI usage, spend, and reset date without leaving your editor.",
   "version": "0.1.6",
   "publisher": "jamesware",
@@ -113,7 +115,7 @@
       ]
     },
     "configuration": {
-      "title": "JamesWare AI Meter",
+      "title": "AI Meter",
       "properties": {
         "aiMeter.refreshIntervalMinutes": {
           "type": "number",

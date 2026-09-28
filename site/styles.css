@@ -484,8 +484,7 @@ tbody th {
 .switcher:has(input[value="included"]:checked) figure[data-page="included"],
 .switcher:has(input[value="paid"]:checked) figure[data-page="paid"],
 .switcher:has(input[value="authentication"]:checked) figure[data-page="authentication"],
-.switcher:has(input[value="accessibility"]:checked) figure[data-page="accessibility"],
-.switcher:has(input[value="about"]:checked) figure[data-page="about"] {
+.switcher:has(input[value="accessibility"]:checked) figure[data-page="accessibility"] {
   display: grid;
   gap: 14px;
 }

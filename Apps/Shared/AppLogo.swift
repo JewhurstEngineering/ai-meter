@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Color square mark, menu-bar template silhouette, or full wordmark.
+/// Color square mark, or the menu-bar template silhouette.
 struct AppLogo: View {
     var size: CGFloat = 34
     var template: Bool = false
@@ -13,21 +13,6 @@ struct AppLogo: View {
             .accessibilityHidden(true)
         return image
             .frame(width: size, height: size)
-    }
-}
-
-/// Wide JamesWare AI Meter wordmark. Color, or black/white by appearance.
-struct AppFullLogo: View {
-    var height: CGFloat = 24
-    var color: Bool = false
-
-    var body: some View {
-        Image(color ? "AppLogoFullBrand" : "AppLogoFull")
-            .resizable()
-            .interpolation(.high)
-            .scaledToFit()
-            .accessibilityHidden(true)
-            .frame(height: height)
     }
 }
 
