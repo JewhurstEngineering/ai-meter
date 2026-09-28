@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Meter — Cursor, Claude, and Codex in the menu bar</title>
+  <meta name="description" content="A local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.">
+  <link rel="canonical" href="https://aiusagemeter.app/">
+  <meta name="theme-color" content="#060a08">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://aiusagemeter.app/">
+  <meta property="og:title" content="AI Meter — Cursor, Claude, and Codex in the menu bar">
+  <meta property="og:description" content="Included pools, rolling windows, and on-demand spend. On this Mac. Nothing else leaves the device.">
+  <meta property="og:image" content="https://aiusagemeter.app/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI Meter — Cursor, Claude, and Codex in the menu bar">
+  <meta name="twitter:description" content="Included pools, rolling windows, and on-demand spend. On this Mac.">
+  <meta name="twitter:image" content="https://aiusagemeter.app/assets/og.png">
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AI Meter",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "macOS 14 or later",
+    "softwareVersion": "1.0.8",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "url": "https://aiusagemeter.app/",
+    "downloadUrl": "https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.8.zip",
+    "license": "https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE",
+    "description": "Local menu bar meter for Cursor, Claude, and Codex usage."
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-bar">
+      <a class="brand" href="#top">
+        <img src="assets/mark.png" width="720" height="720" alt="">
+        <span>AI Meter</span>
+      </a>
+      <nav class="site-nav" aria-label="Page">
+        <a href="#readings">Readings</a>
+        <a href="#settings">Settings</a>
+        <a href="#editor">Editor</a>
+        <a href="#download">Install</a>
+      </nav>
+      <a class="btn btn-primary" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.8.zip"><span class="wide-label">Download for Mac</span><span class="short-label">Download</span></a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title">What’s left, in the menu bar.</h1>
+        <p class="lede">Included pools, rolling windows, and on-demand spend. Read from the Cursor, Claude, and Codex sessions already on this Mac.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.8.zip">Download for Mac</a>
+          <a class="btn btn-quiet" href="https://github.com/JewhurstEngineering/ai-meter">View source</a>
+        </div>
+        <p class="fine">Version 1.0.8. Signed and notarized. macOS 14 or later.</p>
+      </div>
+      <div class="hero-stage">
+        <img class="gauge" src="assets/mark.png" width="720" height="720" alt="">
+        <figure>
+          <img src="assets/aimeter-popover-all.png" width="738" height="1342" alt="Menu bar reading Cursor 11%, Claude 100% with a red warning dot, and ChatGPT Plus 12%, with the popover open on all three accounts." fetchpriority="high">
+          <figcaption>All three accounts in one popover. The red dot means a channel crossed the warning you set.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <hr class="arc">
+
+    <section class="wrap band" id="readings" aria-labelledby="readings-title">
+      <div class="band-intro">
+        <h2 id="readings-title">Each plan counts “left” differently.</h2>
+        <p>Cursor tracks included pools for the billing period. Claude and Codex track rolling windows, and tell you when they reset.</p>
+      </div>
+      <div class="readings">
+        <figure>
+          <figcaption>
+            <p class="who">Cursor</p>
+            <p class="pct">11%</p>
+            <p>Cursor models, other models, and the total included pool. Under that, the period end, the pace, and what last cycle cost.</p>
+          </figcaption>
+          <img src="assets/aimeter-popover-cursor.png" width="738" height="1036" alt="Cursor popover. Cursor Models 11%, Other Models 70%, total included 23%, with spend pace for the billing period." loading="lazy">
+        </figure>
+        <figure>
+          <figcaption>
+            <p class="who">Claude</p>
+            <p class="pct pct-hot">100% <span class="hot-note">Session full</span></p>
+            <p>A 5-hour session and a 7-day window. When the session fills, the popover says so, and how long until it resets.</p>
+          </figcaption>
+          <img src="assets/aimeter-popover-claude.png" width="738" height="888" alt="Claude popover. The 5-hour window is at 100% with 26 minutes until reset, and the 7-day window is at 12%." loading="lazy">
+        </figure>
+        <figure>
+          <figcaption>
+            <p class="who">Codex</p>
+            <p class="pct">12%</p>
+            <p>The same kind of window, read from the Codex login already on this Mac. ChatGPT message caps are not part of this.</p>
+          </figcaption>
+          <img src="assets/aimeter-popover-chatgpt.png" width="738" height="610" alt="ChatGPT Plus popover showing the Codex 5-hour window at 12%, resetting in 6 days." loading="lazy">
+        </figure>
+      </div>
+    </section>
+
+    <section class="wrap band" aria-labelledby="matrix-title">
+      <h2 id="matrix-title">What each account can show</h2>
+      <div class="table-scroll">
+        <table aria-labelledby="matrix-title">
+          <thead>
+            <tr>
+              <th scope="col">Reading</th>
+              <th scope="col">Cursor</th>
+              <th scope="col">Claude and Codex</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Included pools</th>
+              <td data-label="Cursor">Cursor models, other models, and the total for this billing period</td>
+              <td data-label="Claude and Codex">Not shown</td>
+            </tr>
+            <tr>
+              <th scope="row">Rolling windows</th>
+              <td data-label="Cursor">Not shown</td>
+              <td data-label="Claude and Codex">5-hour session and 7-day week, with the reset</td>
+            </tr>
+            <tr>
+              <th scope="row">Spend</th>
+              <td data-label="Cursor">Plan spend against what is included, plus on-demand</td>
+              <td data-label="Claude and Codex">Extra usage or credits, when the account has them</td>
+            </tr>
+            <tr>
+              <th scope="row">Models</th>
+              <td data-label="Cursor">Per-model spend and tokens this period</td>
+              <td data-label="Claude and Codex">Not shown</td>
+            </tr>
+            <tr>
+              <th scope="row">Where it ran</th>
+              <td data-label="Cursor">This Mac, the CLI, and Cloud</td>
+              <td data-label="Claude and Codex">Not shown</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bay" id="settings" aria-labelledby="settings-title">
+      <div class="wrap band bay-inner">
+        <div class="band-intro">
+          <h2 id="settings-title">The menu bar only shows what you turn on.</h2>
+          <p>Warnings, density, themes, and which accounts are saved. The popover can carry more than the menu bar does.</p>
+        </div>
+        <fieldset class="switcher">
+          <legend class="sr-only">Choose a settings page</legend>
+          <div class="choices">
+            <label class="choice"><input type="radio" name="settings" value="general" checked> General</label>
+            <label class="choice"><input type="radio" name="settings" value="layout"> Layout</label>
+            <label class="choice"><input type="radio" name="settings" value="theme"> Theme</label>
+            <label class="choice"><input type="radio" name="settings" value="included"> Included usage</label>
+            <label class="choice"><input type="radio" name="settings" value="paid"> Paid usage</label>
+            <label class="choice"><input type="radio" name="settings" value="authentication"> Authentication</label>
+            <label class="choice"><input type="radio" name="settings" value="accessibility"> Accessibility</label>
+            <label class="choice"><input type="radio" name="settings" value="about"> About</label>
+          </div>
+          <div class="stage">
+            <figure data-page="general">
+              <img src="assets/aimeter-settings-general.png" width="1936" height="1366" alt="General settings. Launch at login, refresh every 5 minutes, and warning sliders at 95% for Cursor models, other models, on-demand, session, and weekly.">
+              <figcaption>Set the level that turns the menu bar dot red. Notifications use that same level, once per channel per cycle.</figcaption>
+            </figure>
+            <figure data-page="layout">
+              <img src="assets/aimeter-settings-layout.png" width="1936" height="1366" alt="Layout settings for the menu bar, shared display, and popover. Accounts are set to Combined, density to Detailed, labels to Icons." loading="lazy">
+              <figcaption>Active, combined, or separate. Combined stacks one line per account, such as Cursor 12% · Claude 44% · Codex 8%.</figcaption>
+            </figure>
+            <figure data-page="theme">
+              <img src="assets/aimeter-settings-theme.png" width="1936" height="1366" alt="Theme settings with System, Light, and Dark, and accent palettes including Original, Cursor, Forest, and Dracula." loading="lazy">
+              <figcaption>System, light, or dark for Settings and the popover. The menu bar stays native macOS. Accents recolor the pools.</figcaption>
+            </figure>
+            <figure data-page="included">
+              <img src="assets/aimeter-settings-includedusage.png" width="1936" height="1366" alt="Included usage for a Cursor Ultra plan, with pool percentages, spend by cycle, models this period, and agents." loading="lazy">
+              <figcaption>The billing window, spend by cycle, models, and agents. Export sits on this page. Invoices stay on Cursor’s dashboard.</figcaption>
+            </figure>
+            <figure data-page="paid">
+              <img src="assets/aimeter-settings-paidusage.png" width="1936" height="1366" alt="Paid usage for Cursor Ultra. On-demand is off, billable usage is $0, and the included plan shows $400." loading="lazy">
+              <figcaption>On-demand against the cap the account reports, and a link through to billing.</figcaption>
+            </figure>
+            <figure data-page="authentication">
+              <img src="assets/aimeter-settings-authentication.png" width="1936" height="1366" alt="Authentication settings with Cursor, Claude, and Codex accounts saved. Tokens stay in Keychain." loading="lazy">
+              <figcaption>Sign in with Cursor, connect from the IDE, or add Claude Code and Codex from this Mac. Tokens stay in Keychain.</figcaption>
+            </figure>
+            <figure data-page="accessibility">
+              <img src="assets/aimeter-settings-accessibility.png" width="1936" height="1366" alt="Accessibility settings for interface size, text size, and color-vision palettes including deuteranopia, protanopia, tritanopia, and monochrome." loading="lazy">
+              <figcaption>Larger type without zooming the whole window, and palettes that stay distinct if color is not enough.</figcaption>
+            </figure>
+            <figure data-page="about">
+              <img src="assets/aimeter-settings-about.png" width="1936" height="1366" alt="About settings with Install to Applications, desktop widget presets, and a note that session tokens stay in Keychain." loading="lazy">
+              <figcaption>Install to Applications lives here, along with the desktop widget presets.</figcaption>
+            </figure>
+          </div>
+        </fieldset>
+      </div>
+    </section>
+
+    <section class="wrap band split" id="local" aria-labelledby="local-title">
+      <div>
+        <h2 id="local-title">It uses the login already on this Mac.</h2>
+        <p>Tokens stay in the Keychain. The phone and the watch get a sanitized snapshot, not credentials. AI Meter does not scrape dashboards, and it does not put tokens in iCloud.</p>
+      </div>
+      <ol class="steps">
+        <li>Sign in with Cursor in the app, or connect from the Cursor IDE.</li>
+        <li>Add Claude Code from the keychain or <span class="path">~/.claude/.credentials.json</span>.</li>
+        <li>Add Codex from <span class="path">~/.codex/auth.json</span>.</li>
+        <li>Or paste a Cursor token if the window and the IDE both miss.</li>
+      </ol>
+    </section>
+
+    <section class="wrap band" aria-labelledby="devices-title">
+      <h2 id="devices-title">Mac, iPhone, and Watch</h2>
+      <dl class="devices">
+        <div>
+          <dt>Mac</dt>
+          <dd>Menu bar extra and desktop widgets. No Dock icon. This is the signed, notarized build, and it updates itself from GitHub Releases.</dd>
+        </div>
+        <div>
+          <dt>iPhone</dt>
+          <dd>The app and Home Screen widgets. TestFlight for now. This version carries a Cursor snapshot.</dd>
+        </div>
+        <div>
+          <dt>Apple Watch</dt>
+          <dd>A glance and complications. Sanitized numbers only. No tokens on the watch.</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="wrap band" id="editor" aria-labelledby="editor-title">
+      <div class="editor-head">
+        <img class="editor-mark" src="assets/extension-icon.png" width="256" height="256" alt="">
+        <div class="band-intro">
+          <h2 id="editor-title">In Cursor and VS Code, too.</h2>
+          <p>A separate extension. The status bar shows Cursor usage without opening the menu bar app. Claude and Codex stay on the Mac app.</p>
+        </div>
+      </div>
+      <div class="split editor-body">
+        <dl class="editor-facts">
+          <div>
+            <dt>Status bar</dt>
+            <dd>A glance such as AI 68%, with Cursor Models, Other Models, and Grok Bot when the plan includes that weekly allowance.</dd>
+          </div>
+          <div>
+            <dt>Spend and reset</dt>
+            <dd>On-demand spend when Cursor reports it, and the date the billing cycle resets.</dd>
+          </div>
+          <div>
+            <dt>On this machine</dt>
+            <dd>It reads the Cursor login already stored here. It does not read your code, prompts, or chats.</dd>
+          </div>
+        </dl>
+        <div>
+          <ol class="steps">
+            <li>Download the extension.</li>
+            <li>In Cursor or VS Code, open Extensions, then Install from VSIX.</li>
+            <li>Run AI Meter: Use This Cursor Login. Paste Token is there if that misses.</li>
+          </ol>
+          <div class="actions">
+            <a class="btn btn-primary" href="downloads/ai-meter-0.1.6.vsix">Download the extension</a>
+            <a class="btn btn-quiet" href="https://github.com/JewhurstEngineering/ai-meter/tree/master/vscode">Extension source</a>
+          </div>
+          <p class="fine">Version 0.1.6. Works in Cursor and VS Code 1.85 or later.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap download" id="download" aria-labelledby="download-title">
+      <img class="lockup" src="assets/lockup.png" width="1200" height="400" alt="JamesWare AI Meter">
+      <h2 id="download-title">Put it in the menu bar.</h2>
+      <ol class="steps steps-inline">
+        <li>Unzip and open AI Meter.</li>
+        <li>Look in the menu bar, not the Dock.</li>
+        <li>Settings, then About, can move it into Applications if you launched it from Downloads.</li>
+        <li>Sign in with Cursor, Claude Code, or Codex.</li>
+      </ol>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.8.zip">Download AI Meter 1.0.8</a>
+        <a class="btn btn-quiet" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest">All releases</a>
+      </div>
+      <p class="fine">Updates are signed and checked with Sparkle before they install. iPhone and Watch builds stay on TestFlight.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-bar">
+      <p>AI Meter is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.</p>
+      <p class="footer-links">
+        <a href="https://github.com/JewhurstEngineering/ai-meter">GitHub</a>
+        <a href="https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE">MIT license</a>
+        <a href="https://jamesware.dev">JamesWare.dev</a>
+      </p>
+      <p class="fine">Copyright © 2026 JamesWare.dev</p>
+    </div>
+  </footer>
+</body>
+</html>

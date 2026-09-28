@@ -16,6 +16,10 @@ dist/
 artifacts/
 .cursor/
 docs/
+!vscode/docs/
+!vscode/docs/**
+vscode/node_modules/
+vscode/out/
 MARKETING.md
 cursor-usage-tracker-marketing.md
 *.p12

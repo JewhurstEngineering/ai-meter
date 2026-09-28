@@ -1,0 +1,29 @@
+{
+  "billingCycleStart": "2026-08-01T00:00:00.000Z",
+  "billingCycleEnd": "2026-09-01T00:00:00.000Z",
+  "membershipType": "pro",
+  "autoModelSelectedDisplayMessage": "You've used 68% of your included Cursor Models usage",
+  "namedModelSelectedDisplayMessage": "You've used 42% of your included API usage",
+  "individualUsage": {
+    "plan": {
+      "enabled": true,
+      "used": 6800,
+      "limit": 10000,
+      "remaining": 3200,
+      "breakdown": {
+        "included": 10000,
+        "bonus": 0,
+        "total": 10000
+      },
+      "autoPercentUsed": 68,
+      "apiPercentUsed": 42,
+      "totalPercentUsed": 55
+    },
+    "onDemand": {
+      "enabled": true,
+      "used": 842,
+      "limit": null,
+      "remaining": null
+    }
+  }
+}

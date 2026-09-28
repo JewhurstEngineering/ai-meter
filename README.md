@@ -25,6 +25,8 @@ AI Meter checks GitHub Releases for signed updates using [Sparkle](https://spark
 
 iPhone and Watch builds stay on TestFlight.
 
+The Cursor / VS Code extension is a separate install. Source is in [`vscode/`](vscode/). Download `ai-meter-0.1.6.vsix` from [aiusagemeter.app](https://aiusagemeter.app/#editor), then in the editor choose **Extensions → Install from VSIX**. It shows Cursor usage in the status bar and does not include Claude or Codex.
+
 ## What it looks like
 
 <p align="center">

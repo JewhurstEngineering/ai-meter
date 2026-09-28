@@ -1,0 +1,34 @@
+{
+  "aggregations": [
+    {
+      "modelIntent": "claude-fable-5-thinking-high",
+      "inputTokens": "2421899",
+      "outputTokens": "1940439",
+      "cacheWriteTokens": "14604241",
+      "cacheReadTokens": "282552476",
+      "totalCents": 50077.9337,
+      "tier": 1
+    },
+    {
+      "modelIntent": "cursor-grok-4.5-high",
+      "inputTokens": "10918235",
+      "outputTokens": "940605",
+      "cacheReadTokens": "96654464",
+      "totalCents": 7558.53622,
+      "tier": 2
+    },
+    {
+      "modelIntent": "cursor-grok-4.5-high-fast",
+      "inputTokens": "207391",
+      "outputTokens": "4738",
+      "cacheReadTokens": "253184",
+      "totalCents": 116.8032,
+      "tier": 2
+    }
+  ],
+  "totalInputTokens": "13547525",
+  "totalOutputTokens": "2885782",
+  "totalCacheWriteTokens": "14604241",
+  "totalCacheReadTokens": "379460124",
+  "totalCostCents": 57753.273120000005
+}

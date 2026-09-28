@@ -1,0 +1,189 @@
+{
+  "name": "ai-meter",
+  "displayName": "JamesWare AI Meter",
+  "description": "See your Cursor AI usage, spend, and reset date without leaving your editor.",
+  "version": "0.1.6",
+  "publisher": "jamesware",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JewhurstEngineering/ai-meter.git",
+    "directory": "vscode"
+  },
+  "icon": "media/icon.png",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "cursor",
+    "usage",
+    "ai",
+    "meter",
+    "billing"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "aiMeter.open",
+        "title": "Open",
+        "category": "AI Meter"
+      },
+      {
+        "command": "aiMeter.refresh",
+        "title": "Refresh Usage",
+        "category": "AI Meter",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "aiMeter.signIn",
+        "title": "Use This Cursor Login",
+        "category": "AI Meter",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "aiMeter.pasteToken",
+        "title": "Paste Token",
+        "category": "AI Meter"
+      },
+      {
+        "command": "aiMeter.openSettings",
+        "title": "Status Bar Metrics",
+        "category": "AI Meter",
+        "icon": "$(list-flat)"
+      },
+      {
+        "command": "aiMeter.disconnect",
+        "title": "Disconnect Cursor",
+        "category": "AI Meter",
+        "icon": "$(sign-out)"
+      },
+      {
+        "command": "aiMeter.openDashboard",
+        "title": "Open Cursor Usage Dashboard",
+        "category": "AI Meter"
+      },
+      {
+        "command": "aiMeter.copySummary",
+        "title": "Copy Usage Summary",
+        "category": "AI Meter"
+      },
+      {
+        "command": "aiMeter.diagnostics",
+        "title": "Diagnostics",
+        "category": "AI Meter"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "aiMeter.usage",
+          "name": "AI Meter"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "aiMeter.openSettings",
+          "when": "view == aiMeter.usage",
+          "group": "navigation@1"
+        },
+        {
+          "command": "aiMeter.refresh",
+          "when": "view == aiMeter.usage",
+          "group": "navigation@2"
+        },
+        {
+          "command": "aiMeter.signIn",
+          "when": "view == aiMeter.usage && !aiMeter.signedIn",
+          "group": "navigation@3"
+        },
+        {
+          "command": "aiMeter.disconnect",
+          "when": "view == aiMeter.usage && aiMeter.signedIn",
+          "group": "navigation@3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "JamesWare AI Meter",
+      "properties": {
+        "aiMeter.refreshIntervalMinutes": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 60,
+          "description": "How often to refresh Cursor usage in the background."
+        },
+        "aiMeter.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the usage meter in the status bar."
+        },
+        "aiMeter.statusBar.cursorModels": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Cursor Models percent in the status bar."
+        },
+        "aiMeter.statusBar.otherModels": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Other Models percent in the status bar."
+        },
+        "aiMeter.statusBar.total": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Total included percent in the status bar."
+        },
+        "aiMeter.statusBar.grokBot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show Grok Bot weekly allowance in the status bar when the Cursor plan includes it."
+        },
+        "aiMeter.notifications.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Notify once when usage crosses a warning or critical threshold."
+        },
+        "aiMeter.notifications.warningPercent": {
+          "type": "number",
+          "default": 85,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Warn when a usage pool reaches this percent."
+        },
+        "aiMeter.notifications.criticalPercent": {
+          "type": "number",
+          "default": 95,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Critical alert when a usage pool reaches this percent."
+        },
+        "aiMeter.debug.useFixture": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use bundled fixture data instead of calling Cursor. For development only."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "tsc -p ./ && node --test 'out/**/*.test.js'",
+    "package": "npm run compile && mkdir -p dist && npx --yes @vscode/vsce package --out dist/ai-meter.vsix --baseContentUrl https://github.com/JewhurstEngineering/ai-meter/blob/HEAD/vscode/ --baseImagesUrl https://github.com/JewhurstEngineering/ai-meter/raw/HEAD/vscode/"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.2"
+  }
+}
