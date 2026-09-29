@@ -15,9 +15,7 @@ build/
 dist/
 artifacts/
 .cursor/
-docs/
-!vscode/docs/
-!vscode/docs/**
+site-docs/
 vscode/node_modules/
 vscode/out/
 MARKETING.md
