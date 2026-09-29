@@ -437,6 +437,7 @@ button {
 
 .desk {
   position: relative;
+  container-type: inline-size;
   min-height: 500px;
   border-radius: 16px;
   border: 1px solid var(--line);
@@ -495,6 +496,12 @@ button {
 
 @media (max-width: 559px) {
   .menubar-app,
+  .menubar-clock {
+    display: none;
+  }
+}
+
+@container (max-width: 560px) {
   .menubar-clock {
     display: none;
   }

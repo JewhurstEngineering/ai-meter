@@ -3,24 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AI Meter — Cursor, Claude, and Codex in the menu bar</title>
+  <title>AI Usage Meter — Cursor, Claude, and Codex in the menu bar</title>
   <meta name="description" content="A local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.">
   <meta name="author" content="Jewhurst Engineering">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <link rel="canonical" href="https://aiusagemeter.app/">
+  <link rel="sitemap" type="application/xml" title="Sitemap" href="https://aiusagemeter.app/sitemap.xml">
   <meta name="theme-color" content="#0c0c0d">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AI Usage Meter">
+  <meta property="og:locale" content="en_US">
   <meta property="og:url" content="https://aiusagemeter.app/">
-  <meta property="og:title" content="AI Meter — Cursor, Claude, and Codex in the menu bar">
+  <meta property="og:title" content="AI Usage Meter — Cursor, Claude, and Codex in the menu bar">
   <meta property="og:description" content="Included pools, rolling windows, and on-demand spend. On this Mac. Nothing else leaves the device.">
   <meta property="og:image" content="https://aiusagemeter.app/assets/og.png">
+  <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="AI Usage Meter logo, built by Jewhurst Engineering">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AI Meter — Cursor, Claude, and Codex in the menu bar">
+  <meta name="twitter:title" content="AI Usage Meter — Cursor, Claude, and Codex in the menu bar">
   <meta name="twitter:description" content="Included pools, rolling windows, and on-demand spend. On this Mac.">
   <meta name="twitter:image" content="https://aiusagemeter.app/assets/og.png">
-  <link rel="icon" href="assets/favicon.png" type="image/png">
-  <link rel="apple-touch-icon" href="assets/apple-touch.png">
+  <meta name="twitter:image:alt" content="AI Usage Meter logo, built by Jewhurst Engineering">
+  <link rel="icon" href="assets/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64">
+  <link rel="apple-touch-icon" href="assets/apple-touch.png" sizes="180x180">
   <script>
     (function () {
       var t = null;
@@ -35,21 +43,78 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "AI Meter",
-    "author": {
-      "@type": "Organization",
-      "name": "Jewhurst Engineering",
-      "url": "https://github.com/JewhurstEngineering"
-    },
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "macOS 14 or later",
-    "softwareVersion": "1.0.11",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "url": "https://aiusagemeter.app/",
-    "downloadUrl": "https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.11.zip",
-    "license": "https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE",
-    "description": "Local menu bar meter for Cursor, Claude, and Codex usage."
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://aiusagemeter.app/#organization",
+        "name": "Jewhurst Engineering",
+        "url": "https://github.com/JewhurstEngineering",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://aiusagemeter.app/assets/mark.png",
+          "width": 720,
+          "height": 709
+        },
+        "sameAs": [
+          "https://github.com/JewhurstEngineering"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://aiusagemeter.app/#website",
+        "url": "https://aiusagemeter.app/",
+        "name": "AI Usage Meter",
+        "description": "A local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.",
+        "publisher": { "@id": "https://aiusagemeter.app/#organization" },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://aiusagemeter.app/#webpage",
+        "url": "https://aiusagemeter.app/",
+        "name": "AI Usage Meter — Cursor, Claude, and Codex in the menu bar",
+        "description": "A local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.",
+        "isPartOf": { "@id": "https://aiusagemeter.app/#website" },
+        "about": { "@id": "https://aiusagemeter.app/#app" },
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": "https://aiusagemeter.app/assets/og.png",
+          "width": 1200,
+          "height": 630
+        },
+        "inLanguage": "en"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://aiusagemeter.app/#app",
+        "name": "AI Usage Meter",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "macOS 14 or later",
+        "softwareVersion": "1.0.11",
+        "url": "https://aiusagemeter.app/",
+        "downloadUrl": "https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.11.zip",
+        "image": "https://aiusagemeter.app/assets/og.png",
+        "screenshot": "https://aiusagemeter.app/assets/aimeter-settings-general.png",
+        "description": "Local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.",
+        "featureList": [
+          "Menu bar meter for Cursor, Claude, and Codex",
+          "Included pools, rolling windows, and on-demand spend",
+          "Reads the sessions already on the Mac",
+          "Session tokens stay in the Keychain",
+          "iPhone and Apple Watch usage snapshots",
+          "Cursor and VS Code status bar extension"
+        ],
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "isAccessibleForFree": true,
+        "author": { "@id": "https://aiusagemeter.app/#organization" },
+        "publisher": { "@id": "https://aiusagemeter.app/#organization" },
+        "license": "https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE"
+      }
+    ]
   }
   </script>
 </head>
@@ -69,8 +134,8 @@
   <header class="site-header">
     <div class="wrap header-bar">
       <a class="brand" href="#top">
-        <img src="assets/mark.png" width="720" height="709" alt="">
-        <span>AI Meter</span>
+        <img src="assets/mark-nav.png" width="128" height="126" alt="">
+        <span>AI Usage Meter</span>
       </a>
       <nav class="site-nav" aria-label="Page">
         <a href="#readings">Readings</a>
@@ -102,7 +167,7 @@
 
       <div class="desk">
         <div class="menubar">
-          <span class="menubar-app">AI Meter</span>
+          <span class="menubar-app">AI Usage Meter</span>
           <button class="menubar-item" type="button" aria-expanded="true" aria-controls="popover">
             <span>Cursor 11% · Claude 100% · Codex 12%</span>
             <span class="dot dot-alert" aria-hidden="true"></span>
@@ -177,7 +242,7 @@
             <p class="pane-foot">ChatGPT message caps are not part of this.</p>
           </div>
 
-          <div class="popover-foot"><span>Settings</span><span class="popover-word">AI Meter</span><span>Quit</span></div>
+          <div class="popover-foot"><span>Settings</span><span class="popover-word">AI Usage Meter</span><span>Quit</span></div>
         </div>
       </div>
     </section>
@@ -260,19 +325,19 @@
       </div>
       <div class="shots">
         <figure role="tabpanel" id="shot-general" aria-labelledby="set-general">
-          <img src="assets/aimeter-settings-general.png" width="1936" height="1366" alt="General settings. Launch at login, refresh every 5 minutes, and warning sliders at 95% for Cursor models, other models, on-demand, session, and weekly." loading="lazy">
+          <img src="assets/aimeter-settings-general.png" width="1936" height="1366" alt="General settings. Launch at login, refresh every 5 minutes, and warning sliders at 95% for Cursor models, other models, on-demand, session, and weekly." loading="lazy" decoding="async">
           <figcaption>Set the level that turns the menu bar dot red. Notifications use that same level, once per channel per cycle.</figcaption>
         </figure>
         <figure role="tabpanel" id="shot-layout" aria-labelledby="set-layout" hidden>
-          <img src="assets/aimeter-settings-layout.png" width="1936" height="1366" alt="Layout settings for the menu bar, shared display, and popover. Accounts are set to Combined, density to Detailed, labels to Icons." loading="lazy">
+          <img src="assets/aimeter-settings-layout.png" width="1936" height="1366" alt="Layout settings for the menu bar, shared display, and popover. Accounts are set to Combined, density to Detailed, labels to Icons." loading="lazy" decoding="async">
           <figcaption>Active, combined, or separate. Combined stacks one line per account, such as Cursor 12% · Claude 44% · Codex 8%.</figcaption>
         </figure>
         <figure role="tabpanel" id="shot-theme" aria-labelledby="set-theme" hidden>
-          <img src="assets/aimeter-settings-theme.png" width="1936" height="1366" alt="Theme settings with System, Light, and Dark, and accent palettes including Original, Cursor, Forest, and Dracula." loading="lazy">
+          <img src="assets/aimeter-settings-theme.png" width="1936" height="1366" alt="Theme settings with System, Light, and Dark, and accent palettes including Original, Cursor, Forest, and Dracula." loading="lazy" decoding="async">
           <figcaption>System, light, or dark for Settings and the popover. The menu bar stays native macOS. Accents recolor the pools.</figcaption>
         </figure>
         <figure role="tabpanel" id="shot-access" aria-labelledby="set-access" hidden>
-          <img src="assets/aimeter-settings-accessibility.png" width="1936" height="1366" alt="Accessibility settings for interface size, text size, and color-vision palettes including deuteranopia, protanopia, tritanopia, and monochrome." loading="lazy">
+          <img src="assets/aimeter-settings-accessibility.png" width="1936" height="1366" alt="Accessibility settings for interface size, text size, and color-vision palettes including deuteranopia, protanopia, tritanopia, and monochrome." loading="lazy" decoding="async">
           <figcaption>Larger type without zooming the whole window, and palettes that stay distinct when color alone is not enough.</figcaption>
         </figure>
       </div>
@@ -282,7 +347,7 @@
       <div class="band-intro">
         <p class="kicker">03 / Local</p>
         <h2 id="local-title">It uses the login already on this Mac.</h2>
-        <p>Tokens stay in the Keychain. AI Meter does not scrape dashboards and does not put tokens in iCloud. The one other request is Sparkle checking GitHub for a signed update.</p>
+        <p>Tokens stay in the Keychain. AI Usage Meter does not scrape dashboards and does not put tokens in iCloud. The one other request is Sparkle checking GitHub for a signed update.</p>
       </div>
       <dl class="rows">
         <div><dt><svg class="icon" aria-hidden="true"><use href="#i-cursor"/></svg>Cursor</dt><dd>Sign in, or connect from the IDE</dd></div>
@@ -352,7 +417,7 @@
           <i style="--w: 46%"></i><i style="--w: 72%; --x: 1"></i><i style="--w: 58%; --x: 1"></i><i style="--w: 30%; --x: 2"></i><i style="--w: 64%; --x: 2"></i><i style="--w: 40%; --x: 1"></i><i style="--w: 18%"></i><i style="--w: 0%"></i><i style="--w: 52%"></i><i style="--w: 68%; --x: 1"></i><i style="--w: 36%; --x: 1"></i>
         </div>
         <div class="ide-tip">
-          <p class="ide-tip-head">AI Meter · Ultra</p>
+          <p class="ide-tip-head">AI Usage Meter · Ultra</p>
           <p><span>Cursor Models</span><b>11%</b></p>
           <p><span>Other Models</span><b>70%</b></p>
           <p><span>Total included</span><b>23%</b></p>
@@ -377,7 +442,7 @@
         <li><span>Sign in with Cursor, Claude Code, or Codex.</span></li>
       </ol>
       <div class="actions">
-        <a class="btn btn-hot btn-large" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.11.zip">Download AI Meter 1.0.11</a>
+        <a class="btn btn-hot btn-large" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest/download/AIMeter-1.0.11.zip">Download AI Usage Meter 1.0.11</a>
         <a class="btn btn-line btn-large" href="https://github.com/JewhurstEngineering/ai-meter/releases/latest">All releases</a>
       </div>
       <p class="fine">Signed · notarized · updates checked with Sparkle before they install. iPhone and Watch builds stay on TestFlight.</p>
@@ -387,13 +452,13 @@
   <footer class="site-footer">
     <div class="wrap footer-bar">
       <a class="brand" href="#top">
-        <img src="assets/mark.png" width="720" height="709" alt="">
-        <span>AI Meter</span>
+        <img src="assets/mark-nav.png" width="128" height="126" alt="">
+        <span>AI Usage Meter</span>
       </a>
-      <p>Built by Jewhurst Engineering. AI Meter is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.</p>
+      <p>Built by Jewhurst Engineering. AI Usage Meter is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.</p>
       <p class="footer-links">
         <a href="https://github.com/JewhurstEngineering/ai-meter">GitHub</a>
-        <a href="https://aiusagemeter.app/privacy/index.html">Privacy</a>
+        <a href="https://aiusagemeter.app/privacy/">Privacy</a>
         <a href="https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE">MIT license</a>
         <a href="https://github.com/JewhurstEngineering">Jewhurst Engineering</a>
         <span>© 2026</span>

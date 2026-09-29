@@ -1,0 +1,14 @@
+# AI Usage Meter
+
+> A local menu bar meter for Cursor, Claude, and Codex. Included pools, rolling windows, and on-demand spend, read from the sessions already on your Mac.
+
+AI Usage Meter is an independent open-source project by Jewhurst Engineering. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI.
+
+- Product: https://aiusagemeter.app/
+- Privacy: https://aiusagemeter.app/privacy/
+- Source: https://github.com/JewhurstEngineering/ai-meter
+- macOS: 14 or later
+- Current Mac release: 1.0.11
+- Editor extension: 0.1.6 for Cursor and VS Code 1.85 or later
+
+Session tokens stay on the device. Jewhurst Engineering does not run a server for them. The Mac app reads Cursor, Claude, and Codex logins already on that Mac. The iPhone app keeps a Cursor token in the Keychain and sends the watch a sanitized usage snapshot only.
