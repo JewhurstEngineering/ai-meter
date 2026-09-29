@@ -455,7 +455,7 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(decoded?.otherModelsPercentUsed ?? 0, 41, accuracy: 0.01)
         XCTAssertEqual(WidgetSnapshotStore.watchTransferKey, "widgetSnapshotJSON")
         XCTAssertEqual(WidgetSnapshotStore.filename, "widget-snapshot.json")
-        XCTAssertEqual(WidgetSnapshotStore.appGroupID, "6998422DKP.com.jamesware.aimeter.shared")
+        XCTAssertEqual(WidgetSnapshotStore.appGroupID, "6998422DKP.dev.jewhurst.aimeter.shared")
     }
 
     func testWidgetSnapshotTempFileRoundTrip() throws {

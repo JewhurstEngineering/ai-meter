@@ -7,7 +7,7 @@ import AIMeterCore
 @MainActor
 final class RootTabSmokeTests: XCTestCase {
     func testBundleIdentity() {
-        XCTAssertEqual(Bundle.main.bundleIdentifier, "com.jamesware.aimeter.ios")
+        XCTAssertEqual(Bundle.main.bundleIdentifier, "dev.jewhurst.aimeter.ios")
         XCTAssertEqual(
             Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String,
             "AI Meter"

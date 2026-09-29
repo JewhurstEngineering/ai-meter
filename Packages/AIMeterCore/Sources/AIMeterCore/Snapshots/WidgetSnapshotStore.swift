@@ -74,10 +74,10 @@ public struct WidgetSnapshot: Codable, Sendable, Equatable {
 
 public enum WidgetSnapshotStore {
     /// macOS App Group form is `TEAMID.name` (see Stats.app). iOS-style `group.` is not in the widget profile.
-    public static let appGroupID = "6998422DKP.com.jamesware.aimeter.shared"
-    public static let legacyAppGroupID = "group.com.jamesware.aimeter.shared"
+    public static let appGroupID = "6998422DKP.dev.jewhurst.aimeter.shared"
+    public static let legacyAppGroupID = "group.dev.jewhurst.aimeter.shared"
     /// Watch app ↔ Watch complications only. Never holds tokens.
-    public static let watchAppGroupID = "group.com.jamesware.aimeter.watch"
+    public static let watchAppGroupID = "group.dev.jewhurst.aimeter.watch"
     public static let filename = "widget-snapshot.json"
     public static let watchTransferKey = "widgetSnapshotJSON"
     private static let defaultsKey = "widgetSnapshotJSON"

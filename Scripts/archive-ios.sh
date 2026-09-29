@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Archive the iOS app (embeds Watch + widgets) for TestFlight / App Store Connect.
-# Create the App Store Connect record for com.jamesware.aimeter.ios first.
+# Create the App Store Connect record for dev.jewhurst.aimeter.ios first.
 # Upload with Transporter or:
 #   xcrun altool --upload-app -f dist/ios/export/*.ipa -t ios --apiKey … --apiIssuer …
 set -euo pipefail

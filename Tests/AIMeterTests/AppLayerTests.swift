@@ -29,7 +29,6 @@ final class AppAboutTests: XCTestCase {
         XCTAssertEqual(AppAbout.makerAttribution, "Built by Jewhurst Engineering")
         XCTAssertEqual(AppAbout.licenseName, "MIT")
         XCTAssertTrue(AppAbout.copyrightLine.contains(AppAbout.copyrightHolder))
-        XCTAssertFalse(AppAbout.affiliationDisclaimer.localizedCaseInsensitiveContains("jamesware"))
     }
 
     func testPublicURLs() {
@@ -68,9 +67,9 @@ final class AppInstallTests: XCTestCase {
 final class WidgetSnapshotFileTests: XCTestCase {
     func testStoreConstants() {
         XCTAssertEqual(WidgetSnapshotStore.filename, "widget-snapshot.json")
-        XCTAssertEqual(WidgetSnapshotStore.appGroupID, "6998422DKP.com.jamesware.aimeter.shared")
-        XCTAssertEqual(WidgetSnapshotStore.legacyAppGroupID, "group.com.jamesware.aimeter.shared")
-        XCTAssertEqual(WidgetSnapshotStore.watchAppGroupID, "group.com.jamesware.aimeter.watch")
+        XCTAssertEqual(WidgetSnapshotStore.appGroupID, "6998422DKP.dev.jewhurst.aimeter.shared")
+        XCTAssertEqual(WidgetSnapshotStore.legacyAppGroupID, "group.dev.jewhurst.aimeter.shared")
+        XCTAssertEqual(WidgetSnapshotStore.watchAppGroupID, "group.dev.jewhurst.aimeter.watch")
     }
 
     func testTempDirectoryRoundTrip() throws {

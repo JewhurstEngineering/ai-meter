@@ -1,6 +1,6 @@
 name: AIMeter
 options:
-  bundleIdPrefix: com.jamesware.aimeter
+  bundleIdPrefix: dev.jewhurst.aimeter
   deploymentTarget:
     macOS: "14.0"
     iOS: "17.0"
@@ -43,7 +43,7 @@ targets:
         SUPublicEDKey: qijKx335WMhnQRru81bLR+sN8uoaHJ0SjzwaFP1Lg7M=
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.app
         PRODUCT_NAME: AI Meter
         PRODUCT_MODULE_NAME: AIMeter
         INFOPLIST_FILE: Apps/macOS/AIMeter/Info.plist
@@ -74,7 +74,7 @@ targets:
           - CycleSpendChart.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.app.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.app.widgets
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/AIMeterWidgets/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: AI Meter
@@ -100,7 +100,7 @@ targets:
           - Assets.xcassets/AppIcon.appiconset
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios
         TARGETED_DEVICE_FAMILY: "1,2"
         SUPPORTS_MACCATALYST: "NO"
         GENERATE_INFOPLIST_FILE: YES
@@ -128,7 +128,7 @@ targets:
           - CycleSpendChart.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.widgets
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/AIMeterWidgets/Info.plist
@@ -148,7 +148,7 @@ targets:
           - CycleSpendChart.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.watchkitapp
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.watchkitapp
         TARGETED_DEVICE_FAMILY: "4"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Apps/watchOS/AIMeterWatch/Info.plist
@@ -169,7 +169,7 @@ targets:
       - Widgets/watchOS
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.watchkitapp.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.watchkitapp.widgets
         TARGETED_DEVICE_FAMILY: "4"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Widgets/watchOS/Info.plist
@@ -188,7 +188,7 @@ targets:
       - package: AIMeterCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.tests
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.tests
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AI Meter.app/Contents/MacOS/AI Meter"
         BUNDLE_LOADER: "$(TEST_HOST)"
@@ -203,7 +203,7 @@ targets:
       - package: AIMeterCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.tests
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.tests
         GENERATE_INFOPLIST_FILE: YES
         TEST_HOST: "$(BUILT_PRODUCTS_DIR)/AIMeteriOS.app/AIMeteriOS"
         BUNDLE_LOADER: "$(TEST_HOST)"
@@ -216,7 +216,7 @@ targets:
       - path: Tests/AIMeteriOSUITests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.jamesware.aimeter.ios.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.uitests
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: AIMeteriOS
         TARGETED_DEVICE_FAMILY: "1"

@@ -1087,7 +1087,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.uitests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1103,7 +1103,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Apps/watchOS/AIMeterWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.watchkitapp;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -1122,7 +1122,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.watchkitapp.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.watchkitapp.widgets;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -1139,7 +1139,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.tests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1160,7 +1160,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1246,7 +1246,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.uitests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1264,7 +1264,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.tests;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1285,7 +1285,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1308,7 +1308,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.app;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app;
 				PRODUCT_MODULE_NAME = AIMeter;
 				PRODUCT_NAME = "AI Meter";
 				SDKROOT = macosx;
@@ -1327,7 +1327,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AI Meter.app/Contents/MacOS/AI Meter";
 			};
@@ -1345,7 +1345,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1360,7 +1360,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Apps/watchOS/AIMeterWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.watchkitapp;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -1383,7 +1383,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.app;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app;
 				PRODUCT_MODULE_NAME = AIMeter;
 				PRODUCT_NAME = "AI Meter";
 				SDKROOT = macosx;
@@ -1402,7 +1402,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.widgets;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1421,7 +1421,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.ios.watchkitapp.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.ios.watchkitapp.widgets;
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				TARGETED_DEVICE_FAMILY = 4;
@@ -1440,7 +1440,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.tests;
 				SDKROOT = macosx;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AI Meter.app/Contents/MacOS/AI Meter";
 			};
@@ -1463,7 +1463,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.app.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app.widgets;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -1486,7 +1486,7 @@
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.jamesware.aimeter.app.widgets;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app.widgets;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};

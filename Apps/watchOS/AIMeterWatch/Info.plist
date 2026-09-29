@@ -7,7 +7,7 @@
 	<key>WKApplication</key>
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
-	<string>com.jamesware.aimeter.ios</string>
+	<string>dev.jewhurst.aimeter.ios</string>
 	<key>WKRunsIndependentlyOfCompanionApp</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>

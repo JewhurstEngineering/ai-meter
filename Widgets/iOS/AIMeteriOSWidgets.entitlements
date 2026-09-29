@@ -4,7 +4,7 @@
 <dict>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.jamesware.aimeter.shared</string>
+		<string>group.dev.jewhurst.aimeter.shared</string>
 	</array>
 </dict>
 </plist>

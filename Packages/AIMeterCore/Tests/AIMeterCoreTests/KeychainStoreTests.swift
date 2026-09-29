@@ -9,7 +9,7 @@ final class KeychainStoreTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        service = "com.jamesware.aimeter.test.\(UUID().uuidString)"
+        service = "dev.jewhurst.aimeter.test.\(UUID().uuidString)"
         account = "account-\(UUID().uuidString)"
     }
 

@@ -83,7 +83,6 @@ describe("copySummary", () => {
     assert.match(text, /Total: 55%/);
     assert.match(text, /On-Demand: \$8\.42/);
     assert.match(text, /via AI Meter/);
-    assert.doesNotMatch(text, /JamesWare/i);
     assert.doesNotMatch(text, /token|cookie|@/i);
   });
 });

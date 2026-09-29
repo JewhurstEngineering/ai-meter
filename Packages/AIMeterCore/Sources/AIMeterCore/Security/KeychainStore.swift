@@ -30,7 +30,7 @@ extension KeychainError: LocalizedError {
 }
 
 public struct KeychainStore: Sendable {
-    public static let appAccessGroup = "6998422DKP.com.jamesware.aimeter.app"
+    public static let appAccessGroup = "6998422DKP.dev.jewhurst.aimeter.app"
 
     public let service: String
     /// Foreign CLI items stay in the login keychain. AI Meter also writes new
@@ -40,7 +40,7 @@ public struct KeychainStore: Sendable {
     public let recoversFromDataProtectionKeychain: Bool
 
     public init(
-        service: String = "com.jamesware.aimeter.session",
+        service: String = "dev.jewhurst.aimeter.session",
         usesDataProtectionKeychain: Bool = false,
         accessGroup: String? = KeychainStore.appAccessGroup,
         recoversFromDataProtectionKeychain: Bool = true

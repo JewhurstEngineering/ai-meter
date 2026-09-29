@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.jamesware.aimeter.ios.refresh</string>
+		<string>dev.jewhurst.aimeter.ios.refresh</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>AI Meter</string>

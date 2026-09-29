@@ -86,7 +86,7 @@ enum AppInstall {
         _ = run(lsregister, ["-f", appURL.path])
         if FileManager.default.fileExists(atPath: plugin.path) {
             _ = run("/usr/bin/pluginkit", ["-a", plugin.path])
-            _ = run("/usr/bin/pluginkit", ["-e", "use", "-i", "com.jamesware.aimeter.app.widgets"])
+            _ = run("/usr/bin/pluginkit", ["-e", "use", "-i", "dev.jewhurst.aimeter.app.widgets"])
         }
     }
 

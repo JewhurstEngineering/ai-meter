@@ -133,7 +133,7 @@ public enum CursorProcessMonitor {
         if isCursorCLI(app) { return false }
         if let bundle = app.bundleIdentifier?.lowercased() {
             if bundle.contains("cursorusagetracker") || bundle.contains("cursor-usage") { return false }
-            if bundle.contains("jamesware.aimeter") || bundle.contains("aimeter") { return false }
+            if bundle.contains("aimeter") { return false }
             if bundle.hasPrefix("com.todesktop.") { return true }
             if bundle == "com.anysphere.cursor" { return true }
             if bundle.contains("cursor") { return true }

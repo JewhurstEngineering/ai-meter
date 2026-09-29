@@ -2,7 +2,7 @@ import BackgroundTasks
 import AIMeterCore
 
 enum BackgroundRefresh {
-    static let identifier = "com.jamesware.aimeter.ios.refresh"
+    static let identifier = "dev.jewhurst.aimeter.ios.refresh"
     private static var didRegister = false
 
     /// Must run during `App.init` / `didFinishLaunching`. SwiftUI `.task` is too late

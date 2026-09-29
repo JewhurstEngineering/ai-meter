@@ -1,6 +1,6 @@
 # AI Meter brand migration
 
-JamesWare is no longer the maker on current AI Meter surfaces. The product name is still AI Meter. The maker line is Jewhurst Engineering.
+The retired maker name is gone from the current tree. The product name is still AI Meter. The maker line is Jewhurst Engineering.
 
 ## References found
 
@@ -13,20 +13,20 @@ JamesWare is no longer the maker on current AI Meter surfaces. The product name 
 - README, extension README, and the Cursor data-source note
 - Extension display name, settings title, and the copied usage summary sign-off
 - Site footer, lockup alt text, Open Graph card, and structured data
-- Wordmarks that rendered the word JamesWare
-- Settings screenshots whose watermark spelled JamesWare
+- Wordmarks that rendered the retired maker name
+- Settings screenshots whose watermark spelled that name
 - The About screenshot, which showed the old About panel in full
 
-### Stable technical identifiers (unchanged)
+### Technical identifiers (changed)
 
-- Bundle IDs, `com.jamesware.aimeter.*`
-- App groups and the keychain access group / service name
+- Bundle IDs are `dev.jewhurst.aimeter.*`
+- App groups, the keychain access group, and the keychain service use that same prefix
 - Background refresh identifier
-- VS Code publisher `jamesware` and extension id `ai-meter`
-- Sparkle feed, still `github.com/JewhurstEngineering/ai-meter`
-- Repository slug and GitHub org
+- VS Code publisher `jewhurstengineering`. Extension id stays `ai-meter`
+- Sparkle feed stays `github.com/JewhurstEngineering/ai-meter`
+- Repository slug and GitHub org stay JewhurstEngineering
 
-Renaming any of those would break upgrades, signing, keychain access, or an already-installed extension.
+The next Mac build is a new app identity. Sparkle will not update an already-installed copy. Sessions in the old keychain will not carry over.
 
 ### Historical / legal (unchanged)
 
@@ -41,18 +41,18 @@ Renaming any of those would break upgrades, signing, keychain access, or an alre
 ## Changed
 
 - Current copy says AI Meter, built by Jewhurst Engineering.
-- The color lockup and the social card no longer include the JamesWare line.
-- In-app full wordmarks that said JamesWare were removed. About uses the gauge plus the AI Meter name. The settings watermark is the name only.
-- Settings screenshots had the JamesWare watermark line painted out. Real labels were left alone. A faint AI Meter watermark is still in those shots.
-- The About screenshot was taken off the site and the README because the panel itself said JamesWare.
-- The site download `ai-meter-0.1.6.vsix` was repackaged from this source. The extension still publishes as `jamesware`, so installs keep the same id.
+- The color lockup and the social card no longer include the old maker line.
+- In-app full wordmarks that used that name were removed. About uses the gauge plus the AI Meter name. The settings watermark is the name only.
+- Settings screenshots had that watermark line painted out. Real labels were left alone. A faint AI Meter watermark is still in those shots.
+- The About screenshot was taken off the site and the README because the panel itself used the old name.
+- Bundle IDs, app groups, keychain identifiers, and the extension publisher no longer use the old maker name.
 
 ## Intentionally unchanged
 
-- Bundle IDs, app groups, keychain identifiers, and the extension publisher. Those are how installs, widgets, and updates find each other.
 - Sparkle still checks GitHub Releases. The feed URL did not move.
 - The product site stays on `aiusagemeter.app` until `jewhurst.dev/ai-meter` exists.
 - The MIT license copyright stays James Jewhurst.
+- Shipped tags and release notes were not rewritten.
 
 ## Redirect dependencies
 
@@ -63,6 +63,7 @@ Renaming any of those would break upgrades, signing, keychain access, or an alre
 
 - A new Settings → About screenshot after a build with this copy. The old one was removed rather than faked.
 - A `jewhurst.dev/ai-meter` page, then the footer and canonical URL can move there.
+- The new App IDs and app groups registered on the Apple developer team before the next signed build.
 
 ## Verification
 
@@ -73,7 +74,7 @@ Renaming any of those would break upgrades, signing, keychain access, or an alre
 ## Manual QA
 
 - Open Settings → About on Mac and confirm the title is AI Meter, the line under the version is “Built by Jewhurst Engineering,” and the copyright names Jewhurst Engineering.
-- Open About on iPhone and confirm the Developer row says Jewhurst Engineering and the logo does not say JamesWare.
+- Open About on iPhone and confirm the Developer row says Jewhurst Engineering.
 - Copy a usage summary from the extension and confirm the last line is `via AI Meter`.
 - Load the site, switch every settings tab, and check the footer and the download lockup.
 - Confirm Sparkle still points at the GitHub appcast before the next Mac release.
