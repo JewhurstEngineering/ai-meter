@@ -1,13 +1,13 @@
 :root {
-  --bg: #060a08;
-  --bay: #0c1210;
-  --text: #e8eee9;
-  --muted: #9aaba1;
-  --line: rgba(232, 238, 233, 0.14);
-  --amber: #e8942a;
-  --amber-hover: #f0a44a;
-  --on-amber: #1a0d05;
-  --green: #3d9a56;
+  --bg: #04140f;
+  --bay: #0a1c16;
+  --text: #eef6f0;
+  --muted: #a8bfb2;
+  --line: rgba(238, 246, 240, 0.14);
+  --accent: #42d340;
+  --accent-hover: #84ec5d;
+  --on-accent: #04210f;
+  --green: #1fb064;
   --shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
   --sans: "IBM Plex Sans", "Avenir Next", "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -38,8 +38,8 @@ body {
 }
 
 ::selection {
-  background: var(--amber);
-  color: var(--on-amber);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 img {
@@ -81,11 +81,11 @@ a {
 }
 
 a:hover {
-  color: var(--amber-hover);
+  color: var(--accent-hover);
 }
 
 :focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -94,8 +94,8 @@ a:hover {
   left: 16px;
   top: -48px;
   z-index: 30;
-  background: var(--amber);
-  color: var(--on-amber);
+  background: var(--accent);
+  color: var(--on-accent);
   padding: 10px 14px;
   border-radius: 8px;
   text-decoration: none;
@@ -103,7 +103,7 @@ a:hover {
 
 .skip:focus {
   top: 12px;
-  color: var(--on-amber);
+  color: var(--on-accent);
 }
 
 .sr-only {
@@ -128,7 +128,7 @@ a:hover {
   top: 0;
   z-index: 10;
   height: var(--header);
-  background: rgba(6, 10, 8, 0.92);
+  background: rgba(4, 20, 15, 0.92);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
 }
@@ -178,7 +178,7 @@ a:hover {
 
 .site-nav a:hover {
   color: var(--text);
-  background: rgba(232, 238, 233, 0.05);
+  background: rgba(238, 246, 240, 0.05);
 }
 
 .btn {
@@ -197,13 +197,13 @@ a:hover {
 }
 
 .btn-primary {
-  background: var(--amber);
-  color: var(--on-amber);
+  background: var(--accent);
+  color: var(--on-accent);
 }
 
 .btn-primary:hover {
-  background: var(--amber-hover);
-  color: var(--on-amber);
+  background: var(--accent-hover);
+  color: var(--on-accent);
 }
 
 .btn-quiet {
@@ -213,9 +213,9 @@ a:hover {
 }
 
 .btn-quiet:hover {
-  border-color: rgba(232, 238, 233, 0.4);
+  border-color: rgba(238, 246, 240, 0.4);
   color: var(--text);
-  background: rgba(232, 238, 233, 0.04);
+  background: rgba(238, 246, 240, 0.04);
 }
 
 .header-bar .btn {
@@ -309,7 +309,7 @@ a:hover {
   border: 0;
   margin: 36px auto 0;
   width: min(var(--page), calc(100% - 40px));
-  background: linear-gradient(90deg, transparent, var(--green) 22%, var(--amber) 68%, transparent);
+  background: linear-gradient(90deg, transparent, var(--green) 22%, var(--accent) 68%, transparent);
 }
 
 .band {
@@ -360,7 +360,7 @@ a:hover {
 }
 
 .pct-hot {
-  color: var(--amber);
+  color: var(--accent);
 }
 
 .hot-note {
@@ -454,23 +454,23 @@ tbody th {
 
 .choice:hover {
   color: var(--text);
-  border-color: rgba(232, 238, 233, 0.32);
+  border-color: rgba(238, 246, 240, 0.32);
 }
 
 .choice:has(input:checked) {
-  background: var(--amber);
-  border-color: var(--amber);
-  color: var(--on-amber);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
 }
 
 .choice:has(input:focus-visible) {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
 .choice:has(input:checked):hover {
-  background: var(--amber-hover);
-  color: var(--on-amber);
+  background: var(--accent-hover);
+  color: var(--on-accent);
 }
 
 .stage figure {
@@ -525,7 +525,7 @@ tbody th {
   position: absolute;
   left: 0;
   top: 0.12em;
-  color: var(--amber);
+  color: var(--accent);
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
