@@ -1398,3 +1398,38 @@ button {
     border: 1px solid ButtonText;
   }
 }
+
+.legal {
+  display: grid;
+  gap: 16px;
+  max-width: 68ch;
+  padding: 56px 0 24px;
+}
+
+.legal h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.legal h2 {
+  margin-top: 12px;
+  font-size: 1.25rem;
+}
+
+.legal p,
+.legal li {
+  color: var(--soft);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.legal ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.legal .dated {
+  color: var(--muted);
+  font: 400 0.8125rem var(--mono);
+}

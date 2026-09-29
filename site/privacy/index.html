@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy — AI Meter</title>
+  <meta name="description" content="AI Meter stores session tokens on your device. Jewhurst Engineering does not run a server for them.">
+  <meta name="author" content="Jewhurst Engineering">
+  <link rel="canonical" href="https://aiusagemeter.app/privacy">
+  <meta name="theme-color" content="#0c0c0d">
+  <link rel="icon" href="../assets/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="../assets/apple-touch.png">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("aimeter-theme"); } catch (e) {}
+      if (t === "light") document.documentElement.setAttribute("data-theme", "light");
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3 3l1 1M12 12l1 1M3 13l1-1M12 4l1-1"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 16 16"><path d="M13.5 9.5A5.5 5.5 0 0 1 6.5 2.5a5.5 5.5 0 1 0 7 7Z"/></symbol>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap header-bar">
+      <a class="brand" href="/">
+        <img src="../assets/mark.png" width="720" height="709" alt="">
+        <span>AI Meter</span>
+      </a>
+      <button class="theme-toggle" type="button" aria-label="Switch to light mode">
+        <svg class="icon icon-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+        <svg class="icon icon-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap legal">
+    <p class="dated">29 September 2026</p>
+    <h1>Privacy</h1>
+    <p>AI Meter is built by Jewhurst Engineering. It does not have an account with us, and we do not run a server that stores your sessions.</p>
+
+    <h2>iPhone</h2>
+    <p>Sign in with Cursor, or paste a session token. That token is saved in this iPhone’s Keychain. The app sends it only to Cursor, to read included usage and on-demand spend. Signing out deletes it from the phone.</p>
+    <ul>
+      <li>The token is not sent to Jewhurst Engineering.</li>
+      <li>The phone cannot read a Cursor session that lives on your Mac.</li>
+    </ul>
+
+    <h2>Apple Watch</h2>
+    <p>The watch app is part of the iPhone app. The phone sends the watch a sanitized usage snapshot: the numbers on the glance and complications. The session token never goes to the watch.</p>
+
+    <h2>Mac</h2>
+    <p>The menu bar app reads the Cursor, Claude, and Codex sessions already on that Mac. Tokens stay in the Mac Keychain. Nothing is uploaded to us.</p>
+
+    <h2>Editor</h2>
+    <p>The Cursor and VS Code extension reads the Cursor login already stored on that computer. It does not read your code, prompts, or chats.</p>
+
+    <h2>What we don’t do</h2>
+    <ul>
+      <li>No tracking, ads, or sale of data.</li>
+      <li>No Jewhurst Engineering account to create or delete. Sign out in the app to remove the token from the device.</li>
+    </ul>
+
+    <p>Questions: <a href="https://github.com/JewhurstEngineering/ai-meter/issues">GitHub issues</a>.</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-bar">
+      <a class="brand" href="/">
+        <img src="../assets/mark.png" width="720" height="709" alt="">
+        <span>AI Meter</span>
+      </a>
+      <p>Built by Jewhurst Engineering. AI Meter is an independent open-source project. It is not affiliated with, endorsed by, or sponsored by Anysphere, Cursor, Anthropic, or OpenAI. Cursor, Claude, and Codex are trademarks of their respective owners.</p>
+      <p class="footer-links">
+        <a href="https://github.com/JewhurstEngineering/ai-meter">GitHub</a>
+        <a href="/privacy/">Privacy</a>
+        <a href="https://github.com/JewhurstEngineering/ai-meter/blob/master/LICENSE">MIT license</a>
+        <a href="https://github.com/JewhurstEngineering">Jewhurst Engineering</a>
+        <span>© 2026</span>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var meta = document.querySelector('meta[name="theme-color"]');
+      var toggle = document.querySelector(".theme-toggle");
+
+      function applyTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        if (meta) meta.setAttribute("content", theme === "light" ? "#f4f2ec" : "#0c0c0d");
+        toggle.setAttribute("aria-label", theme === "light" ? "Switch to dark mode" : "Switch to light mode");
+      }
+
+      applyTheme(root.getAttribute("data-theme") === "light" ? "light" : "dark");
+      toggle.addEventListener("click", function () {
+        var next = root.getAttribute("data-theme") === "light" ? "dark" : "light";
+        applyTheme(next);
+        try { localStorage.setItem("aimeter-theme", next); } catch (e) {}
+      });
+    })();
+  </script>
+</body>
+</html>
