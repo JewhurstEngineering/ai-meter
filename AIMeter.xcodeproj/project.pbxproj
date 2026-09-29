@@ -215,9 +215,9 @@
 		3A27C1B6423A4ED2041174DE /* AppActivation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppActivation.swift; sourceTree = "<group>"; };
 		3C7249493E46A5C9054A8794 /* AIMeterWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterWidgets.swift; sourceTree = "<group>"; };
 		4CCA4666EE82EC9F70F928F6 /* AuthenticationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationSettingsView.swift; sourceTree = "<group>"; };
-		51323408CE8BA51EF6138140 /* AIMeteriOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AIMeteriOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		51323408CE8BA51EF6138140 /* AIMeteriOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AIMeteriOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5223BB27279503FF18BFD417 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
-		58DAD754974E0AA759CDEBFC /* AIMeteriOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = AIMeteriOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		58DAD754974E0AA759CDEBFC /* AIMeteriOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AIMeteriOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5AC210DA9732F3ACFD46D2A7 /* CycleSpendChart.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleSpendChart.swift; sourceTree = "<group>"; };
 		5B5192E96420300FA87B812B /* LoginWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginWebView.swift; sourceTree = "<group>"; };
 		5D3383E6B8B045F83EF0EBD1 /* AccountsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountsView.swift; sourceTree = "<group>"; };
@@ -261,7 +261,7 @@
 		DB8C0BF23307D51ED65AF6C0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DCCE03C63274F395695294F1 /* AIMeterCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AIMeterCore; path = Packages/AIMeterCore; sourceTree = SOURCE_ROOT; };
 		DD26B89C7E9BA6AC6671E2A1 /* AIMeteriOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIMeteriOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E52DF7B14350AD6A849B45AB /* AIMeteriOSWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = AIMeteriOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E52DF7B14350AD6A849B45AB /* AIMeteriOSWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AIMeteriOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA0FBEEF4287E9B00C7B6CB2 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 		EE89107E326FE924787E9513 /* AIMeterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterApp.swift; sourceTree = "<group>"; };
 		F5E5AF64A566E2D72A41FAC9 /* PhoneWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchBridge.swift; sourceTree = "<group>"; };
@@ -785,7 +785,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					287777A5CFB96D65FDA4EE52 = {
 						DevelopmentTeam = 6998422DKP;
@@ -1208,10 +1208,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 48;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1234,6 +1236,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
@@ -1305,11 +1308,11 @@
 		6DDB1C98234E79B4E4936017 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Apps/macOS/AIMeter/AIMeter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1322,6 +1325,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app;
 				PRODUCT_MODULE_NAME = AIMeter;
 				PRODUCT_NAME = "AI Meter";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -1331,6 +1335,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1381,11 +1386,11 @@
 		9A71CF22C88798E165433007 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Apps/macOS/AIMeter/AIMeter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -1398,6 +1403,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app;
 				PRODUCT_MODULE_NAME = AIMeter;
 				PRODUCT_NAME = "AI Meter";
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -1445,6 +1451,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1464,6 +1471,7 @@
 				CODE_SIGN_ENTITLEMENTS = Widgets/AIMeterWidgets/AIMeterWidgets.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1476,6 +1484,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app.widgets;
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -1487,6 +1496,7 @@
 				CODE_SIGN_ENTITLEMENTS = Widgets/AIMeterWidgets/AIMeterWidgets.entitlements;
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
 				ENABLE_DEBUG_DYLIB = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1499,6 +1509,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.jewhurst.aimeter.app.widgets;
+				REGISTER_APP_GROUPS = YES;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 			};
@@ -1540,10 +1551,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 48;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 6998422DKP;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1559,6 +1572,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
