@@ -195,16 +195,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		041105927FDF963B6EC429AF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		041105927FDF963B6EC429AF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		0FCC7FC12DBB1A85E7847C86 /* AIMeterWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIMeterWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		11A564A7E7B2F48740184610 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		11FC10295B1ECCA7631E1965 /* AIMeterWatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeterWatchWidgets.entitlements; sourceTree = "<group>"; };
 		1456110BEF73F3079C3F89FC /* IncludedPaidAboutSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncludedPaidAboutSettings.swift; sourceTree = "<group>"; };
 		15C1EF0A9B19808A8E3EC81E /* BackgroundRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundRefresh.swift; sourceTree = "<group>"; };
 		195B08E311821BCA7A11F20C /* AppLayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLayerTests.swift; sourceTree = "<group>"; };
-		1B082DCF3205CD73BE4DEBE7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		1B082DCF3205CD73BE4DEBE7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		1FDF674D798E974D4617B12D /* AIMeteriOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeteriOSApp.swift; sourceTree = "<group>"; };
-		257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		257EFB2A8271795F824DEF1B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		26CED586AFE92A28214C6B06 /* GeneralSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettingsView.swift; sourceTree = "<group>"; };
 		2DD9C953D1E0BF3360E1D666 /* AIMeterWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterWatchApp.swift; sourceTree = "<group>"; };
 		2FAC1BC5C800FC7D1773FA65 /* RootTabSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabSmokeTests.swift; sourceTree = "<group>"; };
@@ -226,7 +226,7 @@
 		68B7CC0A828B16C2DEB9C7A1 /* AIMeter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeter.entitlements; sourceTree = "<group>"; };
 		6B1EEB0ADD4ECE5BEFBCF978 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		6C2638ABAD0D7EC663F57016 /* MenuBarLabelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarLabelView.swift; sourceTree = "<group>"; };
-		6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6DB4FA9B6B17159CDBFB71B3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6E19744A17745DD0BEA721EA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		72CB3E728C0A6E62D26723E5 /* LaunchSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchSmokeTests.swift; sourceTree = "<group>"; };
 		750A6F1BAB775E9ED9D6DE01 /* AIMeteriOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeteriOS.entitlements; sourceTree = "<group>"; };
@@ -260,13 +260,13 @@
 		DB3EB94E7CE06AD3E0658827 /* AIMeterWatchWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AIMeterWatchWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB8C0BF23307D51ED65AF6C0 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		DCCE03C63274F395695294F1 /* AIMeterCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AIMeterCore; path = Packages/AIMeterCore; sourceTree = SOURCE_ROOT; };
-		DD26B89C7E9BA6AC6671E2A1 /* AIMeteriOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIMeteriOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD26B89C7E9BA6AC6671E2A1 /* AIMeteriOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIMeteriOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E52DF7B14350AD6A849B45AB /* AIMeteriOSWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = AIMeteriOSWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EA0FBEEF4287E9B00C7B6CB2 /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 		EE89107E326FE924787E9513 /* AIMeterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMeterApp.swift; sourceTree = "<group>"; };
 		F5E5AF64A566E2D72A41FAC9 /* PhoneWatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneWatchBridge.swift; sourceTree = "<group>"; };
 		F69D4291A319752DA5194F06 /* AIMeteriOSWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AIMeteriOSWidgets.entitlements; sourceTree = "<group>"; };
-		FE73A1851218DA4462AA95A8 /* AIMeter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIMeter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE73A1851218DA4462AA95A8 /* AI Meter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AI Meter.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -387,7 +387,7 @@
 		3A0C0389BBE9B479D7C39C5B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FE73A1851218DA4462AA95A8 /* AIMeter.app */,
+				FE73A1851218DA4462AA95A8 /* AI Meter.app */,
 				DD26B89C7E9BA6AC6671E2A1 /* AIMeteriOS.app */,
 				51323408CE8BA51EF6138140 /* AIMeteriOSTests.xctest */,
 				58DAD754974E0AA759CDEBFC /* AIMeteriOSUITests.xctest */,
@@ -733,7 +733,7 @@
 				2D973033E752AB9B14EEDD8C /* Sparkle */,
 			);
 			productName = AIMeter;
-			productReference = FE73A1851218DA4462AA95A8 /* AIMeter.app */;
+			productReference = FE73A1851218DA4462AA95A8 /* AI Meter.app */;
 			productType = "com.apple.product-type.application";
 		};
 		B53219F1684AE065007A8509 /* AIMeterWatch */ = {
@@ -1155,7 +1155,12 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Apps/iOS/AIMeteriOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Usage Meter";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Jewhurst Engineering";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1280,7 +1285,12 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Apps/iOS/AIMeteriOS/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AI Meter";
+				INFOPLIST_KEY_CFBundleDisplayName = "AI Usage Meter";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Jewhurst Engineering";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1304,6 +1314,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Apps/macOS/AIMeter/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1379,6 +1390,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Apps/macOS/AIMeter/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
