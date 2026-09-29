@@ -70,6 +70,7 @@ xcodebuild \
   -configuration Release \
   -derivedDataPath "$DERIVED" \
   -archivePath "$ARCHIVE" \
+  -allowProvisioningUpdates \
   archive
 
 mkdir -p "$EXPORT"
