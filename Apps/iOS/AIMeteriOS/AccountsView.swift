@@ -232,28 +232,37 @@ struct AccountsView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            HStack {
-                if !isActive, !hidden {
-                    Button("Set active") { store.setActive(id: account.id) }
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 16) {
+                    if !isActive, !hidden {
+                        Button("Set active") { store.setActive(id: account.id) }
+                    }
+                    Button(hidden ? "Show" : "Hide") {
+                        store.setAccountHidden(id: account.id, hidden: !hidden)
+                    }
+                    Button(paused ? "Resume" : "Pause alerts") {
+                        store.setAccountPaused(id: account.id, paused: !paused)
+                    }
+                    Button("Rename") {
+                        editingLabelID = account.id
+                        draftLabel = account.connection.label.isEmpty
+                            ? account.connection.displayLabel
+                            : account.connection.label
+                    }
                 }
-                Button(hidden ? "Show" : "Hide") {
-                    store.setAccountHidden(id: account.id, hidden: !hidden)
-                }
-                Button(paused ? "Resume" : "Pause alerts") {
-                    store.setAccountPaused(id: account.id, paused: !paused)
-                }
-                Button("Rename") {
-                    editingLabelID = account.id
-                    draftLabel = account.connection.label.isEmpty
-                        ? account.connection.displayLabel
-                        : account.connection.label
+                if editingLabelID == account.id {
+                    Button("Save name") {
+                        store.renameAccount(id: account.id, label: draftLabel)
+                        editingLabelID = nil
+                    }
                 }
                 Button("Sign out", role: .destructive) {
                     store.signOut(id: account.id)
                     statusMessage = "Signed out \(account.connection.displayLabel)."
                 }
             }
-            .font(.caption)
+            .buttonStyle(.borderless)
+            .font(.subheadline)
         }
         .padding(.vertical, 4)
         .opacity(hidden ? 0.72 : 1)
