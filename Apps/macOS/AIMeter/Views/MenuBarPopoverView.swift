@@ -811,6 +811,21 @@ struct MenuBarPopoverView: View {
                 PopoverModelsThisPeriodCard(snapshot: snapshot)
             }
 
+            if snapshot.provider == .cursor, t.tokenChart {
+                TokenUsageChart(
+                    days: snapshot.dailySpend,
+                    onDemandEnabled: snapshot.onDemandEnabled,
+                    onDemandUsedCents: snapshot.onDemandUsedCents,
+                    height: 150
+                )
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color.primary.opacity(0.04))
+                )
+            }
+
             if snapshot.provider == .cursor, t.cycleChart, !snapshot.cycleHistory.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Spend by cycle")

@@ -296,6 +296,10 @@ public enum MenuBarFormatter {
 
     public static func compactCount(_ n: Int) -> String {
         let absN = abs(n)
+        if absN >= 1_000_000_000 {
+            let value = Double(n) / 1_000_000_000
+            return formatCompact(value, suffix: "B")
+        }
         if absN >= 1_000_000 {
             let value = Double(n) / 1_000_000
             return formatCompact(value, suffix: "M")

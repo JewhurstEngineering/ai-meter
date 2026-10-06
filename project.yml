@@ -72,6 +72,7 @@ targets:
       - path: Apps/Shared
         excludes:
           - CycleSpendChart.swift
+          - TokenUsageChart.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.app.widgets
@@ -126,6 +127,7 @@ targets:
         excludes:
           - Assets.xcassets/AppIcon.appiconset
           - CycleSpendChart.swift
+          - TokenUsageChart.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.widgets
@@ -146,6 +148,7 @@ targets:
         excludes:
           - Assets.xcassets/AppIcon.appiconset
           - CycleSpendChart.swift
+          - TokenUsageChart.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.jewhurst.aimeter.ios.watchkitapp

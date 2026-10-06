@@ -159,6 +159,11 @@ struct LayoutSettingsView: View {
             MetricToggleRow(title: "Burn-rate pace", systemImage: "flame", isOn: binding(\.burnRateEstimate))
             if includeModelsThisPeriod {
                 MetricToggleRow(
+                    title: "Tokens by day",
+                    systemImage: "chart.bar.xaxis",
+                    isOn: binding(\.tokenChart)
+                )
+                MetricToggleRow(
                     title: "Spend by cycle",
                     systemImage: "chart.bar",
                     isOn: binding(\.cycleChart)
@@ -421,6 +426,13 @@ private struct PopoverPreviewCard: View {
                 if t.burnRateEstimate {
                     Label(snapshot?.pace()?.caption ?? "Typical ~$17/day · on pace for $400 vs $400 included", systemImage: snapshot?.pace()?.systemImage ?? "flame")
                         .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                if t.tokenChart {
+                    Divider()
+                    Label("Tokens by day", systemImage: "chart.bar.xaxis")
+                        .font(.caption2.weight(.semibold))
                         .foregroundStyle(.secondary)
                 }
 

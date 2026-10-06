@@ -506,6 +506,9 @@ final class UsageSnapshotMapperTests: XCTestCase {
         XCTAssertEqual(MenuBarFormatter.compactCount(1_000), "1K")
         XCTAssertEqual(MenuBarFormatter.compactCount(12_400), "12.4K")
         XCTAssertEqual(MenuBarFormatter.compactCount(2_421_899), "2.4M")
+        XCTAssertEqual(MenuBarFormatter.compactCount(1_000_000_000), "1B")
+        XCTAssertEqual(MenuBarFormatter.compactCount(2_100_000_000), "2.1B")
+        XCTAssertEqual(MenuBarFormatter.compactCount(5_900_000_000), "5.9B")
         XCTAssertNil(MenuBarFormatter.tokenCaption(input: nil, output: nil))
         XCTAssertEqual(MenuBarFormatter.tokenCaption(input: 100, output: nil), "100 in")
     }

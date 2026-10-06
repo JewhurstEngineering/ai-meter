@@ -10,8 +10,20 @@ public struct CachedDailySpend: Codable, Sendable, Equatable {
     }
 }
 
+public struct DailyUsageSample: Sendable, Equatable {
+    public var cents: Double
+    public var models: [UsageSnapshot.DailyModelShare]
+
+    public init(cents: Double, models: [UsageSnapshot.DailyModelShare] = []) {
+        self.cents = cents
+        self.models = models
+    }
+}
+
 public enum DailySpendHistory {
     public static let maxConcurrency = 3
+    /// Last month plus the current cycle, with room for a cycle that started mid-month.
+    public static let chartDayCap = 70
 
     public struct DayWindow: Sendable, Equatable {
         public var start: Date
@@ -20,19 +32,34 @@ public enum DailySpendHistory {
         public var isComplete: Bool
     }
 
-    /// Local-calendar slices of the current cycle through `now`. The first window
-    /// starts at `cycleStart` (mid-day ok). Completed days end at the next midnight.
+    /// Start of last calendar month, or the billing cycle if that began earlier.
+    public static func historyStart(
+        cycleStart: Date,
+        now: Date,
+        calendar: Calendar = .current
+    ) -> Date {
+        let parts = calendar.dateComponents([.year, .month], from: now)
+        guard let monthStart = calendar.date(from: parts),
+              let previousMonth = calendar.date(byAdding: .month, value: -1, to: monthStart)
+        else { return cycleStart }
+        return min(cycleStart, previousMonth)
+    }
+
+    /// Local-calendar slices through `now`. The first window starts at `cycleStart`
+    /// (mid-day ok). Completed days end at the next midnight. Extra days beyond
+    /// `maxDays` are dropped from the front so today stays in the list.
     public static func dayWindows(
         cycleStart: Date,
         cycleEnd: Date,
         now: Date,
-        calendar: Calendar = .current
+        calendar: Calendar = .current,
+        maxDays: Int = 40
     ) -> [DayWindow] {
         guard cycleEnd > cycleStart, now > cycleStart else { return [] }
         var windows: [DayWindow] = []
         var cursor = cycleStart
         let todayStart = calendar.startOfDay(for: now)
-        while cursor < now, cursor < cycleEnd, windows.count < 40 {
+        while cursor < now, cursor < cycleEnd {
             let day = calendar.startOfDay(for: cursor)
             guard let nextMidnight = calendar.date(byAdding: .day, value: 1, to: day) else { break }
             let windowEnd = min(nextMidnight, cycleEnd)
@@ -40,6 +67,9 @@ public enum DailySpendHistory {
             let fetchEnd = isComplete ? windowEnd : min(max(now, cursor.addingTimeInterval(1)), cycleEnd)
             windows.append(DayWindow(start: cursor, end: fetchEnd, day: day, isComplete: isComplete))
             cursor = windowEnd
+        }
+        if windows.count > maxDays {
+            windows = Array(windows.suffix(maxDays))
         }
         return windows
     }
@@ -88,12 +118,19 @@ public enum DailySpendHistory {
         cycleStart: Date,
         cycleEnd: Date,
         now: Date = Date(),
+        rangeStart: Date? = nil,
         cached: CachedDailySpend?,
         calendar: Calendar = .current,
         concurrency: Int = maxConcurrency,
-        fetch: @escaping @Sendable (Date, Date) async -> Double?
+        fetch: @escaping @Sendable (Date, Date) async -> DailyUsageSample?
     ) async -> [UsageSnapshot.DailySpend] {
-        let windows = dayWindows(cycleStart: cycleStart, cycleEnd: cycleEnd, now: now, calendar: calendar)
+        let windows = dayWindows(
+            cycleStart: rangeStart ?? cycleStart,
+            cycleEnd: cycleEnd,
+            now: now,
+            calendar: calendar,
+            maxDays: chartDayCap
+        )
         let cache: [UsageSnapshot.DailySpend]
         if let cached, abs(cached.cycleStart.timeIntervalSince(cycleStart)) < 2 {
             cache = cached.days
@@ -104,7 +141,7 @@ public enum DailySpendHistory {
         var byDay: [TimeInterval: UsageSnapshot.DailySpend] = [:]
         var toFetch: [DayWindow] = []
         for window in windows {
-            if window.isComplete, let hit = cachedDay(cache, day: window.day) {
+            if window.isComplete, let hit = cachedDay(cache, day: window.day), hit.includesTokens {
                 byDay[window.day.timeIntervalSince1970] = hit
             } else {
                 toFetch.append(window)
@@ -116,17 +153,19 @@ public enum DailySpendHistory {
         while index < toFetch.count {
             let chunk = Array(toFetch[index..<min(index + chunkSize, toFetch.count)])
             index += chunk.count
-            await withTaskGroup(of: (DayWindow, Double?).self) { group in
+            await withTaskGroup(of: (DayWindow, DailyUsageSample?).self) { group in
                 for window in chunk {
                     group.addTask {
                         (window, await fetch(window.start, window.end))
                     }
                 }
-                for await (window, cents) in group {
-                    guard let cents else { continue }
+                for await (window, sample) in group {
+                    guard let sample else { continue }
                     byDay[window.day.timeIntervalSince1970] = UsageSnapshot.DailySpend(
                         day: window.day,
-                        cents: cents
+                        cents: sample.cents,
+                        models: sample.models,
+                        includesTokens: true
                     )
                 }
             }

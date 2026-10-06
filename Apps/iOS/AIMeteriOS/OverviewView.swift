@@ -186,6 +186,17 @@ struct OverviewView: View {
                 }
             }
 
+            if layout.tokenChart, snapshot.provider == .cursor {
+                Section {
+                    TokenUsageChart(
+                        days: snapshot.dailySpend,
+                        onDemandEnabled: snapshot.onDemandEnabled,
+                        onDemandUsedCents: snapshot.onDemandUsedCents,
+                        height: 180
+                    )
+                }
+            }
+
             if layout.cycleChart, !snapshot.cycleHistory.isEmpty {
                 Section("Spend by cycle") {
                     CycleSpendChart(cycles: snapshot.cycleHistory, height: 140)

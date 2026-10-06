@@ -103,7 +103,8 @@ public actor PersonalUsageClient {
                 cookie: cookie,
                 userId: userId,
                 start: start,
-                end: end
+                end: end,
+                now: Date()
             )
         }
 
@@ -147,11 +148,15 @@ public actor PersonalUsageClient {
         cookie: String,
         userId: Int,
         start: Date,
-        end: Date
+        end: Date,
+        now: Date
     ) async -> [UsageSnapshot.DailySpend] {
+        let rangeStart = DailySpendHistory.historyStart(cycleStart: start, now: now)
         let days = await DailySpendHistory.fill(
             cycleStart: start,
             cycleEnd: end,
+            now: now,
+            rangeStart: rangeStart,
             cached: dailySpendStore.load(userID: userId)
         ) { windowStart, windowEnd in
             do {
@@ -161,7 +166,10 @@ public actor PersonalUsageClient {
                     end: windowEnd,
                     userId: userId
                 )
-                return response.resolvedTotalCents
+                return DailyUsageSample(
+                    cents: response.resolvedTotalCents,
+                    models: response.dailyModelShares
+                )
             } catch {
                 return nil
             }

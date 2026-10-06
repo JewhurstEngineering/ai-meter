@@ -198,6 +198,7 @@ struct PhoneLayoutSettings: View {
                 Toggle("On-demand", isOn: popoverBinding(\.onDemand))
                 Toggle("Days remaining", isOn: popoverBinding(\.daysRemaining))
                 Toggle("Burn-rate pace", isOn: popoverBinding(\.burnRateEstimate))
+                Toggle("Tokens by day", isOn: popoverBinding(\.tokenChart))
                 Toggle("Spend by cycle", isOn: popoverBinding(\.cycleChart))
                 Toggle("Models this period", isOn: popoverBinding(\.modelsThisPeriod))
                 Toggle("Cloud", isOn: popoverBinding(\.cloudAgents))
@@ -451,6 +452,16 @@ struct PhoneIncludedSettings: View {
                         Label(pace.caption, systemImage: pace.systemImage)
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                    }
+                }
+                if snapshot.provider == .cursor {
+                    Section {
+                        TokenUsageChart(
+                            days: snapshot.dailySpend,
+                            onDemandEnabled: snapshot.onDemandEnabled,
+                            onDemandUsedCents: snapshot.onDemandUsedCents,
+                            height: 200
+                        )
                     }
                 }
                 if !snapshot.cycleHistory.isEmpty {

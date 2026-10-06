@@ -75,13 +75,55 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         }
     }
 
+    /// One model's tokens on a calendar day. Total is input + output + cache write + cache read,
+    /// which is what Cursor's usage chart plots.
+    public struct DailyModelShare: Codable, Sendable, Equatable {
+        public var model: String
+        public var tokens: Int
+
+        public init(model: String, tokens: Int) {
+            self.model = model
+            self.tokens = tokens
+        }
+    }
+
     public struct DailySpend: Codable, Sendable, Equatable {
         public var day: Date
         public var cents: Double
+        public var models: [DailyModelShare]
+        /// False for daily caches saved before per-model tokens were stored.
+        public var includesTokens: Bool
 
-        public init(day: Date, cents: Double) {
+        public init(
+            day: Date,
+            cents: Double,
+            models: [DailyModelShare] = [],
+            includesTokens: Bool = true
+        ) {
             self.day = day
             self.cents = cents
+            self.models = models
+            self.includesTokens = includesTokens
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case day, cents, models, includesTokens
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            day = try container.decode(Date.self, forKey: .day)
+            cents = try container.decode(Double.self, forKey: .cents)
+            models = try container.decodeIfPresent([DailyModelShare].self, forKey: .models) ?? []
+            includesTokens = try container.decodeIfPresent(Bool.self, forKey: .includesTokens) ?? false
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(day, forKey: .day)
+            try container.encode(cents, forKey: .cents)
+            try container.encode(models, forKey: .models)
+            try container.encode(includesTokens, forKey: .includesTokens)
         }
     }
 
@@ -321,7 +363,7 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
         let fraction = min(1, elapsed / length)
         let elapsedDays = elapsedCalendarDays(now: now, calendar: calendar)
         let typical = DailySpendHistory.typicalDailyCents(
-            dailySpend.map(\.cents),
+            cycleDailyCents(now: now, calendar: calendar),
             elapsedDays: elapsedDays
         )
         let daysLeft = remainingDaysAfterToday(now: now, calendar: calendar)
@@ -382,6 +424,19 @@ public struct UsageSnapshot: Codable, Sendable, Equatable {
             caption: caption,
             menuBarText: "~\(Self.cycleUSD(used))"
         )
+    }
+
+    /// Pace only looks at the current cycle. Earlier days exist so the token chart
+    /// can show last month and a 30-day window.
+    private func cycleDailyCents(now: Date, calendar: Calendar) -> [Double] {
+        guard let start = billingCycleStart else { return dailySpend.map(\.cents) }
+        let startDay = calendar.startOfDay(for: start)
+        let today = calendar.startOfDay(for: now)
+        return dailySpend.compactMap { row in
+            let day = calendar.startOfDay(for: row.day)
+            guard day >= startDay, day <= today else { return nil }
+            return row.cents
+        }
     }
 
     private func elapsedCalendarDays(now: Date, calendar: Calendar) -> Int {

@@ -14,6 +14,9 @@ struct IncludedUsageSettingsView: View {
                 if let snapshot = store.snapshot {
                     subscriptionHero(snapshot)
                     pools(snapshot)
+                    if snapshot.provider == .cursor {
+                        tokenChartPanel(snapshot)
+                    }
                     if !snapshot.cycleHistory.isEmpty {
                         cycleHistoryPanel(snapshot)
                     }
@@ -155,6 +158,23 @@ struct IncludedUsageSettingsView: View {
                 .padding(.vertical, 6)
                 .background(RoundedRectangle(cornerRadius: 8).fill(theme.spend.opacity(0.08)))
             }
+        }
+    }
+
+    private func tokenChartPanel(_ snapshot: UsageSnapshot) -> some View {
+        SettingsPanel(
+            title: "Tokens by day",
+            systemImage: "chart.bar.xaxis",
+            subtitle: "Same daily view as the Cursor usage page.",
+            compact: true
+        ) {
+            TokenUsageChart(
+                days: snapshot.dailySpend,
+                onDemandEnabled: snapshot.onDemandEnabled,
+                onDemandUsedCents: snapshot.onDemandUsedCents,
+                height: 200,
+                showsTitle: false
+            )
         }
     }
 

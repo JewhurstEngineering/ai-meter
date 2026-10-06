@@ -90,6 +90,27 @@ struct AggregatedUsageResponse: Decodable, Sendable {
         return (aggregations ?? []).reduce(0) { $0 + ($1.totalCents ?? 0) }
     }
 
+    /// Per-model token totals for one day window. Same sum Cursor plots on the usage chart.
+    var dailyModelShares: [UsageSnapshot.DailyModelShare] {
+        var totals: [String: Int] = [:]
+        for row in aggregations ?? [] {
+            guard let model = row.modelIntent?.trimmingCharacters(in: .whitespacesAndNewlines), !model.isEmpty else {
+                continue
+            }
+            let tokens = TokenUsageSeries.totalTokens(
+                input: row.inputTokens?.value,
+                output: row.outputTokens?.value,
+                cacheWrite: row.cacheWriteTokens?.value,
+                cacheRead: row.cacheReadTokens?.value
+            )
+            guard tokens > 0 else { continue }
+            totals[model, default: 0] += tokens
+        }
+        return totals
+            .map { UsageSnapshot.DailyModelShare(model: $0.key, tokens: $0.value) }
+            .sorted { $0.tokens > $1.tokens }
+    }
+
     struct Aggregation: Decodable, Sendable {
         var modelIntent: String?
         var totalCents: Double?

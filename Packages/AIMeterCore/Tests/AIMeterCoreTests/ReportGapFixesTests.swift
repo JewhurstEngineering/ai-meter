@@ -181,6 +181,30 @@ final class BurnRateTests: XCTestCase {
         XCTAssertGreaterThan(pace.projectedCycleEndCents, 20_000)
     }
 
+    func testPaceIgnoresDaysBeforeTheBillingCycle() throws {
+        let start = date(2026, 10, 1)
+        let end = date(2026, 10, 31)
+        let now = date(2026, 10, 7, hour: 15)
+        var days: [UsageSnapshot.DailySpend] = []
+        for offset in -10..<0 {
+            let day = calendar.date(byAdding: .day, value: offset, to: calendar.startOfDay(for: start))!
+            days.append(.init(day: day, cents: 50_000))
+        }
+        days.append(contentsOf: spendDays(from: start, cents: Array(repeating: 100, count: 7)))
+        let snap = UsageSnapshot(
+            membershipType: "pro",
+            planDisplayName: "Pro",
+            billingCycleStart: start,
+            billingCycleEnd: end,
+            dailySpend: days,
+            planUsedCents: 700,
+            planLimitCents: 40_000
+        )
+        let pace = try XCTUnwrap(snap.pace(now: now, calendar: calendar))
+        XCTAssertTrue(pace.caption.contains("Typical ~$1/day"), pace.caption)
+        XCTAssertEqual(pace.status, .onTrack)
+    }
+
     func testOnTrackWhenTypicalStaysUnderCap() throws {
         let start = date(2026, 8, 1)
         let end = date(2026, 8, 31)
